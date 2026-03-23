@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  }
+}
+
+/* Cytoscape.js container overrides */
+.cytoscape-container {
+  @apply w-full h-full min-h-[400px] rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.cytoscape-container canvas {
+  outline: none;
+}
