@@ -82,6 +82,7 @@ TOPICS=(
     "personal,0"
     "personal/journal,1"
     "personal/goals,1"
+    "personal/relationships,1"
     "meta,0"
     "meta/pkm,1"
     "meta/tools,1"

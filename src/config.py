@@ -49,6 +49,19 @@ class KeepMDSettings(BaseSettings):
     api_url: str = "https://keep.md/mcp"
     api_key: str = ""
     polling_interval_minutes: int = 15
+    poll_interval: int = 900
+    max_items_per_cycle: int = 20
+    enabled_sources: list[str] = Field(
+        default_factory=lambda: [
+            "browser",
+            "mobile",
+            "rss",
+            "twitter",
+            "youtube",
+            "github",
+            "email",
+        ]
+    )
 
 
 class TelegramSettings(BaseSettings):
@@ -58,6 +71,20 @@ class TelegramSettings(BaseSettings):
 
     bot_token: str = ""
     allowed_user_ids: list[int] = Field(default_factory=list)
+    allowed_users: list[int] = Field(default_factory=list)
+    enabled: bool = False
+
+    def get_allowed_ids(self) -> list[int]:
+        """Return the effective allowed user ID list.
+
+        Merges ``allowed_user_ids`` and ``allowed_users`` for backwards
+        compatibility with configs using either field name.
+
+        Returns:
+            Deduplicated list of allowed Telegram user IDs.
+        """
+        combined = set(self.allowed_user_ids) | set(self.allowed_users)
+        return sorted(combined)
 
 
 class VaultSettings(BaseSettings):
@@ -69,6 +96,49 @@ class VaultSettings(BaseSettings):
     inbox_dir: str = "inbox"
     knowledge_dir: str = "knowledge"
     templates_dir: str = "templates"
+    projects_dir: str = "projects"
+    areas_dir: str = "areas"
+    resources_dir: str = "resources"
+    archives_dir: str = "archives"
+
+
+class ProcessingSettings(BaseSettings):
+    """LLM processing configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_PROCESSING_")
+
+    model: str = "claude-sonnet-4-20250514"
+    embedding_model: str = "text-embedding-3-small"
+    concurrency: int = 2
+    max_retries: int = 3
+
+
+class LoggingSettings(BaseSettings):
+    """Logging configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_LOGGING_")
+
+    level: str = "INFO"
+    format: str = "console"
+    file: str = ""
+
+
+class WebSettings(BaseSettings):
+    """Web UI configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_WEB_")
+
+    port: int = 3001
+    host: str = "127.0.0.1"
+
+
+class BackupSettings(BaseSettings):
+    """Backup configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_BACKUP_")
+
+    dir: str = str(Path.home() / "backups" / "beestgraph")
+    retention: int = 7
 
 
 class BeestgraphSettings(BaseSettings):
@@ -92,6 +162,10 @@ class BeestgraphSettings(BaseSettings):
     keepmd: KeepMDSettings = Field(default_factory=KeepMDSettings)
     telegram: TelegramSettings = Field(default_factory=TelegramSettings)
     vault: VaultSettings = Field(default_factory=VaultSettings)
+    processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
+    logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    web: WebSettings = Field(default_factory=WebSettings)
+    backup: BackupSettings = Field(default_factory=BackupSettings)
 
 
 def _load_yaml_overrides(path: Path) -> dict[str, Any]:
@@ -137,6 +211,10 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
         "graphiti": GraphitiSettings,
         "keepmd": KeepMDSettings,
         "telegram": TelegramSettings,
+        "processing": ProcessingSettings,
+        "logging": LoggingSettings,
+        "web": WebSettings,
+        "backup": BackupSettings,
     }
     for key, model_cls in _nested_models.items():
         if key in filtered and isinstance(filtered[key], dict):

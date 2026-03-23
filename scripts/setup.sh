@@ -85,7 +85,7 @@ fi
 # ── Install Node.js (LTS) via NodeSource ─────────────────────
 if ! command -v node &>/dev/null; then
     log "Installing Node.js LTS..."
-    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y -qq nodejs
 else
     log "Node.js already installed: $(node --version)"
@@ -118,7 +118,7 @@ sudo -u "$REAL_USER" mkdir -p \
     "${VAULT_PATH}/templates"
 
 # ── Create project directory ─────────────────────────────────
-PROJECT_DIR="${REAL_HOME}/beestgraph"
+PROJECT_DIR="${PROJECT_DIR:-${REAL_HOME}/beestgraph}"
 log "Ensuring project directory exists at ${PROJECT_DIR}..."
 sudo -u "$REAL_USER" mkdir -p "${PROJECT_DIR}"
 

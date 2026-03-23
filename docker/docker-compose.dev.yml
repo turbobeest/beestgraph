@@ -28,7 +28,3 @@ services:
       - "8000:8000"
       # Debug port for remote debugging
       - "5678:5678"
-    volumes:
-      # Mount local source for live code reload during development
-      - ../src/pipeline:/app/pipeline:ro
-      - ../src/graph:/app/graph:ro

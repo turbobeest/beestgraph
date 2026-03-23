@@ -16,40 +16,6 @@ if TYPE_CHECKING:
 logger = structlog.get_logger(__name__)
 
 
-def _deduplicate_by_label(label: str) -> tuple[str, dict[str, object]]:
-    """Build a deduplication query for nodes with a normalized_name property.
-
-    Finds groups sharing the same normalized_name, keeps the first node created,
-    and transfers all relationships from duplicates to the keeper before deleting
-    the duplicates.
-
-    Args:
-        label: The node label to deduplicate (e.g., 'Tag', 'Person', 'Concept').
-
-    Returns:
-        Tuple of (cypher_string, params_dict) with empty params.
-    """
-    cypher = (
-        f"MATCH (n:{label}) "
-        f"WITH n.normalized_name AS norm, COLLECT(n) AS nodes "
-        "WHERE SIZE(nodes) > 1 "
-        "WITH norm, HEAD(nodes) AS keeper, TAIL(nodes) AS duplicates "
-        "UNWIND duplicates AS dup "
-        "OPTIONAL MATCH (dup)<-[r_in]-() "
-        "OPTIONAL MATCH (dup)-[r_out]->() "
-        "WITH keeper, dup, COLLECT(DISTINCT r_in) AS ins, COLLECT(DISTINCT r_out) AS outs "
-        "FOREACH (r IN ins | "
-        "  MERGE (STARTNODE(r))-[:TAGGED_WITH]->(keeper) "
-        ") "
-        "FOREACH (r IN outs | "
-        "  MERGE (keeper)-[:TAGGED_WITH]->(ENDNODE(r)) "
-        ") "
-        "DETACH DELETE dup "
-        "RETURN COUNT(dup) AS deleted_count"
-    )
-    return cypher, {}
-
-
 async def deduplicate_tags(graph: Graph) -> int:
     """Merge Tag nodes sharing the same normalized_name.
 

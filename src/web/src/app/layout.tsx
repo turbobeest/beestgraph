@@ -12,6 +12,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+  try {
+    if (localStorage.getItem('beestgraph-dark-mode') === 'true' ||
+        (!localStorage.getItem('beestgraph-dark-mode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+` }} />
+      </head>
       <body className="min-h-screen antialiased">
         <Sidebar />
         <main className="min-h-screen pl-0 pt-14 md:pl-64 md:pt-0">

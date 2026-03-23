@@ -44,16 +44,12 @@ Full configuration:
       "url": "https://keep.md/mcp"
     },
     "graphiti": {
-      "command": "graphiti-mcp-server",
-      "args": ["--transport", "sse"],
-      "env": {
-        "FALKORDB_HOST": "localhost",
-        "FALKORDB_PORT": "6379"
-      }
+      "transport": "sse",
+      "url": "http://localhost:8000/sse"
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/vault"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "~/vault"]
     },
     "falkordb": {
       "command": "npx",
@@ -67,7 +63,7 @@ Full configuration:
 }
 ```
 
-Replace `/path/to/vault` with your actual vault path (e.g., `/home/pi/vault` or `/mnt/nvme/vault`).
+Replace `~/vault` with your actual vault path (e.g., `$HOME/vault` or `/mnt/nvme/vault`).
 
 To apply the configuration to Claude Code's global settings:
 

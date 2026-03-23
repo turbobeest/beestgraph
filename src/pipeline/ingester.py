@@ -6,7 +6,6 @@ safe.  Optionally sends episodes to Graphiti for temporal fact tracking.
 
 from __future__ import annotations
 
-import asyncio
 import time
 from datetime import UTC, datetime
 
@@ -14,7 +13,7 @@ import structlog
 from falkordb import FalkorDB
 
 from src.config import FalkorDBSettings, GraphitiSettings
-from src.pipeline.graphiti_client import add_episode as _graphiti_add_episode
+from src.pipeline.graphiti_client import add_episode_sync as _graphiti_add_episode_sync
 from src.pipeline.markdown_parser import ParsedDocument
 
 logger = structlog.get_logger(__name__)
@@ -32,6 +31,7 @@ SET d.title       = $title,
     d.para_category = $para_category,
     d.source_type = $source_type,
     d.source_url  = $source_url,
+    d.author      = $author,
     d.created_at  = $created_at,
     d.updated_at  = $updated_at,
     d.processed_at = $processed_at
@@ -76,7 +76,7 @@ RETURN p.normalized_name AS normalized_name
 
 _MERGE_CONCEPT = """
 MERGE (c:Concept {normalized_name: $normalized_name})
-SET c.name = $name
+SET c.name = $name, c.description = $description
 RETURN c.normalized_name AS normalized_name
 """
 
@@ -166,6 +166,7 @@ class GraphIngester:
             "para_category": str(meta.get("para_category", "")),
             "source_type": str(meta.get("source_type", "")),
             "source_url": str(meta.get("source_url", "")),
+            "author": str(meta.get("author", "")),
             "created_at": str(meta.get("date_captured", now)),
             "updated_at": now,
             "processed_at": now,
@@ -216,6 +217,7 @@ class GraphIngester:
         entity_type: str,
         confidence: float = 1.0,
         context: str = "",
+        description: str = "",
     ) -> None:
         """Create a MENTIONS edge from a document to a Person or Concept.
 
@@ -225,6 +227,7 @@ class GraphIngester:
             entity_type: Either ``"person"`` or ``"concept"``.
             confidence: Extraction confidence score (0.0-1.0).
             context: Short text snippet where the mention was found.
+            description: Optional description for Concept entities.
 
         Raises:
             ValueError: If *entity_type* is not ``person`` or ``concept``.
@@ -243,7 +246,8 @@ class GraphIngester:
             self._graph().query(_MERGE_DOC_MENTIONS_PERSON, params)
         elif entity_type == "concept":
             self._graph().query(
-                _MERGE_CONCEPT, {"name": entity_name, "normalized_name": normalized}
+                _MERGE_CONCEPT,
+                {"name": entity_name, "normalized_name": normalized, "description": description},
             )
             self._graph().query(_MERGE_DOC_MENTIONS_CONCEPT, params)
         else:
@@ -321,13 +325,11 @@ class GraphIngester:
         # Send to Graphiti for temporal fact tracking (best-effort)
         if self._graphiti_settings is not None:
             try:
-                asyncio.run(
-                    _graphiti_add_episode(
-                        self._graphiti_settings,
-                        name=doc.title,
-                        content=doc.content[:8000],
-                        source_url=str(doc.metadata.get("source_url", "")),
-                    )
+                _graphiti_add_episode_sync(
+                    self._graphiti_settings,
+                    name=doc.title,
+                    content=doc.content[:8000],
+                    source_url=str(doc.metadata.get("source_url", "")),
                 )
             except Exception as exc:
                 logger.warning("graphiti_send_failed", path=doc.path, error=str(exc))

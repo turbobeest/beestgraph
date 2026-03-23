@@ -16,8 +16,8 @@ help: ## Show this help
 setup: install docker-up init-schema ## Full setup (install deps, start Docker, init schema)
 	@echo "\n✅ beestgraph setup complete!"
 
-install: ## Install Python dependencies with uv
-	$(UV) sync
+install: ## Install Python dependencies with uv (including dev tools)
+	$(UV) sync --extra dev
 
 # ── Code Quality ─────────────────────────────────────────────
 
@@ -45,8 +45,10 @@ run-bot: ## Start the Telegram bot
 
 run-all: ## Start all Python services (watcher + bot)
 	@echo "Starting vault watcher in background..."
-	$(UV) run python -m src.pipeline.watcher &
-	@echo "Starting Telegram bot..."
+	$(UV) run python -m src.pipeline.watcher & WATCHER_PID=$$!; \
+	trap "kill $$WATCHER_PID 2>/dev/null" EXIT INT TERM; \
+	echo "Watcher PID: $$WATCHER_PID"; \
+	echo "Starting Telegram bot (Ctrl+C stops both)..."; \
 	$(UV) run python -m src.bot.telegram_bot
 
 # ── Docker ───────────────────────────────────────────────────

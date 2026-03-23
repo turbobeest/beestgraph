@@ -140,7 +140,7 @@ async def cmd_search(message: Message, graph: Graph, **_kwargs: object) -> None:
     logger.info("search_command", query=query_text, user_id=user_id)
 
     try:
-        result = graph.query(cypher, params)
+        result = await asyncio.to_thread(graph.query, cypher, params)
     except Exception as exc:
         logger.error("search_query_failed", error=str(exc))
         await message.answer("Search failed. Please try again later.")
@@ -180,7 +180,7 @@ async def cmd_recent(message: Message, graph: Graph, **_kwargs: object) -> None:
     logger.info("recent_command", user_id=message.from_user.id if message.from_user else None)
 
     try:
-        result = graph.query(cypher, params)
+        result = await asyncio.to_thread(graph.query, cypher, params)
     except Exception as exc:
         logger.error("recent_query_failed", error=str(exc))
         await message.answer("Failed to fetch recent documents.")
@@ -224,7 +224,7 @@ async def cmd_stats(message: Message, graph: Graph, **_kwargs: object) -> None:
 
     try:
         for label in node_labels:
-            result = graph.query(f"MATCH (n:{label}) RETURN COUNT(n)")
+            result = await asyncio.to_thread(graph.query, f"MATCH (n:{label}) RETURN COUNT(n)")
             counts[label] = result.result_set[0][0] if result.result_set else 0
     except Exception as exc:
         logger.error("stats_query_failed", error=str(exc))
@@ -277,7 +277,7 @@ async def cmd_add(message: Message, graph: Graph, **_kwargs: object) -> None:
     params = {"url": url, "title": title, "now": now}
 
     try:
-        graph.query(cypher, params)
+        await asyncio.to_thread(graph.query, cypher, params)
     except Exception as exc:
         logger.error("add_query_failed", error=str(exc))
         await message.answer("Failed to add URL. Please try again.")
@@ -303,7 +303,7 @@ async def cmd_topics(message: Message, graph: Graph, **_kwargs: object) -> None:
     cypher, params = topic_tree()
 
     try:
-        result = graph.query(cypher, params)
+        result = await asyncio.to_thread(graph.query, cypher, params)
     except Exception as exc:
         logger.error("topics_query_failed", error=str(exc))
         await message.answer("Failed to fetch topics.")

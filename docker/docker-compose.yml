@@ -49,7 +49,7 @@ services:
       - MODEL_NAME=${GRAPHITI_MODEL:-claude-sonnet-4-20250514}
       - EMBEDDING_MODEL=${GRAPHITI_EMBEDDING_MODEL:-text-embedding-3-small}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8000/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5

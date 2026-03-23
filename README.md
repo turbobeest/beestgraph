@@ -37,7 +37,7 @@ Four layers with clear boundaries:
 | **Storage** | FalkorDB, Graphiti, Obsidian vault (NVMe), Syncthing | Graph database + markdown files synced everywhere |
 | **Access** | FalkorDB Browser (:3000), Web UI (:3001), Telegram bot, SSH+tmux | Query and explore from any device |
 
-See [`docs/beestgraph-architecture.md`](docs/beestgraph-architecture.md) for the full architecture deep-dive.
+See [`docs/setup-guide.md`](docs/setup-guide.md) for the full setup guide and architecture details.
 
 ---
 
@@ -89,7 +89,7 @@ All configuration lives in `config/beestgraph.yml` with environment variable ove
 ANTHROPIC_API_KEY=sk-ant-...       # Required: Claude API access
 FALKORDB_HOST=localhost             # FalkorDB connection
 FALKORDB_PORT=6379
-VAULT_PATH=/home/pi/vault          # Obsidian vault location
+VAULT_PATH=$HOME/vault             # Obsidian vault location
 TELEGRAM_BOT_TOKEN=...             # Optional: Telegram bot
 TELEGRAM_ALLOWED_USERS=12345       # Your Telegram user ID
 ```
@@ -129,7 +129,6 @@ beestgraph/
 | [`docs/obsidian-integration.md`](docs/obsidian-integration.md) | Obsidian vault structure and sync |
 | [`docs/mcp-servers.md`](docs/mcp-servers.md) | MCP server reference |
 | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Common issues and fixes |
-| [`docs/beestgraph-architecture.md`](docs/beestgraph-architecture.md) | Full architecture deep-dive |
 
 ---
 

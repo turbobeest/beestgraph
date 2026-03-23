@@ -29,9 +29,7 @@ dependencies = [
     "aiogram>=3.0",
     "httpx>=0.27",
     "python-frontmatter>=1.0",
-    "obsidiantools>=0.10",
     "click>=8.0",
-    "rich>=13.0",
 ]
 
 [project.optional-dependencies]

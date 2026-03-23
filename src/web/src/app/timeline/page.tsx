@@ -131,7 +131,7 @@ function TimelineEntry({ doc }: { doc: TimelineDocument }) {
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="w-full rounded-lg border border-gray-200 bg-white p-4 text-left transition-colors hover:border-brand-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-700 dark:hover:bg-gray-750"
+        className="w-full rounded-lg border border-gray-200 bg-white p-4 text-left transition-colors hover:border-brand-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-700 dark:hover:bg-gray-700"
         aria-expanded={expanded}
       >
         {/* Header row */}
@@ -224,6 +224,7 @@ export default function TimelinePage() {
   const [limit, setLimit] = useState(50);
 
   const fetchTimeline = useCallback(async (docLimit: number) => {
+    setDocuments([]);
     setLoading(true);
     setError(null);
     try {
@@ -320,6 +321,7 @@ export default function TimelinePage() {
 
       {/* Timeline groups */}
       {!loading &&
+        !error &&
         groups.map((group) => (
           <section key={group.label} aria-label={`${group.label} entries`}>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">

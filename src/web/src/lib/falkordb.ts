@@ -12,6 +12,9 @@ async function getClient(): Promise<RedisClient> {
   clientInstance = createClient({
     socket: { host: FALKORDB_HOST, port: FALKORDB_PORT },
   });
+  clientInstance.on("error", () => {
+    clientInstance = null;
+  });
   await clientInstance.connect();
   return clientInstance;
 }
@@ -21,35 +24,68 @@ async function graphQuery(
   cypher: string,
   params?: Record<string, string | number>,
 ): Promise<{ headers: string[]; rows: unknown[][]; metadata: string[] }> {
-  const client = await getClient();
   const paramStr = params
     ? "CYPHER " +
       Object.entries(params)
-        .map(([k, v]) => `${k}=${typeof v === "string" ? `"${v.replace(/"/g, '\\"')}"` : v}`)
+        .map(([k, v]) => `${k}=${typeof v === "string" ? `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` : v}`)
         .join(" ") +
       " "
     : "";
 
-  const raw = (await client.sendCommand([
-    "GRAPH.QUERY",
-    GRAPH_NAME,
-    `${paramStr}${cypher}`,
-  ])) as unknown[];
-
-  if (!Array.isArray(raw) || raw.length === 0) {
-    return { headers: [], rows: [], metadata: [] };
+  let client: RedisClient;
+  try {
+    client = await getClient();
+  } catch {
+    // First connection attempt failed — reset and throw
+    clientInstance = null;
+    throw new Error("Failed to connect to FalkorDB");
   }
 
-  // Non-compact mode: [headers, data, metadata] or [metadata]
-  if (raw.length === 1) {
-    return { headers: [], rows: [], metadata: raw[0] as string[] };
+  try {
+    const raw = (await client.sendCommand([
+      "GRAPH.QUERY",
+      GRAPH_NAME,
+      `${paramStr}${cypher}`,
+    ])) as unknown[];
+
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return { headers: [], rows: [], metadata: [] };
+    }
+
+    // Non-compact mode: [headers, data, metadata] or [metadata]
+    if (raw.length === 1) {
+      return { headers: [], rows: [], metadata: raw[0] as string[] };
+    }
+
+    const headers = raw[0] as string[];
+    const rows = raw[1] as unknown[][];
+    const metadata = raw[2] as string[];
+
+    return { headers, rows, metadata };
+  } catch (err) {
+    // Connection may have dropped — reset singleton and retry once
+    clientInstance = null;
+    const retryClient = await getClient();
+    const raw = (await retryClient.sendCommand([
+      "GRAPH.QUERY",
+      GRAPH_NAME,
+      `${paramStr}${cypher}`,
+    ])) as unknown[];
+
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return { headers: [], rows: [], metadata: [] };
+    }
+
+    if (raw.length === 1) {
+      return { headers: [], rows: [], metadata: raw[0] as string[] };
+    }
+
+    const headers = raw[0] as string[];
+    const rows = raw[1] as unknown[][];
+    const metadata = raw[2] as string[];
+
+    return { headers, rows, metadata };
   }
-
-  const headers = raw[0] as string[];
-  const rows = raw[1] as unknown[][];
-  const metadata = raw[2] as string[];
-
-  return { headers, rows, metadata };
 }
 
 export interface GraphNode {
@@ -142,9 +178,16 @@ export async function queryGraph(
   }
 
   // Tag relationships
-  const tagWhere = searchTerm
-    ? "WHERE d.title CONTAINS $searchTerm OR d.summary CONTAINS $searchTerm"
-    : "";
+  const tagConditions: string[] = [];
+  if (topicFilter) {
+    tagConditions.push(
+      "EXISTS { MATCH (d)-[:BELONGS_TO]->(t:Topic) WHERE t.name = $topicFilter }",
+    );
+  }
+  if (searchTerm) {
+    tagConditions.push("(d.title CONTAINS $searchTerm OR d.summary CONTAINS $searchTerm)");
+  }
+  const tagWhere = tagConditions.length > 0 ? `WHERE ${tagConditions.join(" AND ")}` : "";
   const tagResult = await graphQuery(
     `MATCH (d:Document)-[:TAGGED_WITH]->(tag:Tag)
      ${tagWhere}
@@ -374,9 +417,3 @@ export async function getTimelineDocuments(
   return Array.from(docs.values());
 }
 
-export async function closeConnection(): Promise<void> {
-  if (clientInstance) {
-    await clientInstance.disconnect();
-    clientInstance = null;
-  }
-}

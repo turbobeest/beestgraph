@@ -397,11 +397,18 @@ Move the file back to `inbox/` if it was moved during processing.
 
 **Cause**: Inconsistent normalization (e.g., "Geoffrey Hinton" vs "G. Hinton").
 
-**Fix**: Run the maintenance script to detect and merge duplicates:
+**Fix**: There is no dedicated maintenance CLI yet. You can detect duplicates with a Cypher query and merge them manually:
 
-```bash
-uv run python -m src.graph.maintenance --deduplicate
+```cypher
+-- Find duplicate Person nodes by normalized_name
+MATCH (p:Person)
+WITH p.normalized_name AS name, COLLECT(p) AS nodes
+WHERE SIZE(nodes) > 1
+RETURN name, SIZE(nodes) AS count
+ORDER BY count DESC
 ```
+
+To merge duplicates, redirect relationships from the duplicate node to the canonical one and delete the duplicate. A dedicated `src.graph.maintenance` script is planned.
 
 The pipeline uses `normalized_name = lower(strip(name))` for deduplication, but variations in source content can still create duplicates.
 

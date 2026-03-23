@@ -34,15 +34,13 @@ claude mcp add falkordb \
     -- npx -y @falkordb/falkordb-mcp-server 2>/dev/null || \
     warn "FalkorDB MCP may already be configured."
 
-# ── 4. Graphiti MCP ──────────────────────────────────────────
+# ── 4. Graphiti MCP (SSE, Docker Compose) ─────────────────────
 # Graphiti's MCP server runs as part of the Docker Compose stack.
 # It connects to Claude Code via SSE transport.
-log "Graphiti MCP server runs via Docker Compose."
+log "Adding Graphiti MCP server (SSE)..."
 log "Ensure it's running: cd docker && docker compose up -d"
-echo ""
-echo "  To add Graphiti MCP manually (after docker compose up):"
-echo "    claude mcp add --transport sse graphiti http://localhost:8000/sse"
-echo ""
+claude mcp add --transport sse graphiti http://localhost:8000/sse 2>/dev/null || \
+    warn "Graphiti MCP may already be configured."
 
 # ── Verify ───────────────────────────────────────────────────
 log "Current MCP servers:"

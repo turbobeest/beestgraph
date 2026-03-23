@@ -4,7 +4,7 @@
 # Uses a lockfile to prevent overlapping runs.
 #
 # Cron example (every 15 minutes):
-#   */15 * * * * /home/pi/beestgraph/scripts/process-keepmd.sh >> /var/log/beestgraph/keepmd.log 2>&1
+#   */15 * * * * $HOME/beestgraph/scripts/process-keepmd.sh >> /var/log/beestgraph/keepmd.log 2>&1
 set -euo pipefail
 
 # ── Color log helpers ────────────────────────────────────────

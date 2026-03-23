@@ -78,7 +78,7 @@ Hierarchical categories from the taxonomy. Topics have levels indicating depth (
 
 ```cypher
 (:Topic {
-  name: STRING,   -- topic name (e.g., "ai-ml")
+  name: STRING,   -- topic name using path-style (e.g., "technology/ai-ml")
   level: INT      -- depth in taxonomy tree (0 = top-level)
 })
 ```
@@ -89,7 +89,7 @@ Create a Topic hierarchy:
 MERGE (tech:Topic {name: "technology"})
 SET tech.level = 0
 
-MERGE (aiml:Topic {name: "ai-ml"})
+MERGE (aiml:Topic {name: "technology/ai-ml"})
 SET aiml.level = 1
 
 MERGE (aiml)-[:SUBTOPIC_OF]->(tech)
@@ -223,7 +223,7 @@ MERGE (d)-[:TAGGED_WITH]->(t)
 
 -- Categorize under a topic
 MATCH (d:Document {path: "knowledge/technology/ai-ml/article.md"})
-MATCH (tp:Topic {name: "ai-ml"})
+MATCH (tp:Topic {name: "technology/ai-ml"})
 MERGE (d)-[:BELONGS_TO]->(tp)
 
 -- Mention with confidence
@@ -240,7 +240,7 @@ MERGE (d)-[:MENTIONS {confidence: 0.82, context: "Used for semantic search over 
 | `SUBTOPIC_OF` | Child topic belongs to parent topic |
 
 ```cypher
-MATCH (child:Topic {name: "programming"})
+MATCH (child:Topic {name: "technology/programming"})
 MATCH (parent:Topic {name: "technology"})
 MERGE (child)-[:SUBTOPIC_OF]->(parent)
 ```
@@ -272,7 +272,7 @@ CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'content', 'summary')
 ### Find all documents about a topic
 
 ```cypher
-MATCH (d:Document)-[:BELONGS_TO]->(t:Topic {name: "ai-ml"})
+MATCH (d:Document)-[:BELONGS_TO]->(t:Topic {name: "technology/ai-ml"})
 RETURN d.title, d.summary, d.source_url
 ORDER BY d.created_at DESC
 ```

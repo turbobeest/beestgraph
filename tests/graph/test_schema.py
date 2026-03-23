@@ -39,9 +39,9 @@ class TestBuildRangeIndexQueries:
 class TestBuildFulltextIndexQueries:
     """Tests for _build_fulltext_index_queries."""
 
-    def test_returns_one_statement(self) -> None:
+    def test_returns_correct_count(self) -> None:
         queries = _build_fulltext_index_queries()
-        assert len(queries) == 1
+        assert len(queries) == 3
 
     def test_includes_document_fields(self) -> None:
         query = _build_fulltext_index_queries()[0]
@@ -75,8 +75,10 @@ class TestEnsureSchema:
     @pytest.mark.asyncio
     async def test_calls_query_for_each_index(self, mock_graph: AsyncMock) -> None:
         await ensure_schema(mock_graph)
+        from src.graph.schema import FULLTEXT_INDEXES
+
         range_count = len(RANGE_INDEXES)
-        fulltext_count = 1
+        fulltext_count = len(FULLTEXT_INDEXES)
         version_count = 1
         assert mock_graph.query.call_count == range_count + fulltext_count + version_count
 
@@ -96,9 +98,11 @@ class TestEnsureSchema:
     @pytest.mark.asyncio
     async def test_tolerates_existing_index_error(self, mock_graph: AsyncMock) -> None:
         """If an index already exists, FalkorDB raises — ensure_schema handles it."""
+        from src.graph.schema import FULLTEXT_INDEXES
+
         mock_graph.query = AsyncMock(
             side_effect=[Exception("Index already exists")] * len(RANGE_INDEXES)
-            + [Exception("Index already exists")]  # fulltext
+            + [Exception("Index already exists")] * len(FULLTEXT_INDEXES)
             + [None]  # schema version succeeds
         )
         # Should not raise

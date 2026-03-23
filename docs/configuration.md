@@ -25,12 +25,15 @@ cp config/beestgraph.yml.example config/beestgraph.yml
 
 ```yaml
 # config/beestgraph.yml
+#
+# These fields match the Python model in src/config.py (BeestgraphSettings).
+# Unrecognized fields are silently ignored.
 
-# ── General ─────────────────────────────────────────────────
-general:
-  log_level: INFO              # DEBUG | INFO | WARNING | ERROR
-  log_format: json             # json | console (console for development)
-  timezone: America/New_York   # IANA timezone for timestamps
+# ── Top-level ───────────────────────────────────────────────
+log_level: INFO                # DEBUG | INFO | WARNING | ERROR
+taxonomy_path: config/taxonomy.yml  # Path to topic taxonomy definition
+claude_code_binary: claude     # Path to Claude Code CLI binary
+enable_llm_processing: true    # Set false to skip LLM calls in the pipeline
 
 # ── Vault ───────────────────────────────────────────────────
 vault:
@@ -49,32 +52,18 @@ falkordb:
 # ── Graphiti ────────────────────────────────────────────────
 graphiti:
   url: http://localhost:8000   # Graphiti MCP server URL
-  model: claude-sonnet-4-20250514  # Model for Graphiti's LLM calls
-  embedding_model: text-embedding-3-small
+  timeout_seconds: 30          # HTTP timeout for Graphiti requests
 
 # ── keep.md ─────────────────────────────────────────────────
 keepmd:
-  enabled: true                # Enable keep.md polling
-  poll_interval: 900           # Seconds between polls (900 = 15 min)
+  api_url: https://keep.md/mcp # keep.md MCP endpoint URL
   api_key: ""                  # keep.md API key (prefer env var)
-  mcp_url: https://keep.md/mcp
+  polling_interval_minutes: 15 # Minutes between polls
 
 # ── Telegram Bot ────────────────────────────────────────────
 telegram:
-  enabled: false               # Enable Telegram bot
   bot_token: ""                # Bot token from @BotFather (prefer env var)
-  allowed_users: []            # List of allowed Telegram user IDs
-
-# ── Processing ──────────────────────────────────────────────
-processing:
-  max_concurrent: 2            # Max items processed simultaneously
-  summary_max_words: 100       # Target word count for AI summaries
-  entity_confidence_threshold: 0.7  # Min confidence for entity extraction
-  default_para_category: resources   # Default PARA category for new items
-
-# ── Taxonomy ────────────────────────────────────────────────
-taxonomy:
-  file: config/taxonomy.yml    # Path to topic taxonomy definition
+  allowed_user_ids: []         # List of allowed Telegram user IDs
 ```
 
 ---
@@ -85,16 +74,18 @@ Environment variables override `config/beestgraph.yml` values. The naming conven
 
 | Variable | Config path | Type | Description |
 |----------|------------|------|-------------|
-| `BEESTGRAPH_GENERAL__LOG_LEVEL` | `general.log_level` | string | Logging level |
-| `BEESTGRAPH_VAULT__PATH` | `vault.path` | string | Vault root path |
-| `BEESTGRAPH_FALKORDB__HOST` | `falkordb.host` | string | FalkorDB hostname |
-| `BEESTGRAPH_FALKORDB__PORT` | `falkordb.port` | int | FalkorDB port |
-| `BEESTGRAPH_FALKORDB__GRAPH_NAME` | `falkordb.graph_name` | string | Graph name |
-| `BEESTGRAPH_GRAPHITI__URL` | `graphiti.url` | string | Graphiti server URL |
-| `BEESTGRAPH_KEEPMD__ENABLED` | `keepmd.enabled` | bool | Enable keep.md polling |
-| `BEESTGRAPH_KEEPMD__POLL_INTERVAL` | `keepmd.poll_interval` | int | Poll interval (seconds) |
-| `BEESTGRAPH_TELEGRAM__ENABLED` | `telegram.enabled` | bool | Enable Telegram bot |
-| `BEESTGRAPH_PROCESSING__MAX_CONCURRENT` | `processing.max_concurrent` | int | Max concurrent items |
+| `BEESTGRAPH_LOG_LEVEL` | `log_level` | string | Logging level |
+| `BEESTGRAPH_TAXONOMY_PATH` | `taxonomy_path` | string | Path to taxonomy YAML |
+| `BEESTGRAPH_CLAUDE_CODE_BINARY` | `claude_code_binary` | string | Claude Code CLI path |
+| `BEESTGRAPH_ENABLE_LLM_PROCESSING` | `enable_llm_processing` | bool | Enable LLM calls |
+| `BEESTGRAPH_VAULT_PATH` | `vault.path` | string | Vault root path |
+| `BEESTGRAPH_FALKORDB_HOST` | `falkordb.host` | string | FalkorDB hostname |
+| `BEESTGRAPH_FALKORDB_PORT` | `falkordb.port` | int | FalkorDB port |
+| `BEESTGRAPH_FALKORDB_GRAPH_NAME` | `falkordb.graph_name` | string | Graph name |
+| `BEESTGRAPH_GRAPHITI_URL` | `graphiti.url` | string | Graphiti server URL |
+| `BEESTGRAPH_GRAPHITI_TIMEOUT_SECONDS` | `graphiti.timeout_seconds` | int | Graphiti HTTP timeout |
+| `BEESTGRAPH_KEEPMD_API_URL` | `keepmd.api_url` | string | keep.md MCP endpoint |
+| `BEESTGRAPH_KEEPMD_POLLING_INTERVAL_MINUTES` | `keepmd.polling_interval_minutes` | int | Poll interval (minutes) |
 
 ### Sensitive variables (never put in config file)
 
@@ -158,16 +149,12 @@ See [`docs/mcp-servers.md`](mcp-servers.md) for detailed server configuration an
       "url": "https://keep.md/mcp"
     },
     "graphiti": {
-      "command": "graphiti-mcp-server",
-      "args": ["--transport", "sse"],
-      "env": {
-        "FALKORDB_HOST": "localhost",
-        "FALKORDB_PORT": "6379"
-      }
+      "transport": "sse",
+      "url": "http://localhost:8000/sse"
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/vault"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "~/vault"]
     },
     "falkordb": {
       "command": "npx",
@@ -181,7 +168,7 @@ See [`docs/mcp-servers.md`](mcp-servers.md) for detailed server configuration an
 }
 ```
 
-Replace `/path/to/vault` with your actual vault path.
+Replace `~/vault` with your actual vault path.
 
 ---
 

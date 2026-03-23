@@ -16,22 +16,28 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # Range indexes: (label, property)
 RANGE_INDEXES: list[tuple[str, str]] = [
     ("Document", "path"),
     ("Document", "source_url"),
     ("Document", "status"),
+    ("Document", "para_category"),
+    ("Document", "source_type"),
     ("Tag", "normalized_name"),
     ("Topic", "name"),
     ("Person", "normalized_name"),
     ("Concept", "normalized_name"),
+    ("Source", "url"),
+    ("Project", "name"),
 ]
 
 # Full-text indexes: (label, [properties])
 FULLTEXT_INDEXES: list[tuple[str, list[str]]] = [
     ("Document", ["title", "content", "summary"]),
+    ("Tag", ["name"]),
+    ("Concept", ["name", "description"]),
 ]
 
 

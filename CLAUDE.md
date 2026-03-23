@@ -188,7 +188,7 @@ Four MCP servers are configured in `config/mcp.json`:
 ### Stream 1: keep.md (cron, every 15 minutes)
 
 ```
-cron → scripts/process-keepmd.sh → claude -p (headless)
+cron → scripts/process-keepmd.sh → python -m src.pipeline.keepmd_poller
   → keep.md MCP: list_inbox
   → for each item: get_item → extract → categorize → summarize
   → filesystem MCP: write_file (formal markdown to vault)

@@ -10,7 +10,7 @@
 
 /* Cytoscape.js container overrides */
 .cytoscape-container {
-  @apply w-full h-full min-h-[400px] rounded-lg border border-gray-200 dark:border-gray-700;
+  @apply w-full h-full min-h-[400px];
 }
 
 .cytoscape-container canvas {
