@@ -55,3 +55,4 @@ backups/
 # ── Config (user-specific, templates are tracked) ────────────
 config/beestgraph.yml
 config/mcp.json
+*.tar.gz
