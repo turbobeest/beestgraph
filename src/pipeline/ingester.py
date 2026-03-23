@@ -7,7 +7,7 @@ safe.
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from falkordb import FalkorDB
@@ -133,7 +133,7 @@ class GraphIngester:
             )
         return self._db
 
-    def _graph(self):  # noqa: ANN202
+    def _graph(self):
         """Return the named graph handle."""
         return self._connect().select_graph(self._settings.graph_name)
 
@@ -148,7 +148,7 @@ class GraphIngester:
         Returns:
             The vault-relative path used as the node key.
         """
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         meta = doc.metadata
         params = {
             "path": doc.path,
@@ -240,9 +240,7 @@ class GraphIngester:
             )
             self._graph().query(_MERGE_DOC_MENTIONS_CONCEPT, params)
         else:
-            raise ValueError(
-                f"entity_type must be 'person' or 'concept', got '{entity_type}'"
-            )
+            raise ValueError(f"entity_type must be 'person' or 'concept', got '{entity_type}'")
 
     def _upsert_source(self, url: str) -> None:
         """Create or update a Source node and link it to a document.
@@ -254,9 +252,7 @@ class GraphIngester:
 
         parsed = urlparse(url)
         domain = parsed.netloc or url
-        self._graph().query(
-            _MERGE_SOURCE, {"url": url, "domain": domain, "name": domain}
-        )
+        self._graph().query(_MERGE_SOURCE, {"url": url, "domain": domain, "name": domain})
 
     # -- high-level ingest ---------------------------------------------------
 

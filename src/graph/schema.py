@@ -6,7 +6,7 @@ with a metadata node. All operations are idempotent.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import structlog
@@ -41,10 +41,7 @@ def _build_range_index_queries() -> list[str]:
     Returns:
         List of Cypher CREATE INDEX statements.
     """
-    return [
-        f"CREATE INDEX FOR (n:{label}) ON (n.{prop})"
-        for label, prop in RANGE_INDEXES
-    ]
+    return [f"CREATE INDEX FOR (n:{label}) ON (n.{prop})" for label, prop in RANGE_INDEXES]
 
 
 def _build_fulltext_index_queries() -> list[str]:
@@ -75,7 +72,7 @@ def _build_schema_version_query(version: int) -> tuple[str, dict[str, object]]:
     )
     params: dict[str, object] = {
         "version": version,
-        "applied_at": datetime.now(tz=timezone.utc).isoformat(),
+        "applied_at": datetime.now(tz=UTC).isoformat(),
     }
     return query, params
 

@@ -143,8 +143,15 @@ async def compute_stats(graph: Graph) -> dict[str, object]:
 
     # Edge counts by type
     edge_types = [
-        "LINKS_TO", "TAGGED_WITH", "BELONGS_TO", "MENTIONS",
-        "DERIVED_FROM", "SUBTOPIC_OF", "SUPPORTS", "CONTRADICTS", "SUPERSEDES",
+        "LINKS_TO",
+        "TAGGED_WITH",
+        "BELONGS_TO",
+        "MENTIONS",
+        "DERIVED_FROM",
+        "SUBTOPIC_OF",
+        "SUPPORTS",
+        "CONTRADICTS",
+        "SUPERSEDES",
     ]
     edge_counts: dict[str, int] = {}
     for etype in edge_types:
@@ -158,8 +165,7 @@ async def compute_stats(graph: Graph) -> dict[str, object]:
         "ORDER BY degree DESC LIMIT 10"
     )
     most_connected = [
-        {"path": row[0], "title": row[1], "degree": row[2]}
-        for row in result.result_set
+        {"path": row[0], "title": row[1], "degree": row[2]} for row in result.result_set
     ]
 
     stats: dict[str, object] = {

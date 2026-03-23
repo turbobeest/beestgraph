@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -74,7 +74,8 @@ async def _fetch_inbox(client: httpx.AsyncClient, settings: KeepMDSettings) -> l
         httpx.HTTPStatusError: On non-2xx response.
     """
     headers = {"Authorization": f"Bearer {settings.api_key}"} if settings.api_key else {}
-    resp = await client.get(f"{settings.api_url}/items", params={"status": "inbox"}, headers=headers)
+    url = f"{settings.api_url}/items"
+    resp = await client.get(url, params={"status": "inbox"}, headers=headers)
     resp.raise_for_status()
     data = resp.json()
     items: list[dict] = data if isinstance(data, list) else data.get("items", [])
@@ -101,9 +102,7 @@ async def _get_item_content(
     return resp.json()
 
 
-async def _mark_done(
-    client: httpx.AsyncClient, settings: KeepMDSettings, item_id: str
-) -> None:
+async def _mark_done(client: httpx.AsyncClient, settings: KeepMDSettings, item_id: str) -> None:
     """Mark a keep.md item as processed / done.
 
     Args:
@@ -131,7 +130,7 @@ def _write_markdown(item: dict, vault_inbox: Path) -> Path:
     Returns:
         Path to the newly written markdown file.
     """
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
     title = item.get("title", "Untitled")
     source_url = item.get("url", item.get("source_url", ""))
     content = item.get("content", item.get("body", ""))

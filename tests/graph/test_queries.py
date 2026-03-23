@@ -61,7 +61,7 @@ class TestFindRelatedByTags:
 
     def test_uses_tag_list_param(self) -> None:
         tags = ["python", "ai-ml"]
-        cypher, params = find_related_by_tags(tags)
+        _cypher, params = find_related_by_tags(tags)
         assert params["tags"] == tags
 
     def test_matches_tagged_with_relationship(self) -> None:

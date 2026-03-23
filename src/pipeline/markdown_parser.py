@@ -137,9 +137,7 @@ def parse_file(filepath: Path, vault_root: Path | None = None) -> ParsedDocument
 
     # Merge frontmatter tags with inline tags
     fm_tags = metadata.get("tags", [])
-    fm_tag_set = frozenset(
-        str(t).lower() for t in (fm_tags if isinstance(fm_tags, list) else [])
-    )
+    fm_tag_set = frozenset(str(t).lower() for t in (fm_tags if isinstance(fm_tags, list) else []))
 
     doc = ParsedDocument(
         path=rel_path,

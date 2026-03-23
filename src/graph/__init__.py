@@ -7,11 +7,11 @@ for the FalkorDB-backed knowledge graph.
 from __future__ import annotations
 
 __all__ = [
-    "ensure_schema",
     "compute_stats",
     "deduplicate_entities",
     "deduplicate_tags",
     "documents_by_source_type",
+    "ensure_schema",
     "find_hub_documents",
     "find_orphan_documents",
     "find_orphans",

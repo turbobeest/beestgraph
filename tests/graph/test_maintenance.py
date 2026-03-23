@@ -58,9 +58,7 @@ class TestDeduplicateEntities:
 
     @pytest.mark.asyncio
     async def test_processes_person_and_concept(self, mock_graph: AsyncMock) -> None:
-        mock_graph.query = AsyncMock(
-            side_effect=[FakeResultSet([[2]]), FakeResultSet([[1]])]
-        )
+        mock_graph.query = AsyncMock(side_effect=[FakeResultSet([[2]]), FakeResultSet([[1]])])
         result = await deduplicate_entities(mock_graph)
         assert result == {"Person": 2, "Concept": 1}
 
@@ -115,10 +113,9 @@ class TestComputeStats:
         assert "most_connected" in stats
 
     @pytest.mark.asyncio
-    async def test_node_counts_include_all_labels(
-        self, mock_graph_with_results: object
-    ) -> None:
-        results = [FakeResultSet([[0]]) for _ in range(17)]
+    async def test_node_counts_include_all_labels(self, mock_graph_with_results: object) -> None:
+        results = [FakeResultSet([[0]]) for _ in range(16)]
+        results.append(FakeResultSet([]))  # most_connected returns no rows
         factory = mock_graph_with_results  # type: ignore[assignment]
         graph = factory(results)  # type: ignore[operator]
         stats = await compute_stats(graph)
@@ -130,12 +127,14 @@ class TestComputeStats:
     @pytest.mark.asyncio
     async def test_most_connected_format(self, mock_graph_with_results: object) -> None:
         node_edge_results = [FakeResultSet([[0]]) for _ in range(16)]
-        connected_result = FakeResultSet([
-            ["knowledge/ai.md", "AI Article", 12],
-            ["knowledge/ml.md", "ML Article", 8],
-        ])
+        connected_result = FakeResultSet(
+            [
+                ["knowledge/ai.md", "AI Article", 12],
+                ["knowledge/ml.md", "ML Article", 8],
+            ]
+        )
         factory = mock_graph_with_results  # type: ignore[assignment]
-        graph = factory(node_edge_results + [connected_result])  # type: ignore[operator]
+        graph = factory([*node_edge_results, connected_result])  # type: ignore[operator]
         stats = await compute_stats(graph)
         most_connected = stats["most_connected"]
         assert isinstance(most_connected, list)

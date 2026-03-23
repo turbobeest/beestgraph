@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, call
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -55,7 +55,7 @@ class TestBuildSchemaVersionQuery:
     """Tests for _build_schema_version_query."""
 
     def test_returns_merge_query(self) -> None:
-        cypher, params = _build_schema_version_query(1)
+        cypher, _params = _build_schema_version_query(1)
         assert "MERGE" in cypher
         assert "SchemaVersion" in cypher
 

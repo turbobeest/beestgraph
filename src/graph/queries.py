@@ -27,9 +27,7 @@ def search_documents(query: str, limit: int = 20) -> tuple[str, dict[str, object
     return cypher, {"query": query, "limit": limit}
 
 
-def get_document_neighborhood(
-    path: str, depth: int = 1
-) -> tuple[str, dict[str, object]]:
+def get_document_neighborhood(path: str, depth: int = 1) -> tuple[str, dict[str, object]]:
     """Retrieve the subgraph around a document up to a given depth.
 
     Follows all relationship types outward from the document matched by path.
@@ -43,7 +41,7 @@ def get_document_neighborhood(
     """
     cypher = (
         "MATCH (d:Document {path: $path}) "
-        f"CALL subgraph.neighbors(d, {{}}, {{maxDepth: $depth}}) "
+        "CALL subgraph.neighbors(d, {}, {maxDepth: $depth}) "
         "YIELD nodes, edges "
         "RETURN nodes, edges"
     )
@@ -75,12 +73,7 @@ def find_orphans() -> tuple[str, dict[str, object]]:
     Returns:
         Tuple of (cypher_string, params_dict) with empty params.
     """
-    cypher = (
-        "MATCH (d:Document) "
-        "WHERE NOT (d)--() "
-        "RETURN d "
-        "ORDER BY d.created_at DESC"
-    )
+    cypher = "MATCH (d:Document) WHERE NOT (d)--() RETURN d ORDER BY d.created_at DESC"
     return cypher, {}
 
 
@@ -112,12 +105,7 @@ def recent_documents(n: int = 10) -> tuple[str, dict[str, object]]:
     Returns:
         Tuple of (cypher_string, params_dict).
     """
-    cypher = (
-        "MATCH (d:Document) "
-        "RETURN d "
-        "ORDER BY d.created_at DESC "
-        "LIMIT $n"
-    )
+    cypher = "MATCH (d:Document) RETURN d ORDER BY d.created_at DESC LIMIT $n"
     return cypher, {"n": n}
 
 
@@ -131,9 +119,6 @@ def documents_by_source_type(source_type: str) -> tuple[str, dict[str, object]]:
         Tuple of (cypher_string, params_dict).
     """
     cypher = (
-        "MATCH (d:Document) "
-        "WHERE d.source_type = $source_type "
-        "RETURN d "
-        "ORDER BY d.created_at DESC"
+        "MATCH (d:Document) WHERE d.source_type = $source_type RETURN d ORDER BY d.created_at DESC"
     )
     return cypher, {"source_type": source_type}
