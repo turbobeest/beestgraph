@@ -7,7 +7,9 @@ into a queryable knowledge graph backed by FalkorDB and Graphiti.
 from __future__ import annotations
 
 __all__ = [
+    "bot",
     "config",
     "graph",
     "pipeline",
+    "vault",
 ]
