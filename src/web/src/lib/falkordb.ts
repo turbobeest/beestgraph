@@ -298,6 +298,82 @@ export async function getTopics(): Promise<Array<{ name: string; level: number }
   }));
 }
 
+export interface TimelineDocument extends DocumentRecord {
+  topics: string[];
+  tags: string[];
+  paraCategory: string;
+}
+
+export async function getTimelineDocuments(
+  limit: number = 50,
+): Promise<TimelineDocument[]> {
+  const result = await graphQuery(
+    `MATCH (d:Document)
+     WHERE d.title IS NOT NULL
+     RETURN d.path, d.title, d.summary, d.status,
+            d.source_type, d.source_url, d.created_at, d.updated_at,
+            d.para_category
+     ORDER BY d.created_at DESC
+     LIMIT $limit`,
+    { limit },
+  );
+
+  const docs = new Map<string, TimelineDocument>();
+
+  for (const row of result.rows) {
+    const path = String(row[0] ?? "");
+    docs.set(path, {
+      path,
+      title: String(row[1] ?? ""),
+      summary: String(row[2] ?? ""),
+      status: String(row[3] ?? ""),
+      sourceType: String(row[4] ?? ""),
+      sourceUrl: String(row[5] ?? ""),
+      createdAt: String(row[6] ?? ""),
+      updatedAt: String(row[7] ?? ""),
+      paraCategory: String(row[8] ?? ""),
+      topics: [],
+      tags: [],
+    });
+  }
+
+  if (docs.size > 0) {
+    const topicResult = await graphQuery(
+      `MATCH (d:Document)-[:BELONGS_TO]->(t:Topic)
+       WHERE d.title IS NOT NULL
+       RETURN d.path, t.name
+       LIMIT 1000`,
+    );
+
+    for (const row of topicResult.rows) {
+      const docPath = String(row[0] ?? "");
+      const topicName = String(row[1] ?? "");
+      const doc = docs.get(docPath);
+      if (doc && topicName) {
+        doc.topics.push(topicName);
+      }
+    }
+
+    const tagResult = await graphQuery(
+      `MATCH (d:Document)-[:TAGGED_WITH]->(tag:Tag)
+       WHERE d.title IS NOT NULL
+       RETURN d.path, tag.name
+       LIMIT 1000`,
+    );
+
+    for (const row of tagResult.rows) {
+      const docPath = String(row[0] ?? "");
+      const tagName = String(row[1] ?? "");
+      const doc = docs.get(docPath);
+      if (doc && tagName) {
+        doc.tags.push(tagName);
+      }
+    }
+  }
+
+  return Array.from(docs.values());
+}
+
 export async function closeConnection(): Promise<void> {
   if (clientInstance) {
     await clientInstance.disconnect();
