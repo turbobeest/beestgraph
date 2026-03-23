@@ -1,0 +1,43 @@
+# beestgraph/config/taxonomy.yml
+# Starter topic taxonomy for organizing captured knowledge.
+# Topics are hierarchical: top-level categories (level 0) contain subtopics (level 1+).
+# Extend this file to add new topics — run `make init-schema` to sync to FalkorDB.
+
+topics:
+  technology:
+    - programming
+    - ai-ml
+    - infrastructure
+    - security
+    - web
+
+  science:
+    - physics
+    - biology
+    - mathematics
+
+  business:
+    - startups
+    - finance
+    - marketing
+
+  culture:
+    - books
+    - film
+    - music
+    - history
+
+  health:
+    - fitness
+    - nutrition
+    - mental-health
+
+  personal:
+    - journal
+    - goals
+    - relationships
+
+  meta:
+    - pkm
+    - tools
+    - workflows

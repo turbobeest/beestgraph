@@ -1,0 +1,111 @@
+# beestgraph/config/beestgraph.yml.example
+# Copy to beestgraph.yml and customize:  cp beestgraph.yml.example beestgraph.yml
+#
+# All settings can be overridden with environment variables using the prefix
+# BEESTGRAPH_. Nested keys use double underscores. Example:
+#   BEESTGRAPH_FALKORDB__HOST=192.168.1.50
+
+# ── Obsidian vault ──────────────────────────────────────────
+vault:
+  # Absolute path to the Obsidian vault root directory
+  path: ~/vault
+
+  # Subdirectory where new captures land (monitored by watchdog)
+  inbox_dir: inbox
+
+  # Subdirectory for processed articles organized by topic
+  knowledge_dir: knowledge
+
+  # PARA method directories
+  projects_dir: projects
+  areas_dir: areas
+  resources_dir: resources
+  archives_dir: archives
+
+# ── FalkorDB ────────────────────────────────────────────────
+falkordb:
+  host: localhost
+  port: 6379
+
+  # Graph name within FalkorDB
+  graph_name: beestgraph
+
+# ── Graphiti ────────────────────────────────────────────────
+graphiti:
+  # SSE endpoint exposed by the Graphiti Docker container
+  url: http://localhost:8000
+
+# ── keep.md polling ─────────────────────────────────────────
+keepmd:
+  # Polling interval in seconds (cron runs every 15 minutes)
+  poll_interval: 900
+
+  # Maximum items to process per polling cycle (prevents runaway costs)
+  max_items_per_cycle: 20
+
+  # Source types to capture from keep.md
+  enabled_sources:
+    - browser
+    - mobile
+    - rss
+    - twitter
+    - youtube
+    - github
+    - email
+
+# ── Processing ──────────────────────────────────────────────
+processing:
+  # LLM model for content extraction and summarization
+  model: claude-sonnet-4-20250514
+
+  # Embedding model for vector similarity (used by Graphiti)
+  embedding_model: text-embedding-3-small
+
+  # Maximum concurrent processing tasks
+  concurrency: 2
+
+  # Retry failed items up to this many times before marking as error
+  max_retries: 3
+
+# ── Taxonomy ────────────────────────────────────────────────
+taxonomy:
+  # Path to the topic taxonomy file (relative to project root)
+  path: config/taxonomy.yml
+
+# ── Logging ─────────────────────────────────────────────────
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: INFO
+
+  # Output format: json (production), console (development)
+  format: console
+
+  # Log file path (leave empty to log only to stdout)
+  file: ""
+
+# ── Telegram bot ────────────────────────────────────────────
+telegram:
+  # Bot token from @BotFather (set via BEESTGRAPH_TELEGRAM__BOT_TOKEN)
+  bot_token: ""
+
+  # Comma-separated list of allowed Telegram user IDs
+  allowed_users: []
+
+  # Enable/disable the Telegram bot
+  enabled: false
+
+# ── Web UI ──────────────────────────────────────────────────
+web:
+  # Port for the Next.js web UI
+  port: 3001
+
+  # Bind address (0.0.0.0 for all interfaces, 127.0.0.1 for local only)
+  host: 127.0.0.1
+
+# ── Backup ──────────────────────────────────────────────────
+backup:
+  # Directory to store backups
+  dir: ~/backups/beestgraph
+
+  # Number of daily backups to retain
+  retention: 7

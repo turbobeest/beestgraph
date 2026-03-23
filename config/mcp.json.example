@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "keep": {
+      "transport": "http",
+      "url": "https://keep.md/mcp",
+      "description": "keep.md — multi-source capture inbox (browser, mobile, RSS, X, YouTube, GitHub, email)"
+    },
+    "graphiti": {
+      "transport": "sse",
+      "url": "http://localhost:8000/sse",
+      "description": "Graphiti — temporal knowledge graph operations via FalkorDB"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "~/vault"
+      ],
+      "description": "Filesystem — read/write access to the Obsidian vault"
+    },
+    "falkordb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@falkordb/falkordb-mcp-server"
+      ],
+      "env": {
+        "FALKORDB_HOST": "localhost",
+        "FALKORDB_PORT": "6379"
+      },
+      "description": "FalkorDB — direct Cypher queries and natural language graph access"
+    }
+  }
+}

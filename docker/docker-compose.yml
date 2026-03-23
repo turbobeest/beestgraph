@@ -1,14 +1,16 @@
 ## beestgraph/docker/docker-compose.yml
 ## Core services: FalkorDB + Graphiti MCP server
+## Target platform: Raspberry Pi 5 (ARM64)
 
 services:
   falkordb:
     image: falkordb/falkordb:latest
     container_name: beestgraph-falkordb
+    platform: linux/arm64
     restart: unless-stopped
     ports:
-      - "6379:6379"   # Redis/FalkorDB protocol
-      - "3000:3000"   # FalkorDB Browser UI
+      - "${FALKORDB_PORT:-6379}:6379"  # Redis/FalkorDB protocol
+      - "3000:3000"                     # FalkorDB Browser UI
     volumes:
       - falkordb-data:/data
     environment:
@@ -18,21 +20,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 15s
     deploy:
       resources:
         limits:
-          memory: 8g    # Leave headroom for Graphiti + pipeline
+          memory: 8g  # Leave headroom for Graphiti + pipeline
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   graphiti:
     image: zepai/graphiti:latest
     container_name: beestgraph-graphiti
+    platform: linux/arm64
     restart: unless-stopped
     depends_on:
       falkordb:
         condition: service_healthy
     ports:
-      - "8000:8000"   # Graphiti MCP server (SSE)
+      - "8000:8000"  # Graphiti MCP server (SSE)
     environment:
+      - GRAPH_DB_PROVIDER=falkordb
       - FALKORDB_HOST=falkordb
       - FALKORDB_PORT=6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -43,6 +53,16 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   falkordb-data:

@@ -1,0 +1,35 @@
+[Unit]
+Description=beestgraph Telegram bot
+Documentation=https://github.com/terbeest/beestgraph
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/beestgraph
+EnvironmentFile=-/home/pi/beestgraph/docker/.env
+
+ExecStart=/home/pi/.local/bin/uv run python -m src.bot.telegram_bot
+
+# Restart on failure with backoff
+Restart=on-failure
+RestartSec=15
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-bot
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/pi/beestgraph
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

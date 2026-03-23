@@ -1,0 +1,35 @@
+[Unit]
+Description=beestgraph vault inbox watchdog
+Documentation=https://github.com/terbeest/beestgraph
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/beestgraph
+EnvironmentFile=-/home/pi/beestgraph/docker/.env
+
+ExecStart=/home/pi/.local/bin/uv run python -m src.pipeline.watcher --vault-path %h/vault
+
+# Restart on failure with backoff
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-watcher
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/pi/vault /home/pi/beestgraph
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -8,6 +8,34 @@ beestgraph turns bookmarks, articles, notes, and feeds into a queryable knowledg
 
 This is an open-source project. All code must be clean, well-documented, and ready for public GitHub.
 
+## Engineering standards (non-negotiable)
+
+This project follows strict professional software engineering practices. Every file, directory, and line of code should reflect the discipline of a well-run engineering organization.
+
+### Code quality
+
+- **No dead code.** Remove unused imports, variables, functions, and files immediately. Do not comment out code "for later."
+- **No placeholder or stub implementations** unless explicitly marked with `# TODO(username): reason` and tracked in an issue.
+- **Single responsibility.** Every module, class, and function does one thing. If a docstring needs "and" to describe what it does, split it.
+- **Explicit over implicit.** No magic strings, no hardcoded values, no hidden coupling between modules. Constants go in a dedicated module or config.
+- **Defensive at boundaries, trusting internally.** Validate all external input (user input, API responses, file contents). Internal function calls between trusted modules do not need redundant validation.
+- **Error messages are actionable.** Every raised exception or logged error must tell the reader what happened, why, and what to do about it.
+
+### Directory and file organization
+
+- **Mirror the architecture.** The directory tree must reflect the system's logical layers. A new contributor should understand the architecture just by reading `tree -L 3`.
+- **No orphan files.** Every file belongs in a purposeful directory. No loose scripts, configs, or modules at the repo root unless they are standard (Makefile, pyproject.toml, etc.).
+- **No god modules.** If a file exceeds ~300 lines, it likely needs to be split. If a directory has more than ~10 files, it likely needs subdirectories.
+- **`__init__.py` files are intentional.** They define the public API of a package via explicit `__all__` exports. They are not empty placeholders.
+- **Test structure mirrors source.** `tests/` replicates the `src/` directory tree exactly. `src/pipeline/ingester.py` → `tests/pipeline/test_ingester.py`.
+
+### Process discipline
+
+- **Every PR must be reviewable.** Small, focused changes with clear commit messages. No 1000-line "initial implementation" dumps.
+- **Dependencies are justified.** Do not add a package for something achievable in <20 lines of standard library code. Pin versions.
+- **Configuration has one source of truth.** `config/beestgraph.yml` with env var overrides. No scattered `.env` files or inline defaults that diverge.
+- **Logging is structured and leveled.** DEBUG for development tracing, INFO for operational events, WARNING for recoverable issues, ERROR for failures requiring attention.
+
 ## Architecture
 
 Four layers, each with clear boundaries:
