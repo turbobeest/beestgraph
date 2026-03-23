@@ -35,7 +35,7 @@ test: ## Run tests with coverage
 # ── Pipeline Services ────────────────────────────────────────
 
 run-watcher: ## Start the vault inbox watchdog daemon
-	$(UV) run python -m src.pipeline.watcher --vault-path $(VAULT_PATH)
+	$(UV) run python -m src.pipeline.watcher
 
 run-poller: ## Run keep.md inbox poller once (for cron)
 	$(UV) run python -m src.pipeline.keepmd_poller
@@ -45,7 +45,7 @@ run-bot: ## Start the Telegram bot
 
 run-all: ## Start all Python services (watcher + bot)
 	@echo "Starting vault watcher in background..."
-	$(UV) run python -m src.pipeline.watcher --vault-path $(VAULT_PATH) &
+	$(UV) run python -m src.pipeline.watcher &
 	@echo "Starting Telegram bot..."
 	$(UV) run python -m src.bot.telegram_bot
 

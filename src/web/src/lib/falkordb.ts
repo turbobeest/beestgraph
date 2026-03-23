@@ -34,35 +34,22 @@ async function graphQuery(
     "GRAPH.QUERY",
     GRAPH_NAME,
     `${paramStr}${cypher}`,
-    "--compact",
   ])) as unknown[];
 
   if (!Array.isArray(raw) || raw.length === 0) {
     return { headers: [], rows: [], metadata: [] };
   }
 
-  // FalkorDB returns [headers, data, metadata] or [metadata]
+  // Non-compact mode: [headers, data, metadata] or [metadata]
   if (raw.length === 1) {
     return { headers: [], rows: [], metadata: raw[0] as string[] };
   }
 
-  const headers = (raw[0] as Array<[number, string]>).map((h) => h[1]);
+  const headers = raw[0] as string[];
   const rows = raw[1] as unknown[][];
   const metadata = raw[2] as string[];
 
-  // Each row contains [type, value] pairs in compact mode
-  const parsedRows = rows.map((row) =>
-    (row as Array<[number, unknown]>).map((cell) => {
-      const [cellType, cellValue] = cell;
-      // Type 2 = integer, 3 = string, 4 = double, 1 = null
-      if (cellType === 2) return Number(cellValue);
-      if (cellType === 3) return String(cellValue);
-      if (cellType === 4) return Number(cellValue);
-      return cellValue;
-    }),
-  );
-
-  return { headers, rows: parsedRows, metadata };
+  return { headers, rows, metadata };
 }
 
 export interface GraphNode {
@@ -222,6 +209,7 @@ export async function searchDocuments(
 export async function getRecentDocuments(limit: number = 20): Promise<DocumentRecord[]> {
   const result = await graphQuery(
     `MATCH (d:Document)
+     WHERE d.title IS NOT NULL
      RETURN d.path, d.title, d.summary, d.status,
             d.source_type, d.source_url, d.created_at, d.updated_at
      ORDER BY d.created_at DESC

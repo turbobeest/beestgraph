@@ -127,7 +127,22 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
     """
     path = config_path or _DEFAULT_CONFIG_PATH
     overrides = _load_yaml_overrides(path)
-    settings = BeestgraphSettings(**overrides)
+    # Filter to only fields the model recognizes to avoid pydantic extra_forbidden errors.
+    known_top_keys = set(BeestgraphSettings.model_fields.keys())
+    filtered = {k: v for k, v in overrides.items() if k in known_top_keys}
+    # Also filter nested dicts to their sub-model fields.
+    _nested_models: dict[str, type[BaseSettings]] = {
+        "vault": VaultSettings,
+        "falkordb": FalkorDBSettings,
+        "graphiti": GraphitiSettings,
+        "keepmd": KeepMDSettings,
+        "telegram": TelegramSettings,
+    }
+    for key, model_cls in _nested_models.items():
+        if key in filtered and isinstance(filtered[key], dict):
+            sub_keys = set(model_cls.model_fields.keys())
+            filtered[key] = {k: v for k, v in filtered[key].items() if k in sub_keys}
+    settings = BeestgraphSettings(**filtered)
     logger.info(
         "settings_loaded",
         config_path=str(path),

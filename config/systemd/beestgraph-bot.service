@@ -6,12 +6,12 @@ Wants=network-online.target docker.service
 
 [Service]
 Type=simple
-User=pi
-Group=pi
-WorkingDirectory=/home/pi/beestgraph
-EnvironmentFile=-/home/pi/beestgraph/docker/.env
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/mnt/walnut-drive/dev/beestgraph
+EnvironmentFile=-/mnt/walnut-drive/dev/beestgraph/docker/.env
 
-ExecStart=/home/pi/.local/bin/uv run python -m src.bot.telegram_bot
+ExecStart=/home/turbobeest/.local/bin/uv run python -m src.bot.telegram_bot
 
 # Restart on failure with backoff
 Restart=on-failure
@@ -28,7 +28,7 @@ SyslogIdentifier=beestgraph-bot
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/pi/beestgraph
+ReadWritePaths=/mnt/walnut-drive/dev/beestgraph /home/turbobeest/.cache/uv
 PrivateTmp=yes
 
 [Install]
