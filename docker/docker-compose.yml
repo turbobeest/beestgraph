@@ -1,0 +1,49 @@
+## beestgraph/docker/docker-compose.yml
+## Core services: FalkorDB + Graphiti MCP server
+
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: beestgraph-falkordb
+    restart: unless-stopped
+    ports:
+      - "6379:6379"   # Redis/FalkorDB protocol
+      - "3000:3000"   # FalkorDB Browser UI
+    volumes:
+      - falkordb-data:/data
+    environment:
+      - REDIS_ARGS=--save 60 1 --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 8g    # Leave headroom for Graphiti + pipeline
+
+  graphiti:
+    image: zepai/graphiti:latest
+    container_name: beestgraph-graphiti
+    restart: unless-stopped
+    depends_on:
+      falkordb:
+        condition: service_healthy
+    ports:
+      - "8000:8000"   # Graphiti MCP server (SSE)
+    environment:
+      - FALKORDB_HOST=falkordb
+      - FALKORDB_PORT=6379
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - MODEL_NAME=${GRAPHITI_MODEL:-claude-sonnet-4-20250514}
+      - EMBEDDING_MODEL=${GRAPHITI_EMBEDDING_MODEL:-text-embedding-3-small}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  falkordb-data:
+    driver: local
