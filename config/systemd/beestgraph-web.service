@@ -1,0 +1,34 @@
+[Unit]
+Description=beestgraph web UI (Next.js)
+Documentation=https://github.com/terbeest/beestgraph
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/home/turbobeest/beestgraph/src/web
+
+ExecStart=/usr/bin/npm run start
+
+# Restart on failure with backoff
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-web
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/turbobeest/beestgraph/src/web/.next
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

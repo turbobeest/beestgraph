@@ -120,7 +120,7 @@ class WebSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_WEB_")
 
     port: int = 3001
-    host: str = "127.0.0.1"
+    host: str = "0.0.0.0"  # noqa: S104
 
 
 class BackupSettings(BaseSettings):
