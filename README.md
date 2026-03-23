@@ -17,8 +17,8 @@
 
 - **Multi-source capture** -- browser extension, mobile, X/Twitter, RSS, YouTube, GitHub, email (via keep.md) plus deep article clipping (via Obsidian Web Clipper)
 - **AI processing pipeline** -- Claude Code agent in headless mode categorizes, extracts entities, and enriches every new item automatically
-- **Temporal knowledge graph** -- Graphiti tracks when facts became true and when they changed, built on FalkorDB's in-memory graph engine
-- **Four MCP servers** -- keep.md, Graphiti, Filesystem, and FalkorDB all accessible through Model Context Protocol
+- **In-memory graph engine** -- FalkorDB provides fast graph queries with full-text search and Cypher support
+- **Three MCP servers** -- keep.md, Filesystem, and FalkorDB all accessible through Model Context Protocol
 - **Self-hosted** -- runs entirely on a Raspberry Pi 5 (16GB) with NVMe SSD behind Tailscale VPN
 - **Open Obsidian vault** -- all processed knowledge lives as markdown files synced across devices via Syncthing
 - **Web UI** -- FalkorDB Browser for graph exploration, with a custom Next.js + Cytoscape.js frontend in progress
@@ -33,8 +33,8 @@ Four layers with clear boundaries:
 | Layer | Components | Purpose |
 |-------|-----------|---------|
 | **Capture** | keep.md, Obsidian Web Clipper, manual notes | Get content in with minimal friction |
-| **Processing** | Claude Code (headless), cron poller, watchdog, 4 MCP servers | AI categorization, entity extraction, enrichment |
-| **Storage** | FalkorDB, Graphiti, Obsidian vault (NVMe), Syncthing | Graph database + markdown files synced everywhere |
+| **Processing** | Claude Code (headless), cron poller, watchdog, 3 MCP servers | AI categorization, entity extraction, enrichment |
+| **Storage** | FalkorDB, Obsidian vault (NVMe), Syncthing | Graph database + markdown files synced everywhere |
 | **Access** | FalkorDB Browser (:3000), Web UI (:3001), Telegram bot, SSH+tmux | Query and explore from any device |
 
 See [`docs/setup-guide.md`](docs/setup-guide.md) for the full setup guide and architecture details.
@@ -65,7 +65,7 @@ cp config/beestgraph.yml.example config/beestgraph.yml
 cp docker/.env.example docker/.env
 # Edit both files with your API keys and paths
 
-# 3. Start Docker services (FalkorDB + Graphiti)
+# 3. Start Docker services (FalkorDB)
 make docker-up
 
 # 4. Install Python dependencies

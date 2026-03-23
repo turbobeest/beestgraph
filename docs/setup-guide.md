@@ -26,7 +26,7 @@ Step-by-step instructions for setting up beestgraph on a Raspberry Pi 5 from bar
 - NVMe SSD (M.2 2230 or 2242 via HAT)
 - MicroSD card (for initial OS flash, 16GB+)
 - Ethernet or Wi-Fi connection
-- Anthropic API key (for Claude Code and Graphiti)
+- Anthropic API key (for Claude Code)
 - keep.md account (Plus plan, $10/mo)
 
 ---
@@ -291,7 +291,7 @@ make web-install
 
 ## 10. Start services
 
-Start FalkorDB and Graphiti:
+Start FalkorDB:
 
 ```bash
 make docker-up
@@ -359,10 +359,6 @@ docker ps
 # FalkorDB responds to queries
 docker exec beestgraph-falkordb redis-cli PING
 # Expected: PONG
-
-# Graphiti health check
-curl -s http://localhost:8000/health
-# Expected: {"status": "ok"}
 
 # Python pipeline can import
 uv run python -c "import src; print('Pipeline OK')"

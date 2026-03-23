@@ -22,7 +22,7 @@ List any alternative solutions or workarounds you have considered.
 
 - [ ] Capture (keep.md, Obsidian Web Clipper, sources)
 - [ ] Processing (pipeline, Claude Code agent, MCP servers)
-- [ ] Storage (FalkorDB, Graphiti, vault, schema)
+- [ ] Storage (FalkorDB, vault, schema)
 - [ ] Access (web UI, Telegram bot, API)
 - [ ] Infrastructure (Docker, Tailscale, deployment)
 - [ ] Documentation

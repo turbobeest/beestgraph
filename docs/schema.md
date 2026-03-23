@@ -345,5 +345,5 @@ RETURN a.title AS document, b.title AS contradicts
 - **Idempotency**: All writes use `MERGE`, not `CREATE`. Processing the same document twice produces no duplicates.
 - **Normalization**: Tags, Person, and Concept nodes store a `normalized_name` field computed as `lower(strip(name))`. Always match on `normalized_name`.
 - **Provenance**: Every Document preserves `source_url` and `source_type`. Never lose where content came from.
-- **Temporal tracking**: Use Graphiti's `add_episode` for ingestion. It handles temporal fact management automatically on top of the FalkorDB graph.
+- **Temporal tracking**: Documents include `created_at`, `updated_at`, and `processed_at` timestamps for tracking when content was captured and processed.
 - **Status lifecycle**: Documents follow the lifecycle `inbox` -> `processing` -> `published` -> `archived`.

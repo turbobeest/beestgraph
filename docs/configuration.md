@@ -49,11 +49,6 @@ falkordb:
   graph_name: beestgraph       # Name of the graph in FalkorDB
   password: ""                 # Redis password (if set)
 
-# ── Graphiti ────────────────────────────────────────────────
-graphiti:
-  url: http://localhost:8000   # Graphiti MCP server URL
-  timeout_seconds: 30          # HTTP timeout for Graphiti requests
-
 # ── keep.md ─────────────────────────────────────────────────
 keepmd:
   api_url: https://keep.md/mcp # keep.md MCP endpoint URL
@@ -82,8 +77,6 @@ Environment variables override `config/beestgraph.yml` values. The naming conven
 | `BEESTGRAPH_FALKORDB_HOST` | `falkordb.host` | string | FalkorDB hostname |
 | `BEESTGRAPH_FALKORDB_PORT` | `falkordb.port` | int | FalkorDB port |
 | `BEESTGRAPH_FALKORDB_GRAPH_NAME` | `falkordb.graph_name` | string | Graph name |
-| `BEESTGRAPH_GRAPHITI_URL` | `graphiti.url` | string | Graphiti server URL |
-| `BEESTGRAPH_GRAPHITI_TIMEOUT_SECONDS` | `graphiti.timeout_seconds` | int | Graphiti HTTP timeout |
 | `BEESTGRAPH_KEEPMD_API_URL` | `keepmd.api_url` | string | keep.md MCP endpoint |
 | `BEESTGRAPH_KEEPMD_POLLING_INTERVAL_MINUTES` | `keepmd.polling_interval_minutes` | int | Poll interval (minutes) |
 
@@ -91,7 +84,7 @@ Environment variables override `config/beestgraph.yml` values. The naming conven
 
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | Anthropic API key for Claude Code and Graphiti |
+| `ANTHROPIC_API_KEY` | Anthropic API key for Claude Code |
 | `KEEPMD_API_KEY` | keep.md API key |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token from @BotFather |
 
@@ -111,10 +104,8 @@ cp docker/.env.example docker/.env
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | (required) | Anthropic API key for Graphiti LLM calls |
+| `ANTHROPIC_API_KEY` | (required) | Anthropic API key for Claude Code |
 | `FALKORDB_PORT` | `6379` | Host port for FalkorDB |
-| `GRAPHITI_MODEL` | `claude-sonnet-4-20250514` | LLM model for Graphiti |
-| `GRAPHITI_EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model for Graphiti |
 
 ### Docker resource limits
 
@@ -123,15 +114,14 @@ Defined in `docker/docker-compose.yml`:
 | Service | Memory limit | Purpose |
 |---------|-------------|---------|
 | FalkorDB | 8 GB | In-memory graph database |
-| Graphiti | 2 GB | Knowledge graph framework |
 
-On a 16GB Pi 5, this leaves approximately 6GB for the OS, Python pipeline, web UI, and other services. Adjust the limits in `docker/docker-compose.yml` if needed.
+On a 16GB Pi 5, this leaves approximately 8GB for the OS, Python pipeline, web UI, and other services. Adjust the limits in `docker/docker-compose.yml` if needed.
 
 ---
 
 ## MCP server configuration
 
-MCP servers are configured in `config/mcp.json`. This file is read by Claude Code to connect to the four servers.
+MCP servers are configured in `config/mcp.json`. This file is read by Claude Code to connect to the three servers.
 
 ```bash
 cp config/mcp.json.example config/mcp.json
@@ -147,10 +137,6 @@ See [`docs/mcp-servers.md`](mcp-servers.md) for detailed server configuration an
     "keep": {
       "transport": "http",
       "url": "https://keep.md/mcp"
-    },
-    "graphiti": {
-      "transport": "sse",
-      "url": "http://localhost:8000/sse"
     },
     "filesystem": {
       "command": "npx",

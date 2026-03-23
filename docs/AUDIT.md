@@ -42,13 +42,9 @@ The Anthropic API key and GitHub PAT were exposed in conversation history during
 
 ## High — Blocks Correct Operation
 
-### H1: `asyncio.run()` Inside Running Event Loop Will Crash
+### ~~H1: `asyncio.run()` Inside Running Event Loop Will Crash~~ (resolved)
 
-**Files:** `src/pipeline/ingester.py:324`, `src/pipeline/keepmd_poller.py:203`
-
-The ingester calls `asyncio.run(_graphiti_add_episode(...))` in a sync method. When called from the async `keepmd_poller.poll_once()`, this raises `RuntimeError: asyncio.run() cannot be called from a running event loop`. The keep.md poller will crash when Graphiti is configured.
-
-**Fix:** Use `asyncio.get_event_loop().create_task()` or make the ingester async, or use `nest_asyncio`.
+*Removed: Graphiti integration has been removed from the project. The ingester no longer calls `asyncio.run()` for Graphiti episodes.*
 
 ---
 
@@ -104,13 +100,9 @@ Running `ensure_schema()` in Python vs `make init-schema` produces different dat
 
 ---
 
-### H5: Graphiti Docker Image Name Likely Wrong
+### ~~H5: Graphiti Docker Image Name Likely Wrong~~ (resolved)
 
-**File:** `docker/docker-compose.yml:35`
-
-Image `zepai/graphiti:latest` — the official Graphiti image may be under `getzep/graphiti` or a different registry. ARM64 support is not verified. If the image doesn't exist, `docker compose up` will fail on fresh installs.
-
-**Fix:** Verify the correct image name and ARM64 availability.
+*Removed: Graphiti has been removed from the project entirely.*
 
 ---
 
@@ -123,6 +115,8 @@ Image `zepai/graphiti:latest` — the official Graphiti image may be under `getz
 - Bot handlers are `async` but call `graph.query()` synchronously, blocking the event loop
 
 **Fix:** Standardize on either async or sync throughout, or add adapter layers.
+
+*Note: The Graphiti async/sync mismatch (former H1) has been resolved by removing Graphiti entirely.*
 
 ---
 
@@ -160,11 +154,9 @@ Links to `docs/beestgraph-architecture.md` which doesn't exist (was deleted as a
 
 ---
 
-### M5: MCP Config Inconsistency
+### ~~M5: MCP Config Inconsistency~~ (resolved)
 
-**Files:** `config/mcp.json.example:8-12`, `docs/mcp-servers.md:47-54`
-
-Config template shows Graphiti as SSE transport (`http://localhost:8000/sse`). Docs show it as stdio with `graphiti-mcp-server` command. Fundamentally different architectures.
+*Removed: Graphiti has been removed from the project. MCP config now only includes keep.md, Filesystem, and FalkorDB.*
 
 ---
 
@@ -176,11 +168,9 @@ CLAUDE.md taxonomy and `config/taxonomy.yml` include `personal/relationships`. T
 
 ---
 
-### M7: Graphiti Health Check May Fail
+### ~~M7: Graphiti Health Check May Fail~~ (resolved)
 
-**File:** `docker/docker-compose.yml:52`
-
-Uses `curl` in health check but minimal Docker images often lack `curl`.
+*Removed: Graphiti has been removed from the project.*
 
 ---
 
@@ -192,11 +182,9 @@ References `uv run python -m src.graph.maintenance --deduplicate`. No CLI entry 
 
 ---
 
-### M9: `configure-mcp.sh` Only Configures 3 of 4 MCP Servers
+### ~~M9: `configure-mcp.sh` Only Configures 3 of 4 MCP Servers~~ (resolved)
 
-**File:** `scripts/configure-mcp.sh:40-45`
-
-Prints manual instructions for Graphiti instead of configuring it. Docs claim all 4 are configured.
+*Resolved: Graphiti has been removed. The script now correctly configures all 3 MCP servers (keep.md, Filesystem, FalkorDB).*
 
 ---
 
@@ -212,7 +200,7 @@ On re-fetch failure, error banner displays but old document data still renders b
 
 **File:** `docs/configuration.md:30-73`
 
-Documents `general.timezone`, `graphiti.model`, `graphiti.embedding_model`, `keepmd.enabled`, `keepmd.mcp_url`, `processing.summary_max_words`, `processing.entity_confidence_threshold` — none of which exist in the Python model.
+Documents `general.timezone`, `keepmd.enabled`, `keepmd.mcp_url`, `processing.summary_max_words`, `processing.entity_confidence_threshold` — none of which exist in the Python model.
 
 ---
 

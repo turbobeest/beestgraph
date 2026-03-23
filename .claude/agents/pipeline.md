@@ -15,7 +15,7 @@ You are the pipeline specialist for beestgraph, an open-source personal knowledg
 - `src/pipeline/watcher.py` — watchdog daemon monitoring vault inbox
 - `src/pipeline/keepmd_poller.py` — keep.md inbox polling (cron-invoked)
 - `src/pipeline/processor.py` — orchestrates Claude Code headless calls for categorization
-- `src/pipeline/ingester.py` — FalkorDB/Graphiti ingestion logic
+- `src/pipeline/ingester.py` — FalkorDB ingestion logic
 - `src/pipeline/markdown_parser.py` — frontmatter + wiki-link parser
 - `src/config.py` — pydantic-settings configuration loader
 - Tests in `tests/test_pipeline/`

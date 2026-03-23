@@ -4,7 +4,7 @@
 
 ## Project overview
 
-beestgraph turns bookmarks, articles, notes, and feeds into a queryable knowledge graph. It runs on a Raspberry Pi 5 (16GB, NVMe SSD) behind Tailscale VPN, using FalkorDB as the graph database, Graphiti for temporal knowledge graph management, keep.md for multi-source capture, Obsidian for deep note-taking, and Claude Code as the AI processing agent.
+beestgraph turns bookmarks, articles, notes, and feeds into a queryable knowledge graph. It runs on a Raspberry Pi 5 (16GB, NVMe SSD) behind Tailscale VPN, using FalkorDB as the graph database, keep.md for multi-source capture, Obsidian for deep note-taking, and Claude Code as the AI processing agent.
 
 This is an open-source project. All code must be clean, well-documented, and ready for public GitHub.
 
@@ -41,8 +41,8 @@ This project follows strict professional software engineering practices. Every f
 Four layers, each with clear boundaries:
 
 1. **Capture** — keep.md (browser/mobile/X/RSS/YouTube/GitHub/email) + Obsidian Web Clipper + manual notes
-2. **Processing** — Claude Code headless agent + cron poller + watchdog daemon + 4 MCP servers
-3. **Storage** — FalkorDB (Docker) + Graphiti (Docker) + Obsidian vault (NVMe) + Syncthing
+2. **Processing** — Claude Code headless agent + cron poller + watchdog daemon + 3 MCP servers
+3. **Storage** — FalkorDB (Docker) + Obsidian vault (NVMe) + Syncthing
 4. **Access** — FalkorDB Browser (:3000) + beestgraph Web UI (:3001) + Telegram bot + SSH+tmux
 
 System diagram: `docs/diagrams/beestgraph-system.svg`
@@ -55,7 +55,6 @@ System diagram: `docs/diagrams/beestgraph-system.svg`
 | Language (web UI) | TypeScript | 5.x |
 | Web framework | Next.js | 15.x |
 | Graph database | FalkorDB | latest (Docker, ARM64) |
-| KG framework | Graphiti (Zep) | latest |
 | Graph viz | Cytoscape.js | 3.x |
 | File watching | watchdog (Python) | 4.x |
 | Telegram bot | aiogram | 3.x |
@@ -176,12 +175,11 @@ CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'content', 'summary')
 
 ## MCP servers
 
-Four MCP servers are configured in `config/mcp.json`:
+Three MCP servers are configured in `config/mcp.json`:
 
 1. **keep.md** (`https://keep.md/mcp`) — Capture intake. Tools: `list_inbox`, `get_item`, `mark_done`, `search_items`, `save_item`, `update_item`, `add_source`, `remove_source`, `list_sources`, `get_stats`, `whoami`, `list_items`.
-2. **Graphiti** (local SSE) — Knowledge graph operations. Tools: `add_episode`, `search_facts`, `search_nodes`, `get_episodes`.
-3. **Filesystem** (local stdio) — Vault read/write. Tools: `read_file`, `write_file`, `list_directory`, `search_files`.
-4. **FalkorDB** (local stdio) — Direct Cypher queries. Natural language to Cypher translation.
+2. **Filesystem** (local stdio) — Vault read/write. Tools: `read_file`, `write_file`, `list_directory`, `search_files`.
+3. **FalkorDB** (local stdio) — Direct Cypher queries. Natural language to Cypher translation.
 
 ## Processing pipeline
 
@@ -192,7 +190,7 @@ cron → scripts/process-keepmd.sh → python -m src.pipeline.keepmd_poller
   → keep.md MCP: list_inbox
   → for each item: get_item → extract → categorize → summarize
   → filesystem MCP: write_file (formal markdown to vault)
-  → graphiti MCP: add_episode
+  → FalkorDB: ingest document subgraph
   → keep.md MCP: mark_done
 ```
 
@@ -203,7 +201,7 @@ watchdog (inotify on ~/vault/inbox/) → triggers processor
   → filesystem MCP: read_file
   → extract → categorize → summarize
   → filesystem MCP: write_file (move to proper vault location)
-  → graphiti MCP: add_episode
+  → FalkorDB: ingest document subgraph
 ```
 
 ## Taxonomy (starter)
@@ -297,7 +295,6 @@ status: published
 
 ```
 falkordb >= 1.0
-graphiti-core
 watchdog >= 4.0
 pyyaml >= 6.0
 pydantic >= 2.0
@@ -332,7 +329,7 @@ make run-bot          # Start Telegram bot
 make run-all          # Start all Python services
 
 # Docker
-make docker-up        # docker compose up -d (FalkorDB + Graphiti)
+make docker-up        # docker compose up -d (FalkorDB)
 make docker-down      # docker compose down
 make docker-logs      # docker compose logs -f
 
@@ -351,6 +348,5 @@ make backup           # Snapshot FalkorDB + vault
 - **Idempotency**: All graph writes use `MERGE` not `CREATE`. Processing the same document twice must be safe.
 - **Provenance**: Every Document node preserves `source_url` and `source_type`. Never lose where something came from.
 - **Normalization**: Tags and entity names get `normalized_name = lower(strip(name))` for deduplication.
-- **Temporal**: Use Graphiti's `add_episode` for ingestion — it handles temporal fact tracking automatically.
 - **Graceful failure**: If Claude Code or any MCP server is unreachable, queue items stay unprocessed. Never lose data.
 - **Logging**: Every processing step logs: item ID, source, processing time, entities extracted, graph nodes created.

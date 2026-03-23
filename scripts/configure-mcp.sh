@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# beestgraph/scripts/configure-mcp.sh — Wire up all 4 MCP servers for Claude Code
+# beestgraph/scripts/configure-mcp.sh — Wire up all 3 MCP servers for Claude Code
 set -euo pipefail
 
 GREEN='\033[0;32m'
@@ -33,14 +33,6 @@ claude mcp add falkordb \
     -e FALKORDB_PORT=6379 \
     -- npx -y @falkordb/falkordb-mcp-server 2>/dev/null || \
     warn "FalkorDB MCP may already be configured."
-
-# ── 4. Graphiti MCP (SSE, Docker Compose) ─────────────────────
-# Graphiti's MCP server runs as part of the Docker Compose stack.
-# It connects to Claude Code via SSE transport.
-log "Adding Graphiti MCP server (SSE)..."
-log "Ensure it's running: cd docker && docker compose up -d"
-claude mcp add --transport sse graphiti http://localhost:8000/sse 2>/dev/null || \
-    warn "Graphiti MCP may already be configured."
 
 # ── Verify ───────────────────────────────────────────────────
 log "Current MCP servers:"

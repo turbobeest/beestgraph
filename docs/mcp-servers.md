@@ -1,13 +1,12 @@
 # MCP servers
 
-beestgraph uses four Model Context Protocol (MCP) servers to give Claude Code access to external tools and data. This document describes each server, its tools, and usage examples.
+beestgraph uses three Model Context Protocol (MCP) servers to give Claude Code access to external tools and data. This document describes each server, its tools, and usage examples.
 
 ## Table of contents
 
 - [Overview](#overview)
 - [Configuration](#configuration)
 - [keep.md server](#keepmd-server)
-- [Graphiti server](#graphiti-server)
 - [Filesystem server](#filesystem-server)
 - [FalkorDB server](#falkordb-server)
 
@@ -18,11 +17,10 @@ beestgraph uses four Model Context Protocol (MCP) servers to give Claude Code ac
 | Server | Transport | Endpoint | Purpose |
 |--------|-----------|----------|---------|
 | keep.md | HTTP | `https://keep.md/mcp` | Capture inbox intake |
-| Graphiti | SSE (local) | `http://localhost:8000` | Knowledge graph operations |
 | Filesystem | stdio (local) | N/A | Vault file read/write |
 | FalkorDB | stdio (local) | N/A | Direct Cypher queries |
 
-All four servers are configured in `config/mcp.json` and loaded by Claude Code at startup. The processing pipeline uses them in sequence: read from keep.md or filesystem, process with Claude, write to filesystem, ingest via Graphiti, and optionally query FalkorDB directly.
+All three servers are configured in `config/mcp.json` and loaded by Claude Code at startup. The processing pipeline uses them in sequence: read from keep.md or filesystem, process with Claude, write to filesystem, ingest into FalkorDB, and query the graph directly.
 
 ---
 
@@ -42,10 +40,6 @@ Full configuration:
     "keep": {
       "transport": "http",
       "url": "https://keep.md/mcp"
-    },
-    "graphiti": {
-      "transport": "sse",
-      "url": "http://localhost:8000/sse"
     },
     "filesystem": {
       "command": "npx",
@@ -189,68 +183,6 @@ list_items(status: "done", limit: 50)
 
 ---
 
-## Graphiti server
-
-**Transport**: SSE (local Docker container)
-**URL**: `http://localhost:8000`
-**Requires**: FalkorDB running, `ANTHROPIC_API_KEY` set
-
-Graphiti manages the temporal knowledge graph layer on top of FalkorDB. It handles entity resolution, fact tracking, and temporal relationships.
-
-### Tools
-
-#### `add_episode`
-
-Ingest a piece of content into the knowledge graph. Graphiti automatically extracts entities, resolves them against existing nodes, and tracks temporal facts.
-
-```
-add_episode(
-  name: "Knowledge Graphs Overview",
-  episode_body: "Full markdown content of the article...",
-  source: "keepmd",
-  reference_time: "2026-03-22T10:30:00Z"
-)
-```
-
-This is the primary ingestion tool. For each processed document, call `add_episode` with the full content. Graphiti handles:
-
-- Entity extraction and resolution
-- Fact extraction with temporal bounds
-- Relationship creation
-- Deduplication against existing graph data
-
-#### `search_facts`
-
-Search for facts in the knowledge graph.
-
-```
-search_facts(query: "What do I know about knowledge graphs?")
-```
-
-Returns a list of facts with their source episodes, entities involved, and temporal bounds (when the fact was valid).
-
-#### `search_nodes`
-
-Search for entity nodes in the graph.
-
-```
-search_nodes(query: "Geoffrey Hinton")
-```
-
-Returns matching nodes with their properties, relationships, and connected facts.
-
-#### `get_episodes`
-
-Retrieve episodes (ingested documents) with optional filters.
-
-```
-get_episodes(limit: 10)
-```
-
-Returns recent episodes with their metadata and extracted facts.
-
----
-
 ## Filesystem server
 
 **Transport**: stdio (local process)
@@ -351,10 +283,9 @@ ORDER BY mentions DESC
 
 | Task | Server |
 |------|--------|
-| Ingest new content into the graph | Graphiti |
-| Search for facts and relationships | Graphiti |
 | Read/write vault files | Filesystem |
 | Read keep.md inbox | keep.md |
+| Ingest content into the graph | FalkorDB |
 | Run specific Cypher queries | FalkorDB |
 | Get graph statistics | FalkorDB |
 | Natural language graph exploration | FalkorDB |

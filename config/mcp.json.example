@@ -5,11 +5,6 @@
       "url": "https://keep.md/mcp",
       "description": "keep.md — multi-source capture inbox (browser, mobile, RSS, X, YouTube, GitHub, email)"
     },
-    "graphiti": {
-      "transport": "sse",
-      "url": "http://localhost:8000/sse",
-      "description": "Graphiti — temporal knowledge graph operations via FalkorDB"
-    },
     "filesystem": {
       "command": "npx",
       "args": [

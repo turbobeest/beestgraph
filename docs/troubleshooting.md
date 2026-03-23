@@ -6,7 +6,6 @@ Common issues and their solutions when running beestgraph on a Raspberry Pi 5.
 
 - [Docker and containers](#docker-and-containers)
 - [FalkorDB](#falkordb)
-- [Graphiti](#graphiti)
 - [ARM64 compatibility](#arm64-compatibility)
 - [Tailscale and network access](#tailscale-and-network-access)
 - [Claude Code](#claude-code)
@@ -38,7 +37,7 @@ Check available memory:
 free -h
 ```
 
-On a 16GB Pi, aim for: FalkorDB 6-8GB, Graphiti 1-2GB, leaving 6-8GB for OS and services.
+On a 16GB Pi, aim for: FalkorDB 6-8GB, leaving 8-10GB for OS and services.
 
 ### Docker Compose version errors
 
@@ -127,44 +126,6 @@ CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'content', 'summary')
 
 ---
 
-## Graphiti
-
-### Graphiti container fails to start
-
-**Symptom**: Graphiti container exits immediately or restarts in a loop.
-
-**Cause**: Usually a missing `ANTHROPIC_API_KEY` or FalkorDB not being ready.
-
-**Fix**: Check the logs:
-
-```bash
-docker logs beestgraph-graphiti
-```
-
-Verify the API key is set:
-
-```bash
-grep ANTHROPIC_API_KEY docker/.env
-```
-
-Graphiti depends on FalkorDB being healthy. If FalkorDB is slow to start, Graphiti may time out. Restart it after FalkorDB is ready:
-
-```bash
-docker restart beestgraph-graphiti
-```
-
-### Graphiti health check fails
-
-**Symptom**: `curl http://localhost:8000/health` returns connection refused or error.
-
-**Fix**: The Graphiti server has a 30-second start period. Wait and retry. If it persists, check that port 8000 is not in use by another process:
-
-```bash
-sudo lsof -i :8000
-```
-
----
-
 ## ARM64 compatibility
 
 ### Docker image not available for ARM64
@@ -179,7 +140,7 @@ sudo lsof -i :8000
 docker manifest inspect <image-name>
 ```
 
-If no ARM64 image is available, you may need to build from source or use an alternative image. The images specified in `docker/docker-compose.yml` (FalkorDB, Graphiti) have ARM64 support.
+If no ARM64 image is available, you may need to build from source or use an alternative image. The FalkorDB image specified in `docker/docker-compose.yml` has ARM64 support.
 
 ### Python packages fail to build on ARM64
 
@@ -287,9 +248,6 @@ cat ~/.claude/mcp.json
 Verify each server is reachable:
 
 ```bash
-# Graphiti
-curl -s http://localhost:8000/health
-
 # FalkorDB (via Docker)
 docker exec beestgraph-falkordb redis-cli PING
 

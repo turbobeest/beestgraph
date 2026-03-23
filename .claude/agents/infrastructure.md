@@ -17,7 +17,7 @@ You are the infrastructure specialist for beestgraph, an open-source personal kn
 - Cron job setup for keep.md polling
 - Shell scripts in `scripts/` (setup, backup, etc.)
 - Tailscale and networking configuration docs
-- FalkorDB and Graphiti container configuration
+- FalkorDB container configuration
 - Health checks, restart policies, resource limits
 
 ## Standards

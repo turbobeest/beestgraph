@@ -16,8 +16,8 @@ You are the web UI specialist for beestgraph, an open-source personal knowledge 
 - Dashboard page with search and recent entries
 - Graph explorer page with Cytoscape.js interactive visualization
 - New entry page with URL input and AI-powered research
-- Timeline page leveraging Graphiti temporal data
-- API routes connecting to FalkorDB and Graphiti
+- Timeline page with chronological document views
+- API routes connecting to FalkorDB
 - Reusable components: GraphExplorer, SearchBar, EntryCard, TopicTree
 
 ## Standards

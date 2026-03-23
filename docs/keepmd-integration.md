@@ -146,7 +146,7 @@ The typical flow from capture to knowledge graph:
    - Categorizes by topic (from the taxonomy) and PARA category
    - Generates a 2-3 sentence summary
    - Writes a formal markdown file to the vault via `Filesystem MCP: write_file`
-   - Ingests into the knowledge graph via `Graphiti MCP: add_episode`
+   - Ingests into the knowledge graph via FalkorDB
    - Marks the source item as done via `keep.md MCP: mark_done`
 
 5. **The knowledge graph is updated** -- new Document, Tag, Topic, Person, Concept, and Source nodes are created (or merged if they already exist).
@@ -161,7 +161,7 @@ The keep.md processing is defined in `scripts/process-keepmd.sh`, which calls Cl
 # scripts/process-keepmd.sh (simplified)
 claude -p "Process all unread keep.md inbox items" \
   --mcp-config config/mcp.json \
-  --allowedTools "mcp__keep__*,mcp__filesystem__*,mcp__graphiti__*"
+  --allowedTools "mcp__keep__*,mcp__filesystem__*,mcp__falkordb__*"
 ```
 
 The agent uses the prompt templates in `agent/prompts/` for categorization, entity extraction, and summarization.

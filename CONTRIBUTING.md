@@ -119,7 +119,7 @@ docs: add troubleshooting section for ARM64 Docker
 
 refactor: extract entity normalization into shared utility
 
-test: add integration tests for Graphiti ingestion
+test: add integration tests for FalkorDB ingestion
 ```
 
 Keep the first line under 72 characters. Use the body for additional context when the "why" is not obvious from the description.

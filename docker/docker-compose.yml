@@ -1,5 +1,5 @@
 ## beestgraph/docker/docker-compose.yml
-## Core services: FalkorDB + Graphiti MCP server
+## Core service: FalkorDB graph database
 ## Target platform: Raspberry Pi 5 (ARM64)
 
 services:
@@ -24,44 +24,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g  # Leave headroom for Graphiti + pipeline
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  graphiti:
-    image: zepai/graphiti:latest
-    container_name: beestgraph-graphiti
-    platform: linux/arm64
-    restart: unless-stopped
-    depends_on:
-      falkordb:
-        condition: service_healthy
-    ports:
-      - "8000:8000"  # Graphiti MCP server (SSE)
-    environment:
-      - GRAPH_DB_PROVIDER=falkordb
-      - FALKORDB_HOST=falkordb
-      - FALKORDB_PORT=6379
-      - NEO4J_URI=bolt://falkordb:6379
-      - NEO4J_USER=default
-      - NEO4J_PASSWORD=default
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-not-set}
-      - MODEL_NAME=${GRAPHITI_MODEL:-claude-sonnet-4-20250514}
-      - EMBEDDING_MODEL=${GRAPHITI_EMBEDDING_MODEL:-text-embedding-3-small}
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost:8000/health || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          memory: 2g
+          memory: 8g
     logging:
       driver: json-file
       options:

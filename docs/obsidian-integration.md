@@ -241,7 +241,7 @@ The vault watchdog daemon monitors `~/vault/inbox/` for new or modified markdown
    - Generates a summary
    - Moves the file to the correct `knowledge/` subdirectory based on topic
    - Updates the frontmatter with processing results
-   - Ingests into the knowledge graph via Graphiti MCP
+   - Ingests into the knowledge graph via FalkorDB
 4. The file's `status` field changes from `inbox` to `published`.
 
 ### Starting the watchdog

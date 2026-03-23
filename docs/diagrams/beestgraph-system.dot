@@ -131,7 +131,6 @@ digraph beestgraph {
             margin=12
 
             mcp_keep     [label="keep.md MCP\nlist_inbox · get_item\nmark_done · search" fillcolor="#e8f0fe" color="#1a73e8"]
-            mcp_graphiti [label="Graphiti MCP\nadd_episode · search_facts\nsearch_nodes" fillcolor="#e6f4ea" color="#1e8e3e"]
             mcp_fs       [label="Filesystem MCP\nread · write · list\nsearch_files" fillcolor="#fff3cd" color="#e8a317"]
             mcp_falkor   [label="FalkorDB MCP\nNL → Cypher\nraw queries" fillcolor="#e6f4ea" color="#1e8e3e"]
         }
@@ -157,7 +156,6 @@ digraph beestgraph {
             margin=12
 
             falkordb [label=<<B>FalkorDB</B><BR/>In-memory graph · GraphBLAS<BR/><FONT POINT-SIZE="8">OpenCypher · Full-text · Vector index</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
-            graphiti [label=<<B>Graphiti</B><BR/>Temporal knowledge graph<BR/><FONT POINT-SIZE="8">Entity extraction · Hybrid search</FONT>> fillcolor="#34a853" fontcolor="white" color="#1e8e3e" penwidth=1.5]
         }
 
         subgraph cluster_vault {
@@ -174,7 +172,6 @@ digraph beestgraph {
             syncthing   [label=<<B>Syncthing</B><BR/>P2P vault sync<BR/><FONT POINT-SIZE="8">All devices</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
         }
 
-        graphiti -> falkordb [label="  reads/writes  " style=dashed color="#1e8e3e"]
     }
 
     // ════════════════════════════════════════════════════════
@@ -224,13 +221,11 @@ digraph beestgraph {
 
     // ── Agent ↔ MCP ──
     claude_code -> mcp_keep     [dir=both color="#1a73e8"]
-    claude_code -> mcp_graphiti [dir=both color="#1e8e3e"]
     claude_code -> mcp_fs       [dir=both color="#e8a317"]
     claude_code -> mcp_falkor   [dir=both color="#1e8e3e"]
 
     // ── MCP → Storage ──
     mcp_keep     -> keep_cloud  [label="  API calls  " style=dashed color="#1a73e8"]
-    mcp_graphiti -> graphiti    [color="#1e8e3e"]
     mcp_fs       -> vault_inbox [color="#e8a317"]
     mcp_fs       -> vault_know  [color="#e8a317"]
     mcp_fs       -> vault_para  [color="#e8a317"]
@@ -243,7 +238,6 @@ digraph beestgraph {
     // ── Access → Storage ──
     falkor_ui -> falkordb   [color="#d93025"]
     web_ui    -> falkordb   [color="#d93025"]
-    web_ui    -> graphiti   [color="#d93025"]
     telegram  -> claude_code [label="  commands  " color="#d93025"]
     ssh_tmux  -> claude_code [color="#d93025"]
     obsidian  -> syncthing  [dir=both label="  vault sync  " color="#d93025"]

@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Project architecture design and documentation
 - Repository structure with `src/`, `docker/`, `scripts/`, `config/`, `tests/`, `docs/`
-- `pyproject.toml` with all Python dependencies (FalkorDB, Graphiti, watchdog, aiogram, etc.)
+- `pyproject.toml` with all Python dependencies (FalkorDB, watchdog, aiogram, etc.)
 - `Makefile` with build, lint, test, Docker, and service commands
-- Docker Compose configuration for FalkorDB and Graphiti (ARM64)
+- Docker Compose configuration for FalkorDB (ARM64)
 - Graph schema definition with 7 node types and 9 relationship types
-- MCP server configuration for keep.md, Graphiti, Filesystem, and FalkorDB
+- MCP server configuration for keep.md, Filesystem, and FalkorDB
 - System architecture diagram (Graphviz DOT + SVG)
 - Claude Code agent context (`CLAUDE.md`) with full project specifications
 - Documentation: architecture deep-dive, setup guide, configuration reference, schema reference, integration guides, troubleshooting

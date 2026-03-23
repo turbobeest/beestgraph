@@ -11,7 +11,6 @@ Process unread items from the Obsidian vault inbox directory. For each item, ext
 ## Prerequisites
 
 - FalkorDB is running (Docker, port 6379)
-- Graphiti service is running (Docker)
 - MCP servers are configured in `config/mcp.json`
 - The Obsidian vault is mounted at `~/vault/`
 
@@ -100,17 +99,7 @@ Content: frontmatter + processed body
 
 #### 2i. Ingest into knowledge graph
 
-Use Graphiti MCP to add the episode:
-
-```
-Tool: graphiti.add_episode
-Name: <document title>
-Content: <document content>
-Source: document
-Metadata: { path, source_url, source_type, topics, tags, entities }
-```
-
-Additionally, ensure FalkorDB nodes and relationships are created:
+Ingest the document into FalkorDB by creating nodes and relationships:
 
 1. **MERGE Document node** with all properties from frontmatter
 2. **MERGE Tag nodes** and create `TAGGED_WITH` relationships

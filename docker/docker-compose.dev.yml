@@ -14,17 +14,3 @@ services:
       - "3000:3000"
       # Redis Insight / debug port
       - "16379:16379"
-
-  graphiti:
-    environment:
-      - LOG_LEVEL=DEBUG
-      - GRAPH_DB_PROVIDER=falkordb
-      - FALKORDB_HOST=falkordb
-      - FALKORDB_PORT=6379
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - MODEL_NAME=${GRAPHITI_MODEL:-claude-sonnet-4-20250514}
-      - EMBEDDING_MODEL=${GRAPHITI_EMBEDDING_MODEL:-text-embedding-3-small}
-    ports:
-      - "8000:8000"
-      # Debug port for remote debugging
-      - "5678:5678"

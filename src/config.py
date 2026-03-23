@@ -32,15 +32,6 @@ class FalkorDBSettings(BaseSettings):
     password: str = ""
 
 
-class GraphitiSettings(BaseSettings):
-    """Graphiti (Zep) service settings."""
-
-    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_GRAPHITI_")
-
-    url: str = "http://localhost:8000"
-    timeout_seconds: int = 30
-
-
 class KeepMDSettings(BaseSettings):
     """keep.md MCP / API settings."""
 
@@ -158,7 +149,6 @@ class BeestgraphSettings(BaseSettings):
     enable_llm_processing: bool = True
 
     falkordb: FalkorDBSettings = Field(default_factory=FalkorDBSettings)
-    graphiti: GraphitiSettings = Field(default_factory=GraphitiSettings)
     keepmd: KeepMDSettings = Field(default_factory=KeepMDSettings)
     telegram: TelegramSettings = Field(default_factory=TelegramSettings)
     vault: VaultSettings = Field(default_factory=VaultSettings)
@@ -208,7 +198,6 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
     _nested_models: dict[str, type[BaseSettings]] = {
         "vault": VaultSettings,
         "falkordb": FalkorDBSettings,
-        "graphiti": GraphitiSettings,
         "keepmd": KeepMDSettings,
         "telegram": TelegramSettings,
         "processing": ProcessingSettings,

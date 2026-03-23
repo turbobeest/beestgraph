@@ -74,7 +74,7 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
 
     # Ingest into FalkorDB
     try:
-        ingester = GraphIngester(settings.falkordb, settings.graphiti)
+        ingester = GraphIngester(settings.falkordb)
         ingester.ingest_parsed_document(doc)
     except ConnectionError as exc:
         logger.error("ingest_failed", path=doc.path, error=str(exc))

@@ -53,7 +53,7 @@ run-all: ## Start all Python services (watcher + bot)
 
 # ── Docker ───────────────────────────────────────────────────
 
-docker-up: ## Start FalkorDB + Graphiti containers
+docker-up: ## Start FalkorDB container
 	cd docker && docker compose up -d
 
 docker-down: ## Stop containers

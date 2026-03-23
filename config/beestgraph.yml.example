@@ -30,11 +30,6 @@ falkordb:
   # Graph name within FalkorDB
   graph_name: beestgraph
 
-# ── Graphiti ────────────────────────────────────────────────
-graphiti:
-  # SSE endpoint exposed by the Graphiti Docker container
-  url: http://localhost:8000
-
 # ── keep.md polling ─────────────────────────────────────────
 keepmd:
   # Polling interval in seconds (cron runs every 15 minutes)
@@ -58,7 +53,7 @@ processing:
   # LLM model for content extraction and summarization
   model: claude-sonnet-4-20250514
 
-  # Embedding model for vector similarity (used by Graphiti)
+  # Embedding model for vector similarity
   embedding_model: text-embedding-3-small
 
   # Maximum concurrent processing tasks
