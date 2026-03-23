@@ -1,18 +1,20 @@
-"""Async FalkorDB ingester — writes parsed documents into the knowledge graph.
+"""FalkorDB ingester — writes parsed documents into the knowledge graph.
 
 Every write uses ``MERGE`` for idempotency so reprocessing a document is always
-safe.
+safe.  Optionally sends episodes to Graphiti for temporal fact tracking.
 """
 
 from __future__ import annotations
 
+import asyncio
 import time
 from datetime import UTC, datetime
 
 import structlog
 from falkordb import FalkorDB
 
-from src.config import FalkorDBSettings
+from src.config import FalkorDBSettings, GraphitiSettings
+from src.pipeline.graphiti_client import add_episode as _graphiti_add_episode
 from src.pipeline.markdown_parser import ParsedDocument
 
 logger = structlog.get_logger(__name__)
@@ -112,8 +114,13 @@ class GraphIngester:
         settings: FalkorDB connection settings.
     """
 
-    def __init__(self, settings: FalkorDBSettings) -> None:
+    def __init__(
+        self,
+        settings: FalkorDBSettings,
+        graphiti_settings: GraphitiSettings | None = None,
+    ) -> None:
         self._settings = settings
+        self._graphiti_settings = graphiti_settings
         self._db: FalkorDB | None = None
 
     # -- connection helpers --------------------------------------------------
@@ -310,6 +317,20 @@ class GraphIngester:
                 self.create_mention(doc.path, str(person), "person")
             for concept in entities.get("concepts", []) or []:
                 self.create_mention(doc.path, str(concept), "concept")
+
+        # Send to Graphiti for temporal fact tracking (best-effort)
+        if self._graphiti_settings is not None:
+            try:
+                asyncio.run(
+                    _graphiti_add_episode(
+                        self._graphiti_settings,
+                        name=doc.title,
+                        content=doc.content[:8000],
+                        source_url=str(doc.metadata.get("source_url", "")),
+                    )
+                )
+            except Exception as exc:
+                logger.warning("graphiti_send_failed", path=doc.path, error=str(exc))
 
         elapsed_ms = (time.monotonic() - start) * 1000
         logger.info(

@@ -169,7 +169,7 @@ async def poll_once(settings: BeestgraphSettings) -> int:
         Number of items successfully processed.
     """
     vault_inbox = Path(settings.vault.path) / settings.vault.inbox_dir
-    ingester = GraphIngester(settings.falkordb)
+    ingester = GraphIngester(settings.falkordb, settings.graphiti)
     processed_count = 0
 
     async with httpx.AsyncClient(timeout=30.0) as client:
