@@ -8,10 +8,11 @@ Wants=network-online.target docker.service
 Type=simple
 User=turbobeest
 Group=turbobeest
-WorkingDirectory=/mnt/walnut-drive/dev/beestgraph
-EnvironmentFile=-/mnt/walnut-drive/dev/beestgraph/docker/.env
+WorkingDirectory=/home/turbobeest/beestgraph
+EnvironmentFile=-/home/turbobeest/beestgraph/docker/.env
 
-ExecStart=/home/turbobeest/.local/bin/uv run python -m src.bot.telegram_bot
+# Load secrets from 1Password, then start the bot
+ExecStart=/bin/bash -c 'source <(bash /home/turbobeest/beestgraph/scripts/load-secrets.sh) && exec /home/turbobeest/.local/bin/uv run python -m src.bot.telegram_bot'
 
 # Restart on failure with backoff
 Restart=on-failure
@@ -28,7 +29,7 @@ SyslogIdentifier=beestgraph-bot
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/mnt/walnut-drive/dev/beestgraph /home/turbobeest/.cache/uv
+ReadWritePaths=/home/turbobeest/beestgraph /home/turbobeest/.cache/uv /home/turbobeest/.config/op
 PrivateTmp=yes
 
 [Install]

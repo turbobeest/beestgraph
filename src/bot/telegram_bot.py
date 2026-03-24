@@ -402,10 +402,11 @@ def create_bot(settings: BeestgraphSettings) -> tuple[Bot, Dispatcher]:
 def main(config_path: Path | None) -> None:
     """Start the beestgraph Telegram bot."""
     settings = load_settings(config_path)
+    import logging
+
+    level = getattr(logging, settings.log_level.upper(), logging.INFO)
     structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(
-            structlog.get_level_from_name(settings.log_level)
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(level),
     )
     bot, dp = create_bot(settings)
     logger.info("telegram_bot_starting")

@@ -208,7 +208,11 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
     for key, model_cls in _nested_models.items():
         if key in filtered and isinstance(filtered[key], dict):
             sub_keys = set(model_cls.model_fields.keys())
-            filtered[key] = {k: v for k, v in filtered[key].items() if k in sub_keys}
+            # Filter to known keys and drop empty strings so env vars can override.
+            filtered[key] = {
+                k: v for k, v in filtered[key].items()
+                if k in sub_keys and v != ""
+            }
     settings = BeestgraphSettings(**filtered)
     logger.info(
         "settings_loaded",
