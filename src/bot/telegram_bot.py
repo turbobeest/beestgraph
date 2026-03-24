@@ -2,7 +2,8 @@
 
 Provides commands for searching documents, viewing recent entries,
 browsing topics, inspecting graph stats, and quick-adding URLs to
-the inbox. Uses aiogram 3.x with Router-based command handlers.
+the inbox. Also supports free-form conversational queries powered
+by Claude Code headless mode.
 
 Usage::
 
@@ -13,6 +14,7 @@ Usage::
 from __future__ import annotations
 
 import asyncio
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -108,12 +110,16 @@ async def cmd_start(message: Message) -> None:
     """Handle /start — welcome message with available commands."""
     text = (
         "Welcome to *beestgraph* \\- your personal knowledge graph bot\\!\n\n"
-        "Available commands:\n"
+        "You can chat with me naturally about your knowledge graph, "
+        "or use these commands:\n\n"
         "/search \\<query\\> \\- full\\-text search documents\n"
         "/recent \\- show 5 most recent documents\n"
         "/stats \\- graph statistics\n"
         "/add \\<url\\> \\[title\\] \\- quick\\-add a URL to inbox\n"
-        "/topics \\- list top\\-level topics\n"
+        "/topics \\- list top\\-level topics\n\n"
+        "Or just type a question like:\n"
+        "_What do I know about knowledge graphs?_\n"
+        "_Who are the people in my graph?_\n"
     )
     await message.answer(text, parse_mode="MarkdownV2")
 
@@ -323,6 +329,180 @@ async def cmd_topics(message: Message, graph: Graph, **_kwargs: object) -> None:
 
     header = "*Topics*\n\n"
     await message.answer(header + "\n".join(lines), parse_mode="MarkdownV2")
+
+
+# ---------------------------------------------------------------------------
+# Conversational handler — Claude-powered free-form queries
+# ---------------------------------------------------------------------------
+
+_CHAT_TIMEOUT_SECONDS = 120
+
+_CHAT_SYSTEM_PROMPT = """\
+You are beestgraph, a personal knowledge graph assistant available via Telegram.
+You help the user explore, search, and understand their knowledge graph.
+
+The user's graph contains documents, tags, topics, people, concepts, and sources.
+Below is context from the graph to help you answer.
+
+RULES:
+- Be concise — Telegram messages should be short and readable.
+- Use plain text, not markdown (Telegram formatting is limited).
+- If the graph context doesn't contain relevant info, say so honestly.
+- Suggest /search or /add commands when appropriate.
+- Never make up documents or facts that aren't in the context.
+"""
+
+
+async def _build_graph_context(graph: Graph) -> str:
+    """Query the graph for recent docs, stats, and topics to give Claude context.
+
+    Args:
+        graph: FalkorDB graph handle.
+
+    Returns:
+        A text summary of the graph state for inclusion in the prompt.
+    """
+    sections: list[str] = []
+
+    # Stats
+    try:
+        labels = ["Document", "Tag", "Topic", "Person", "Concept", "Source"]
+        counts: dict[str, int] = {}
+        for label in labels:
+            result = await asyncio.to_thread(
+                graph.query, f"MATCH (n:{label}) RETURN COUNT(n)"
+            )
+            counts[label] = result.result_set[0][0] if result.result_set else 0
+        stats_lines = [f"  {k}: {v}" for k, v in counts.items()]
+        sections.append("GRAPH STATS:\n" + "\n".join(stats_lines))
+    except Exception:
+        pass
+
+    # Recent documents (last 10)
+    try:
+        cypher, params = recent_documents(n=10)
+        result = await asyncio.to_thread(graph.query, cypher, params)
+        if result.result_set:
+            doc_lines: list[str] = []
+            for row in result.result_set:
+                node = row[0]
+                title = node.properties.get("title", "Untitled")
+                summary = node.properties.get("summary", "")
+                topics_str = node.properties.get("topics", "")
+                line = f"  - {title}"
+                if summary:
+                    line += f": {summary[:150]}"
+                doc_lines.append(line)
+            sections.append("RECENT DOCUMENTS:\n" + "\n".join(doc_lines))
+    except Exception:
+        pass
+
+    # Topics
+    try:
+        cypher, params = topic_tree()
+        result = await asyncio.to_thread(graph.query, cypher, params)
+        if result.result_set:
+            topic_names = [row[0] for row in result.result_set]
+            sections.append("TOPICS: " + ", ".join(topic_names))
+    except Exception:
+        pass
+
+    return "\n\n".join(sections) if sections else "Graph is empty."
+
+
+async def _ask_claude(question: str, graph_context: str) -> str:
+    """Send a question to Claude Code headless with graph context.
+
+    Args:
+        question: The user's free-form message.
+        graph_context: Summary of the graph state.
+
+    Returns:
+        Claude's response text, or an error message.
+    """
+    prompt = f"{_CHAT_SYSTEM_PROMPT}\n\n{graph_context}\n\nUSER QUESTION: {question}"
+
+    try:
+        result = await asyncio.to_thread(
+            subprocess.run,
+            ["claude", "-p", prompt],
+            capture_output=True,
+            text=True,
+            timeout=_CHAT_TIMEOUT_SECONDS,
+        )
+        if result.returncode != 0:
+            logger.warning("claude_chat_failed", returncode=result.returncode, stderr=result.stderr[:200])
+            return "Sorry, I couldn't process that right now. Try a /search command instead."
+        response = result.stdout.strip()
+        if not response:
+            return "I didn't get a response. Try rephrasing your question."
+        return response
+    except FileNotFoundError:
+        logger.warning("claude_binary_not_found")
+        return (
+            "Claude Code CLI is not available on this machine. "
+            "You can still use commands like /search, /recent, /stats."
+        )
+    except subprocess.TimeoutExpired:
+        logger.warning("claude_chat_timeout", timeout=_CHAT_TIMEOUT_SECONDS)
+        return "That took too long. Try a simpler question or use /search."
+
+
+@router.message()
+async def chat_handler(message: Message, graph: Graph, **_kwargs: object) -> None:
+    """Handle any non-command message as a conversational query.
+
+    Sends the message to Claude Code with graph context for an intelligent response.
+
+    Args:
+        message: Incoming Telegram message.
+        graph: FalkorDB graph handle (injected via middleware).
+    """
+    if not message.text or message.text.startswith("/"):
+        return
+
+    user_text = message.text.strip()
+    if not user_text:
+        return
+
+    user_id = message.from_user.id if message.from_user else None
+    logger.info("chat_message", text=user_text[:100], user_id=user_id)
+
+    # Send typing indicator while Claude thinks
+    await message.answer_chat_action("typing")
+
+    # Build context from the graph + targeted search results
+    graph_context = await _build_graph_context(graph)
+
+    # Also run a search for the user's query to find specifically relevant docs
+    try:
+        cypher, params = search_documents(user_text, limit=5)
+        result = await asyncio.to_thread(graph.query, cypher, params)
+        if result.result_set:
+            search_lines: list[str] = []
+            for row in result.result_set:
+                node = row[0]
+                title = node.properties.get("title", "Untitled")
+                summary = node.properties.get("summary", "")
+                content = node.properties.get("content", "")[:500]
+                line = f"  - {title}"
+                if summary:
+                    line += f"\n    Summary: {summary}"
+                if content:
+                    line += f"\n    Content preview: {content[:300]}"
+                search_lines.append(line)
+            graph_context += "\n\nSEARCH RESULTS FOR USER QUERY:\n" + "\n".join(search_lines)
+    except Exception:
+        pass  # Search may fail on short queries, that's fine
+
+    # Ask Claude
+    response = await _ask_claude(user_text, graph_context)
+
+    # Telegram has a 4096 char limit
+    if len(response) > 4000:
+        response = response[:3997] + "..."
+
+    await message.answer(response)
 
 
 # ---------------------------------------------------------------------------
