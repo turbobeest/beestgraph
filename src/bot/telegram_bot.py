@@ -449,7 +449,7 @@ async def _ask_claude(question: str, graph_context: str) -> str:
 
 
 @router.message()
-async def chat_handler(message: Message, graph: Graph, **_kwargs: object) -> None:
+async def chat_handler(message: Message, graph: Graph, bot: Bot, **_kwargs: object) -> None:
     """Handle any non-command message as a conversational query.
 
     Sends the message to Claude Code with graph context for an intelligent response.
@@ -457,6 +457,7 @@ async def chat_handler(message: Message, graph: Graph, **_kwargs: object) -> Non
     Args:
         message: Incoming Telegram message.
         graph: FalkorDB graph handle (injected via middleware).
+        bot: The aiogram Bot instance (injected by dispatcher).
     """
     if not message.text or message.text.startswith("/"):
         return
@@ -469,7 +470,7 @@ async def chat_handler(message: Message, graph: Graph, **_kwargs: object) -> Non
     logger.info("chat_message", text=user_text[:100], user_id=user_id)
 
     # Send typing indicator while Claude thinks
-    await message.answer_chat_action("typing")
+    await bot.send_chat_action(chat_id=message.chat.id, action="typing")
 
     # Build context from the graph + targeted search results
     graph_context = await _build_graph_context(graph)
