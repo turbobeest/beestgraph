@@ -84,7 +84,6 @@ Environment variables override `config/beestgraph.yml` values. The naming conven
 
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | Anthropic API key for Claude Code |
 | `KEEPMD_API_KEY` | keep.md API key |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token from @BotFather |
 
@@ -104,7 +103,6 @@ cp docker/.env.example docker/.env
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | (required) | Anthropic API key for Claude Code |
 | `FALKORDB_PORT` | `6379` | Host port for FalkorDB |
 
 ### Docker resource limits

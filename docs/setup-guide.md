@@ -26,7 +26,6 @@ Step-by-step instructions for setting up beestgraph on a Raspberry Pi 5 from bar
 - NVMe SSD (M.2 2230 or 2242 via HAT)
 - MicroSD card (for initial OS flash, 16GB+)
 - Ethernet or Wi-Fi connection
-- Anthropic API key (for Claude Code)
 - keep.md account (Plus plan, $10/mo)
 
 ---
@@ -261,7 +260,6 @@ nano docker/.env
 Required values:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...    # Your Anthropic API key
 VAULT_PATH=/mnt/nvme/vault      # Path to your Obsidian vault
 ```
 

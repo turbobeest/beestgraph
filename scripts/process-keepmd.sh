@@ -70,18 +70,6 @@ release_lock() {
 # Clean up lockfile on exit (normal or error)
 trap release_lock EXIT
 
-# ── Pre-flight checks ───────────────────────────────────────
-if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
-    err "ANTHROPIC_API_KEY is not set."
-    err "Add it to ${PROJECT_DIR}/docker/.env or export it."
-    exit 1
-fi
-
-if ! command -v claude &>/dev/null; then
-    err "Claude Code CLI not found. Run scripts/install-claude-code.sh first."
-    exit 1
-fi
-
 # ── Acquire lock ─────────────────────────────────────────────
 acquire_lock
 

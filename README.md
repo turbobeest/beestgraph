@@ -86,10 +86,9 @@ All configuration lives in `config/beestgraph.yml` with environment variable ove
 
 ```bash
 # docker/.env
-ANTHROPIC_API_KEY=sk-ant-...       # Required: Claude API access
+VAULT_PATH=$HOME/vault             # Obsidian vault location
 FALKORDB_HOST=localhost             # FalkorDB connection
 FALKORDB_PORT=6379
-VAULT_PATH=$HOME/vault             # Obsidian vault location
 TELEGRAM_BOT_TOKEN=...             # Optional: Telegram bot
 TELEGRAM_ALLOWED_USERS=12345       # Your Telegram user ID
 ```
