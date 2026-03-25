@@ -1,0 +1,30 @@
+[Unit]
+Description=beestgraph Obsidian Sync (headless)
+Documentation=https://help.obsidian.md/sync/headless
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/home/turbobeest/vault
+
+ExecStart=/usr/bin/ob sync --continuous
+
+Restart=on-failure
+RestartSec=15
+StartLimitBurst=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-obsidian-sync
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/turbobeest/vault /home/turbobeest/.config /home/turbobeest/.local
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
