@@ -86,91 +86,70 @@ def _escape_md(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _format_qualification_message(notification: dict) -> str:
-    """Format a qualification Telegram message from notification data.
+def _format_qualification_message(
+    notification: dict, web_base_url: str = "http://beestgraph:3001"
+) -> str:
+    """Format a compact qualification Telegram message from notification data.
 
-    Includes visibility and maturity recommendations alongside type, topic,
-    tags, quality, and summary.
+    Returns a 3-line message: title, metadata, review link.
 
     Args:
         notification: Parsed notification JSON with recommended fields.
+        web_base_url: Base URL for the web UI review link.
 
     Returns:
         MarkdownV2-formatted message string.
     """
     title = _escape_md(notification.get("title", "Untitled"))
-    source_url = notification.get("source_url", "")
-    source_type = _escape_md(notification.get("source_type", "unknown"))
-    recommended_type = _escape_md(notification.get("recommended_type", "article"))
-    recommended_topic = _escape_md(notification.get("recommended_topic", ""))
-    tags = notification.get("recommended_tags", [])
-    tag_list = ", ".join(_escape_md(t) for t in tags) if tags else "none"
-    quality = _escape_md(notification.get("recommended_quality", "medium"))
-    visibility = _escape_md(notification.get("recommended_visibility", "private"))
-    summary = _escape_md(notification.get("recommended_summary", ""))
+    visibility = notification.get("recommended_visibility", "private")
+    content_type = _escape_md(notification.get("recommended_type", "note"))
+    topic = _escape_md(notification.get("recommended_topic", ""))
+    filename = notification.get("filename", "")
 
-    source_line = f"[Link]({source_url})" if source_url else "no URL"
+    # Generate slug from filename
+    slug = filename.replace(".md", "").replace(" ", "-").lower()
+    review_url = f"{web_base_url}/queue/{slug}"
 
-    # Security scan indicator
-    security_findings = notification.get("security_findings", "")
-    scan_passed = not security_findings
-    if scan_passed:
-        security_line = "\U0001f50d Security scan: PASSED"
-    else:
-        security_line = f"\u26a0\ufe0f Security: {_escape_md(security_findings[:80])}"
-
-    # Visibility icon
     vis_icon = "\U0001f513" if visibility == "public" else "\U0001f512"
 
     return (
-        f"\U0001f4e5 *New item captured:*\n\n"
-        f"*{title}*\n"
-        f"Source: {source_line}\n"
-        f"Via: {source_type}\n\n"
-        f"  Type: `{recommended_type}` \\| Topic: `{recommended_topic}`\n"
-        f"  Tags: {tag_list}\n"
-        f"  Quality: {quality} \\| Summary: {summary}\n\n"
-        f"{vis_icon} *Visibility: {visibility}*\n"
-        f"{security_line}\n\n"
-        f"Reply:\n"
-        f"  `ok` \\— fleeting \\(private\\)\n"
-        f"  `ok public` \\— fleeting \\(public\\)\n"
-        f"  `publish` \\— permanent \\(private\\)\n"
-        f"  `publish public` \\— permanent \\(public\\)\n"
-        f"  `type X` \\| `topic X` \\| `add tag X`\n"
-        f"  `later` \\| `reject`"
+        f"\U0001f4e5 {title}\n"
+        f"{vis_icon} {_escape_md(visibility)} \u00b7 "
+        f"{content_type} \u00b7 {topic}\n"
+        f"[Review]({review_url})"
     )
 
 
-def _format_updated_message(notification: dict) -> str:
-    """Format an updated classification for re-presentation after edits.
+def _format_updated_message(
+    notification: dict, web_base_url: str = "http://beestgraph:3001"
+) -> str:
+    """Format a compact updated classification message after edits.
+
+    Returns a 3-line message: title with edit icon, metadata, review link.
 
     Args:
         notification: Updated notification data dict.
+        web_base_url: Base URL for the web UI review link.
 
     Returns:
         MarkdownV2-formatted message string.
     """
     title = _escape_md(notification.get("title", "Untitled"))
-    recommended_type = _escape_md(notification.get("recommended_type", "article"))
-    recommended_topic = _escape_md(notification.get("recommended_topic", ""))
-    tags = notification.get("recommended_tags", [])
-    tag_list = ", ".join(_escape_md(t) for t in tags) if tags else "none"
-    quality = _escape_md(notification.get("recommended_quality", "medium"))
-    visibility = _escape_md(notification.get("recommended_visibility", "private"))
-    maturity = _escape_md(notification.get("recommended_maturity", "fleeting"))
-    summary = _escape_md(notification.get("recommended_summary", ""))
+    visibility = notification.get("recommended_visibility", "private")
+    content_type = _escape_md(notification.get("recommended_type", "note"))
+    topic = _escape_md(notification.get("recommended_topic", ""))
+    filename = notification.get("filename", "")
+
+    slug = filename.replace(".md", "").replace(" ", "-").lower()
+    review_url = f"{web_base_url}/queue/{slug}"
+
+    vis_icon = "\U0001f513" if visibility == "public" else "\U0001f512"
 
     return (
-        f"\u270f\ufe0f *Updated classification for:* {title}\n\n"
-        f"  Type: `{recommended_type}`\n"
-        f"  Topic: `{recommended_topic}`\n"
-        f"  Tags: {tag_list}\n"
-        f"  Quality: {quality}\n"
-        f"  Visibility: {visibility}\n"
-        f"  Maturity: {maturity}\n"
-        f"  Summary: {summary}\n\n"
-        f"Approve? Reply `ok` \\(fleeting\\) or `publish` \\(permanent\\) or keep editing\\."
+        f"\u270f\ufe0f {title}\n"
+        f"{vis_icon} {_escape_md(visibility)} \u00b7 "
+        f"{content_type} \u00b7 {topic}\n"
+        f"[Review]({review_url})"
     )
 
 
@@ -768,7 +747,7 @@ async def cmd_later(
         _deferred_tasks[chat_id].cancel()
 
     # Schedule a reminder
-    task = asyncio.create_task(_send_deferred_reminder(bot, chat_id, data, delay))
+    task = asyncio.create_task(_send_deferred_reminder(bot, chat_id, data, delay, web_base_url=settings.web.public_url))
     _deferred_tasks[chat_id] = task
 
     # Try to create a calendar event for the reminder
@@ -978,7 +957,7 @@ async def handle_qualification_response(
         if chat_id in _deferred_tasks:
             _deferred_tasks[chat_id].cancel()
 
-        task = asyncio.create_task(_send_deferred_reminder(bot, chat_id, data, delay))
+        task = asyncio.create_task(_send_deferred_reminder(bot, chat_id, data, delay, web_base_url=settings.web.public_url))
         _deferred_tasks[chat_id] = task
         return True
 
@@ -992,7 +971,7 @@ async def handle_qualification_response(
             data["filename"],
             {"visibility": text_lower},
         )
-        msg = _format_updated_message(data)
+        msg = _format_updated_message(data, web_base_url=settings.web.public_url)
         await message.answer(msg, parse_mode="MarkdownV2")
         return True
 
@@ -1008,7 +987,7 @@ async def handle_qualification_response(
                 data["filename"],
                 {"visibility": new_vis},
             )
-            msg = _format_updated_message(data)
+            msg = _format_updated_message(data, web_base_url=settings.web.public_url)
             await message.answer(msg, parse_mode="MarkdownV2")
             return True
 
@@ -1024,7 +1003,7 @@ async def handle_qualification_response(
                 data["filename"],
                 {"maturity": new_mat},
             )
-            msg = _format_updated_message(data)
+            msg = _format_updated_message(data, web_base_url=settings.web.public_url)
             await message.answer(msg, parse_mode="MarkdownV2")
             return True
 
@@ -1039,7 +1018,7 @@ async def handle_qualification_response(
             data["filename"],
             {"type": new_type},
         )
-        msg = _format_updated_message(data)
+        msg = _format_updated_message(data, web_base_url=settings.web.public_url)
         await message.answer(msg, parse_mode="MarkdownV2")
         return True
 
@@ -1054,7 +1033,7 @@ async def handle_qualification_response(
             data["filename"],
             {"topics": [new_topic]},
         )
-        msg = _format_updated_message(data)
+        msg = _format_updated_message(data, web_base_url=settings.web.public_url)
         await message.answer(msg, parse_mode="MarkdownV2")
         return True
 
@@ -1072,7 +1051,7 @@ async def handle_qualification_response(
             data["filename"],
             {"tags": tags},
         )
-        msg = _format_updated_message(data)
+        msg = _format_updated_message(data, web_base_url=settings.web.public_url)
         await message.answer(msg, parse_mode="MarkdownV2")
         return True
 
@@ -1089,7 +1068,7 @@ async def handle_qualification_response(
             data["filename"],
             {"tags": tags},
         )
-        msg = _format_updated_message(data)
+        msg = _format_updated_message(data, web_base_url=settings.web.public_url)
         await message.answer(msg, parse_mode="MarkdownV2")
         return True
 
@@ -1105,7 +1084,7 @@ async def handle_qualification_response(
                 data["filename"],
                 {"quality": new_quality},
             )
-            msg = _format_updated_message(data)
+            msg = _format_updated_message(data, web_base_url=settings.web.public_url)
             await message.answer(msg, parse_mode="MarkdownV2")
             return True
 
@@ -1189,7 +1168,9 @@ def _resolve_target(
 # ---------------------------------------------------------------------------
 
 
-async def _send_deferred_reminder(bot: Bot, chat_id: int, data: dict, delay: timedelta) -> None:
+async def _send_deferred_reminder(
+    bot: Bot, chat_id: int, data: dict, delay: timedelta, web_base_url: str = "http://beestgraph:3001"
+) -> None:
     """Wait for *delay*, then re-send the qualification message.
 
     Args:
@@ -1197,10 +1178,11 @@ async def _send_deferred_reminder(bot: Bot, chat_id: int, data: dict, delay: tim
         chat_id: The Telegram chat ID to send to.
         data: The notification data dict.
         delay: How long to wait before sending.
+        web_base_url: Base URL for the web UI review link.
     """
     try:
         await asyncio.sleep(delay.total_seconds())
-        msg = _format_qualification_message(data)
+        msg = _format_qualification_message(data, web_base_url=web_base_url)
         await bot.send_message(chat_id, msg, parse_mode="MarkdownV2")
         _active_qualifications[chat_id] = data
         logger.info("deferred_reminder_sent", chat_id=chat_id, filename=data.get("filename"))
@@ -1300,7 +1282,7 @@ async def start_notification_poller(bot: Bot, settings: BeestgraphSettings) -> N
                 data.setdefault("recommended_visibility", "private")
                 data.setdefault("recommended_maturity", "fleeting")
 
-                msg = _format_qualification_message(data)
+                msg = _format_qualification_message(data, web_base_url=settings.web.public_url)
 
                 # Send to allowed users, or known users if no allowlist
                 recipients = allowed_ids or list(_known_chat_ids)

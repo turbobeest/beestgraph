@@ -12,10 +12,11 @@
   },
   "dependencies": {
     "cytoscape": "^3.30.4",
-    "redis": "^4.7.0",
+    "gray-matter": "^4.0.3",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.8",

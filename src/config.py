@@ -130,6 +130,7 @@ class WebSettings(BaseSettings):
 
     port: int = 3001
     host: str = "0.0.0.0"  # noqa: S104
+    public_url: str = "http://beestgraph:3001"
 
 
 class HeartbeatSettings(BaseSettings):

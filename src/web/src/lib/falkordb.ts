@@ -20,7 +20,7 @@ async function getClient(): Promise<RedisClient> {
 }
 
 /** Run a Cypher query via GRAPH.QUERY and return parsed rows. */
-async function graphQuery(
+export async function graphQuery(
   cypher: string,
   params?: Record<string, string | number>,
 ): Promise<{ headers: string[]; rows: unknown[][]; metadata: string[] }> {
