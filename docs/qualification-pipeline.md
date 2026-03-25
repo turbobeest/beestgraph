@@ -168,8 +168,8 @@ doi: "10.1234/..."             # for paper type
 
 When a new item enters the inbox:
 
-1. **Watcher detects file** → moves to `~/vault/queue/`
-2. **Bot sends Telegram message:**
+1. **Watcher detects file** → AI pre-classifies → moves to `~/vault/queue/`
+2. **Bot sends Telegram message with AI recommendation:**
    ```
    📥 New item captured:
 
@@ -177,23 +177,58 @@ When a new item enters the inbox:
    Source: https://example.com/kg-intro
    Captured via: keep.md
 
-   Quick classify:
-   /type article
-   /topic technology/ai-ml
-   /quality high
-   /approve
-   /reject
-   /later (remind me in 4 hours)
+   🤖 My recommendation:
+     Type: article
+     Topic: technology/ai-ml
+     Tags: knowledge-graphs, graph-databases, ai
+     Quality: high
+     Summary: An overview of knowledge graph architectures
+     and their applications in AI systems.
 
-   Or just reply with notes and I'll classify it.
+   Reply:
+     ✅ "ok" or "approve" — accept as-is
+     ✏️ "type paper" — change the type
+     ✏️ "topic science/cs" — change the topic
+     ✏️ "add tag semantic-web" — add a tag
+     ✏️ Any free text — I'll adjust based on your notes
+     ⏰ "later" or "remind me at 9pm" — schedule a follow-up
+     ❌ "reject" — archive it
    ```
 3. **User responds** (or doesn't):
-   - `/approve` → move to enrichment → permanent
-   - `/type article` → set content_type, keep qualifying
-   - `/reject` → move to ~/vault/archives/rejected/
-   - `/later` → stay in queue, remind later
-   - Free text reply → save as qualification_notes, auto-classify
-   - No response → auto-classify after `qualification_timeout` hours
+   - `ok` / `approve` / `👍` → accept AI recommendation → enrich → permanent
+   - `type paper` → update content_type, re-present for approval
+   - `topic business/startups` → update topic, re-present
+   - `add tag X` / `remove tag Y` → modify tags
+   - `quality low` → downgrade quality assessment
+   - Free text reply → Claude interprets intent, adjusts classification, re-presents
+   - `later` → stay in queue, remind in 4 hours
+   - `remind me at 9pm` / `remind me tomorrow` → schedule specific follow-up (calendar event)
+   - `reject` → move to ~/vault/archives/rejected/
+   - No response → auto-classify using AI recommendation after `qualification_timeout` hours
+
+4. **Conversational refinement:**
+   The bot maintains context for each qualifying item. Multiple back-and-forth exchanges
+   are supported:
+   ```
+   User: "this is more of a tutorial than an article"
+   Bot: "Got it. Updated:
+         Type: tutorial (was: article)
+         Everything else unchanged. Approve?"
+   User: "also add tag self-hosted"
+   Bot: "Added. Final classification:
+         Type: tutorial
+         Topic: technology/ai-ml
+         Tags: knowledge-graphs, graph-databases, ai, self-hosted
+         Approve?"
+   User: "ok"
+   Bot: "✅ Published to knowledge/tutorials/technology/ai-ml/"
+   ```
+
+5. **Scheduled reminders:**
+   When a user says "later" or "remind me at X", the bot:
+   - Creates a calendar event in Radicale at the requested time
+   - When that time arrives, re-sends the qualification message
+   - Items can be deferred multiple times
 
 ## Configuration
 
