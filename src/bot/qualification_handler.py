@@ -1273,7 +1273,7 @@ async def start_notification_poller(bot: Bot, settings: BeestgraphSettings) -> N
         bot: The aiogram Bot instance.
         settings: Application settings.
     """
-    notifications_dir = Path(settings.vault.path) / ".notifications"
+    notifications_dir = Path(settings.vault.path) / settings.vault.queue_dir / ".notifications"
     poll_interval = settings.qualification.poll_interval_seconds
 
     # Determine the chat ID to send to
