@@ -1,9 +1,11 @@
+(https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-ARM64-blue.svg)](https://www.docker.com/)
+<p><p><p></p></p>
 # beestgraph
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-ARM64-blue.svg)](https://www.docker.com/)
+[![Python 3.11+]
 
 > AI-augmented personal knowledge graph -- self-hosted on a Raspberry Pi 5
 
