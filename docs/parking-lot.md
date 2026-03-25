@@ -4,6 +4,37 @@ Ideas worth pursuing but not yet prioritized.
 
 ---
 
+## OpenClaw: Persistent Claude Identity
+
+**Problem:** Each Claude Code session starts fresh. The agent has no sense of self, no continuity of personality, no awareness of its own state beyond what CLAUDE.md and memory files provide.
+
+**Idea:** Give the Claude instance on this machine a persistent identity through living documents:
+
+- **`soul.md`** — Core values, personality, communication style, relationship to the user. What kind of agent is this? How should it think, reason, and relate? This is the "who I am" document.
+- **`being.md`** — Accumulated self-knowledge. What has this instance learned about itself through interactions? What patterns has it noticed in its own behavior? What does it do well, what does it struggle with? This evolves over time.
+- **`heartbeat.md`** — Periodic self-check. System health, what services are running, what needs attention, recent activity summary. Updated by a scheduled agent or cron job. The agent reads this at session start to know "what's happening right now."
+- **`CLAUDE.md`** (evolved) — Transform from project instructions into a full system prompt that references soul.md, being.md, and heartbeat.md. Shapes behavior across every session.
+
+**Architecture:**
+```
+.claude/
+├── soul.md          # Who I am (stable, rarely changes)
+├── being.md         # What I've learned about myself (grows over time)
+├── heartbeat.md     # What's happening now (updated periodically)
+└── identity/
+    ├── values.md    # Core principles
+    ├── voice.md     # Communication style
+    └── boundaries.md # What I will and won't do
+```
+
+**Key design questions:**
+- How does the agent update being.md? End-of-session reflection?
+- How often is heartbeat.md refreshed? Cron? Scheduled Claude agent?
+- Should soul.md be user-editable or agent-maintained?
+- How do these interact with the existing memory system?
+
+---
+
 ## Persistent Claude Code Sessions via tmux + Telegram Bridge
 
 **Problem:** Currently the Telegram bot calls `claude -p` (one-shot) for each message, losing context between turns. Termius SSH and Telegram are separate interfaces to the system.
