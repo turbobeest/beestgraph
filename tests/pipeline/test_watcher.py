@@ -58,9 +58,7 @@ class TestResolveDestination:
         expected = vault / "knowledge" / "article.md"
         assert dest == expected
 
-    def test_topic_normalized_lowercase(
-        self, mock_beestgraph_settings: BeestgraphSettings
-    ) -> None:
+    def test_topic_normalized_lowercase(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
         doc = ParsedDocument(
             path="inbox/article.md",
             title="Test",
@@ -97,13 +95,16 @@ class TestHandleNewFile:
         mock_queue.add_item.return_value = MagicMock(title="Test Article")
 
         with (
-            patch("src.pipeline.watcher.classify_document", return_value={
-                "content_type": "article",
-                "topic": "meta/pkm",
-                "tags": ["test"],
-                "quality": "medium",
-                "summary": "Test summary.",
-            }),
+            patch(
+                "src.pipeline.watcher.classify_document",
+                return_value={
+                    "content_type": "article",
+                    "topic": "meta/pkm",
+                    "tags": ["test"],
+                    "quality": "medium",
+                    "summary": "Test summary.",
+                },
+            ),
             patch("src.pipeline.watcher.QualificationQueue", return_value=mock_queue),
         ):
             _handle_new_file(filepath, mock_beestgraph_settings)
@@ -153,14 +154,20 @@ class TestHandleNewFile:
         mock_beestgraph_settings.qualification.enabled = False
         filepath = tmp_vault / "inbox" / "test.md"
         filepath.write_text(
-            "---\ntitle: Test\ntopics:\n  - meta/pkm\n---\nContent.\n", encoding="utf-8",
+            "---\ntitle: Test\ntopics:\n  - meta/pkm\n---\nContent.\n",
+            encoding="utf-8",
         )
 
         with (
-            patch("src.pipeline.processor.process_document", return_value=ParsedDocument(
-                path="test.md", title="Test", content="Content.",
-                metadata={"topics": ["meta/pkm"]},
-            )),
+            patch(
+                "src.pipeline.processor.process_document",
+                return_value=ParsedDocument(
+                    path="test.md",
+                    title="Test",
+                    content="Content.",
+                    metadata={"topics": ["meta/pkm"]},
+                ),
+            ),
             patch("src.pipeline.ingester.GraphIngester") as mock_ingester_cls,
         ):
             mock_ingester_cls.return_value = MagicMock()
@@ -176,9 +183,7 @@ class TestHandleNewFile:
 class TestInboxHandler:
     """Tests for the watchdog event handler."""
 
-    def test_ignores_directory_events(
-        self, mock_beestgraph_settings: BeestgraphSettings
-    ) -> None:
+    def test_ignores_directory_events(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = True
@@ -187,9 +192,7 @@ class TestInboxHandler:
             handler.on_created(event)
             mock_handle.assert_not_called()
 
-    def test_ignores_non_markdown_files(
-        self, mock_beestgraph_settings: BeestgraphSettings
-    ) -> None:
+    def test_ignores_non_markdown_files(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = False
@@ -198,9 +201,7 @@ class TestInboxHandler:
             handler.on_created(event)
             mock_handle.assert_not_called()
 
-    def test_processes_markdown_files(
-        self, mock_beestgraph_settings: BeestgraphSettings
-    ) -> None:
+    def test_processes_markdown_files(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = False

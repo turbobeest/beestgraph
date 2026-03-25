@@ -14,6 +14,7 @@ Usage::
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -26,6 +27,13 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from falkordb import FalkorDB
 
+from src.bot.qualification_handler import (
+    handle_qualification_response,
+    is_qualification_response,
+    qualification_router,
+    register_chat_id,
+    start_notification_poller,
+)
 from src.config import BeestgraphSettings, FalkorDBSettings, load_settings
 from src.graph.queries import (
     recent_documents,
@@ -108,15 +116,25 @@ class _AllowedUsers:
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
     """Handle /start — welcome message with available commands."""
+    register_chat_id(message.chat.id)
     text = (
         "Welcome to *beestgraph* \\- your personal knowledge graph bot\\!\n\n"
         "You can chat with me naturally about your knowledge graph, "
         "or use these commands:\n\n"
+        "*Search \\& browse:*\n"
         "/search \\<query\\> \\- full\\-text search documents\n"
         "/recent \\- show 5 most recent documents\n"
         "/stats \\- graph statistics\n"
-        "/add \\<url\\> \\[title\\] \\- quick\\-add a URL to inbox\n"
         "/topics \\- list top\\-level topics\n\n"
+        "*Capture:*\n"
+        "/add \\<url\\> \\[title\\] \\- quick\\-add a URL to inbox\n\n"
+        "*Qualification queue:*\n"
+        "/queue \\- list items awaiting review\n"
+        "/approve \\[name\\] \\- approve an item\n"
+        "/reject \\[name\\] \\- reject an item\n"
+        "/later \\[time\\] \\- defer review \\(e\\.g\\. `later 9pm`\\)\n\n"
+        "I'll also notify you when new items are captured\\. "
+        "You can reply inline to classify, tag, and approve them\\.\n\n"
         "Or just type a question like:\n"
         "_What do I know about knowledge graphs?_\n"
         "_Who are the people in my graph?_\n"
@@ -369,13 +387,11 @@ async def _build_graph_context(graph: Graph) -> str:
         labels = ["Document", "Tag", "Topic", "Person", "Concept", "Source"]
         counts: dict[str, int] = {}
         for label in labels:
-            result = await asyncio.to_thread(
-                graph.query, f"MATCH (n:{label}) RETURN COUNT(n)"
-            )
+            result = await asyncio.to_thread(graph.query, f"MATCH (n:{label}) RETURN COUNT(n)")
             counts[label] = result.result_set[0][0] if result.result_set else 0
         stats_lines = [f"  {k}: {v}" for k, v in counts.items()]
         sections.append("GRAPH STATS:\n" + "\n".join(stats_lines))
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     # Recent documents (last 10)
@@ -388,13 +404,12 @@ async def _build_graph_context(graph: Graph) -> str:
                 node = row[0]
                 title = node.properties.get("title", "Untitled")
                 summary = node.properties.get("summary", "")
-                topics_str = node.properties.get("topics", "")
                 line = f"  - {title}"
                 if summary:
                     line += f": {summary[:150]}"
                 doc_lines.append(line)
             sections.append("RECENT DOCUMENTS:\n" + "\n".join(doc_lines))
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     # Topics
@@ -404,7 +419,7 @@ async def _build_graph_context(graph: Graph) -> str:
         if result.result_set:
             topic_names = [row[0] for row in result.result_set]
             sections.append("TOPICS: " + ", ".join(topic_names))
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     return "\n\n".join(sections) if sections else "Graph is empty."
@@ -432,7 +447,9 @@ async def _ask_claude(question: str, graph_context: str, claude_binary: str = "c
             timeout=_CHAT_TIMEOUT_SECONDS,
         )
         if result.returncode != 0:
-            logger.warning("claude_chat_failed", returncode=result.returncode, stderr=result.stderr[:200])
+            logger.warning(
+                "claude_chat_failed", returncode=result.returncode, stderr=result.stderr[:200]
+            )
             return "Sorry, I couldn't process that right now. Try a /search command instead."
         response = result.stdout.strip()
         if not response:
@@ -453,7 +470,9 @@ async def _ask_claude(question: str, graph_context: str, claude_binary: str = "c
 async def chat_handler(message: Message, graph: Graph, bot: Bot, **_kwargs: object) -> None:
     """Handle any non-command message as a conversational query.
 
-    Sends the message to Claude Code with graph context for an intelligent response.
+    First checks if the message is a qualification response (e.g. "ok",
+    "type paper", "topic science/cs"). If so, delegates to the qualification
+    handler. Otherwise sends the message to Claude Code with graph context.
 
     Args:
         message: Incoming Telegram message.
@@ -468,7 +487,17 @@ async def chat_handler(message: Message, graph: Graph, bot: Bot, **_kwargs: obje
         return
 
     user_id = message.from_user.id if message.from_user else None
+    register_chat_id(message.chat.id)
     logger.info("chat_message", text=user_text[:100], user_id=user_id)
+
+    # Check if this is a qualification response before falling through to Claude
+    chat_id = message.chat.id
+    if is_qualification_response(chat_id, user_text):
+        settings: BeestgraphSettings | None = _kwargs.get("settings")
+        if settings is not None:
+            handled = await handle_qualification_response(message, bot, settings)
+            if handled:
+                return
 
     # Send typing indicator while Claude thinks
     await bot.send_chat_action(chat_id=message.chat.id, action="typing")
@@ -494,7 +523,7 @@ async def chat_handler(message: Message, graph: Graph, bot: Bot, **_kwargs: obje
                     line += f"\n    Content preview: {content[:300]}"
                 search_lines.append(line)
             graph_context += "\n\nSEARCH RESULTS FOR USER QUERY:\n" + "\n".join(search_lines)
-    except Exception:
+    except Exception:  # noqa: S110
         pass  # Search may fail on short queries, that's fine
 
     # Ask Claude
@@ -522,7 +551,10 @@ class _GraphMiddleware:
     """
 
     def __init__(
-        self, graph: Graph, allowed_filter: _AllowedUsers, settings: BeestgraphSettings,
+        self,
+        graph: Graph,
+        allowed_filter: _AllowedUsers,
+        settings: BeestgraphSettings,
     ) -> None:
         self._graph = graph
         self._allowed = allowed_filter
@@ -564,7 +596,10 @@ def create_bot(settings: BeestgraphSettings) -> tuple[Bot, Dispatcher]:
     graph = _get_graph(settings.falkordb)
     allowed_filter = _AllowedUsers(settings.telegram.allowed_user_ids)
 
-    router.message.outer_middleware(_GraphMiddleware(graph, allowed_filter, settings))
+    middleware = _GraphMiddleware(graph, allowed_filter, settings)
+    router.message.outer_middleware(middleware)
+    qualification_router.message.outer_middleware(middleware)
+    dp.include_router(qualification_router)
     dp.include_router(router)
 
     logger.info(
@@ -599,7 +634,22 @@ def main(config_path: Path | None) -> None:
     )
     bot, dp = create_bot(settings)
     logger.info("telegram_bot_starting")
-    asyncio.run(dp.start_polling(bot))
+
+    async def _run() -> None:
+        """Run the bot with the notification poller as a background task."""
+        poller_task: asyncio.Task | None = None  # type: ignore[type-arg]
+        if settings.qualification.enabled and settings.qualification.notify_telegram:
+            poller_task = asyncio.create_task(start_notification_poller(bot, settings))
+            logger.info("notification_poller_scheduled")
+        try:
+            await dp.start_polling(bot)
+        finally:
+            if poller_task is not None:
+                poller_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await poller_task
+
+    asyncio.run(_run())
 
 
 if __name__ == "__main__":

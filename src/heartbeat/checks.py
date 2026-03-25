@@ -175,7 +175,9 @@ def check_falkordb(host: str = "localhost", port: int = 6379) -> CheckResult:
         query = "MATCH (d:Document) RETURN count(d) AS cnt"
         graph_result = _run_cmd(
             [
-                "docker", "exec", "beestgraph-falkordb",
+                "docker",
+                "exec",
+                "beestgraph-falkordb",
                 "redis-cli",
                 "GRAPH.QUERY",
                 "beestgraph",
