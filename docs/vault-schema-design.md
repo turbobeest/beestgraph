@@ -422,7 +422,7 @@ The graph schema needs to evolve to support the new organizational model.
 })
 ```
 
-### New node type
+### New node types
 
 ```cypher
 (:MOC {
@@ -430,6 +430,15 @@ The graph schema needs to evolve to support the new organizational model.
   normalized_name: STRING,
   path: STRING,               -- vault path
   description: STRING
+})
+
+(:Attachment {
+  path: STRING,               -- vault path in 09-attachments/
+  filename: STRING,           -- original filename
+  parent_id: STRING,          -- zettelkasten ID of parent note
+  file_type: STRING,          -- image | pdf | audio | video
+  size_bytes: INT,            -- file size
+  created_at: STRING
 })
 ```
 
@@ -440,6 +449,7 @@ The graph schema needs to evolve to support the new organizational model.
 (MOC)-[:CHILD_OF]->(MOC)              -- MOC hierarchy
 (Document)-[:SUPERSEDES]->(Document)  -- note replaces an older note
 (Document)-[:GRADUATED_FROM]->(Document) -- fleeting → permanent lineage
+(Document)-[:HAS_ATTACHMENT]->(Attachment) -- binary file relationship
 ```
 
 ### New indexes
@@ -508,10 +518,55 @@ CREATE INDEX FOR (m:MOC) ON (m.normalized_name)
 
 ---
 
-## Open Questions
+## Design Decisions (resolved)
 
-1. **Should fleeting notes auto-expire?** If a fleeting note isn't graduated in 30 days, should it auto-archive?
-2. **MOC auto-generation?** Should beestgraph auto-create/update MOCs based on topic clustering in the graph?
-3. **Dataview compatibility?** The frontmatter schema should work with Obsidian's Dataview plugin — verify field types.
-4. **Attachment handling?** Should PDFs and images go in `09-attachments/` or alongside their note?
-5. **Multi-vault?** Should work and personal be separate vaults or same vault with PARA separation?
+### 1. Fleeting notes never expire — "Diary of Bygones"
+
+Fleeting notes stay in `03-fleeting/` **forever**. They are never auto-archived or deleted. Over time this becomes a valuable archaeological record — a diary of what caught your attention, when, and why. Analytics on fleeting notes reveal:
+- **Societal trends** — what topics spiked in your captures over time?
+- **Personal patterns** — what ideas kept recurring but never graduated?
+- **Reflection material** — revisit old fleeting notes to see how your thinking evolved
+- **Serendipity** — old fleeting notes may suddenly connect to new permanent notes
+
+FalkorDB tracks `created` timestamps on all fleeting notes, enabling queries like:
+```cypher
+MATCH (d:Document {maturity: 'fleeting'})
+WHERE d.created_at > '2026-01-01' AND d.created_at < '2026-04-01'
+RETURN d.title, d.topics ORDER BY d.created_at
+```
+
+### 2. Attachments centralized with strict traceability
+
+All binary files (PDFs, images, etc.) go in `09-attachments/` with a naming convention that traces back to the parent note:
+
+```
+09-attachments/
+├── 20260324213500-knowledge-graphs-fig1.png
+├── 20260324213500-knowledge-graphs-paper.pdf
+└── 20260325101200-docker-networking-diagram.svg
+```
+
+Pattern: `{zettelkasten_id}-{parent_slug}-{description}.{ext}`
+
+The parent note references attachments via standard Obsidian embeds: `![[20260324213500-knowledge-graphs-fig1.png]]`
+
+FalkorDB tracks attachment relationships:
+```cypher
+(Document)-[:HAS_ATTACHMENT {type: "image"}]->(Attachment {path, filename, size})
+```
+
+### 3. Single vault — PARA separation within
+
+One vault for everything. Work and personal are separated by PARA categories and topics, not by vault. This maximizes cross-domain connections (a work article about AI may connect to a personal interest in machine learning).
+
+### 4. Zettelkasten as capture forcing function
+
+The Zettelkasten method serves double duty:
+- **Organizational**: atomic notes, heavy linking, maturity graduation
+- **Behavioral**: the inbox → fleeting → permanent pipeline creates a natural forcing function. Nothing enters permanent storage without being processed. The qualification pipeline via Telegram makes this frictionless rather than burdensome.
+
+## Remaining Open Questions
+
+1. **MOC auto-generation?** Should beestgraph auto-create/update MOCs based on topic clustering in the graph?
+2. **Dataview compatibility?** The frontmatter schema should work with Obsidian's Dataview plugin — verify field types.
+3. **Review cadence?** Weekly review of fleeting notes via Telegram bot? ("You have 12 fleeting notes from this week — want to review?")
