@@ -410,12 +410,13 @@ async def _build_graph_context(graph: Graph) -> str:
     return "\n\n".join(sections) if sections else "Graph is empty."
 
 
-async def _ask_claude(question: str, graph_context: str) -> str:
+async def _ask_claude(question: str, graph_context: str, claude_binary: str = "claude") -> str:
     """Send a question to Claude Code headless with graph context.
 
     Args:
         question: The user's free-form message.
         graph_context: Summary of the graph state.
+        claude_binary: Path to the claude CLI binary.
 
     Returns:
         Claude's response text, or an error message.
@@ -425,7 +426,7 @@ async def _ask_claude(question: str, graph_context: str) -> str:
     try:
         result = await asyncio.to_thread(
             subprocess.run,
-            ["claude", "-p", prompt],
+            [claude_binary, "-p", prompt],
             capture_output=True,
             text=True,
             timeout=_CHAT_TIMEOUT_SECONDS,
@@ -497,7 +498,10 @@ async def chat_handler(message: Message, graph: Graph, bot: Bot, **_kwargs: obje
         pass  # Search may fail on short queries, that's fine
 
     # Ask Claude
-    response = await _ask_claude(user_text, graph_context)
+    # Get claude binary path from settings if available
+    settings: BeestgraphSettings | None = _kwargs.get("settings")
+    claude_bin = settings.claude_code_binary if settings else "claude"
+    response = await _ask_claude(user_text, graph_context, claude_binary=claude_bin)
 
     # Telegram has a 4096 char limit
     if len(response) > 4000:
@@ -517,12 +521,15 @@ class _GraphMiddleware:
     Also enforces the user allowlist before dispatching to handlers.
     """
 
-    def __init__(self, graph: Graph, allowed_filter: _AllowedUsers) -> None:
+    def __init__(
+        self, graph: Graph, allowed_filter: _AllowedUsers, settings: BeestgraphSettings,
+    ) -> None:
         self._graph = graph
         self._allowed = allowed_filter
+        self._settings = settings
 
     async def __call__(self, handler, event: Message, data: dict) -> object:
-        """Intercept messages, check access, and inject *graph* into data."""
+        """Intercept messages, check access, and inject *graph* + *settings* into data."""
         if isinstance(event, Message) and not self._allowed(event):
             logger.warning(
                 "unauthorized_access",
@@ -530,6 +537,7 @@ class _GraphMiddleware:
             )
             return None  # silently drop
         data["graph"] = self._graph
+        data["settings"] = self._settings
         return await handler(event, data)
 
 
@@ -556,7 +564,7 @@ def create_bot(settings: BeestgraphSettings) -> tuple[Bot, Dispatcher]:
     graph = _get_graph(settings.falkordb)
     allowed_filter = _AllowedUsers(settings.telegram.allowed_user_ids)
 
-    router.message.outer_middleware(_GraphMiddleware(graph, allowed_filter))
+    router.message.outer_middleware(_GraphMiddleware(graph, allowed_filter, settings))
     dp.include_router(router)
 
     logger.info(

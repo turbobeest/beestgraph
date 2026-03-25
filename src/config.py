@@ -145,7 +145,7 @@ class BeestgraphSettings(BaseSettings):
 
     log_level: str = "INFO"
     taxonomy_path: str = str(_PROJECT_ROOT / "config" / "taxonomy.yml")
-    claude_code_binary: str = "claude"
+    claude_code_binary: str = str(Path.home() / ".local" / "bin" / "claude")
     enable_llm_processing: bool = True
 
     falkordb: FalkorDBSettings = Field(default_factory=FalkorDBSettings)
