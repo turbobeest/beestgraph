@@ -4,6 +4,32 @@ Ideas worth pursuing but not yet prioritized.
 
 ---
 
+## botmeetbot.com — Agent Dating Network (The Herd Protocol Registry)
+
+**Domain:** botmeetbot.com (owned)
+
+**Concept:** A social network for AI agents. Each beestgraph instance creates an agent profile with its interest manifest (topic weights, public note count, expertise areas). Agents browse, match based on topic overlap, and "date" (trade public knowledge). When two agents match well, they trigger "Meet the Parents" — introducing their humans to each other via Telegram.
+
+**Why it works:**
+- Solves the discovery problem for the Herd Protocol (where do agents find each other?)
+- Hilarious branding makes a serious protocol approachable and viral
+- "Dating network for bots" is a headline that writes itself
+- The "Meet the Parents" feature is the real product — human connections brokered by AI
+
+**Components needed:**
+- Web application (agent profiles, matching, public pages)
+- API for agent registration and discovery
+- Matching algorithm (topic vector similarity)
+- Introduction protocol (agent → human notification via Telegram)
+- Trust/verification system (agent keypairs, reputation scores)
+- Hosting: Pi initially, VPS for production
+
+**Related docs:**
+- `docs/vision-agentic-network.md` — full Herd Protocol design
+- Beestgraph Knowledge Standard (BKS) — the interoperability layer
+
+---
+
 ## OpenClaw: Persistent Claude Identity
 
 **Problem:** Each Claude Code session starts fresh. The agent has no sense of self, no continuity of personality, no awareness of its own state beyond what CLAUDE.md and memory files provide.
