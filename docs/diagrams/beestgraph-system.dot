@@ -50,7 +50,7 @@ digraph beestgraph {
         margin=16
 
         subgraph cluster_keepmd {
-            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1a73e8"><B>keep.md  ($10/mo Plus)</B></FONT>>
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1a73e8"><B>keep.md  (Plus)</B></FONT>>
             style="filled,rounded"
             color="#1a73e8"
             bgcolor="#e8f0fe"
@@ -64,11 +64,11 @@ digraph beestgraph {
             keep_yt     [label="YouTube\nTranscripts" fillcolor="#cfe2ff" color="#1a73e8"]
             keep_gh     [label="GitHub\nStarred Repos" fillcolor="#cfe2ff" color="#1a73e8"]
             keep_email  [label="Email Inbox\nNewsletters" fillcolor="#cfe2ff" color="#1a73e8"]
-            keep_cloud  [label=<<B>keep.md Cloud</B><BR/>MCP · REST API · CLI> fillcolor="#1a73e8" fontcolor="white" color="#0d47a1" penwidth=1.5]
+            keep_cloud  [label=<<B>keep.md Cloud</B><BR/>MCP API> fillcolor="#1a73e8" fontcolor="white" color="#0d47a1" penwidth=1.5]
         }
 
-        subgraph cluster_obsidian_cap {
-            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1a73e8"><B>Obsidian Capture</B></FONT>>
+        subgraph cluster_direct_cap {
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1a73e8"><B>Direct Capture</B></FONT>>
             style="filled,rounded"
             color="#1a73e8"
             bgcolor="#e8f0fe"
@@ -76,6 +76,8 @@ digraph beestgraph {
             margin=12
 
             obs_clipper [label="Obsidian Web Clipper\nFull article + frontmatter" fillcolor="#cfe2ff" color="#1a73e8"]
+            tg_add      [label="Telegram /add\nQuick capture" fillcolor="#cfe2ff" color="#1a73e8"]
+            webui_entry [label="Web UI /entry\nForm-based capture" fillcolor="#cfe2ff" color="#1a73e8"]
             obs_manual  [label="Manual Notes\nObsidian Editor" fillcolor="#cfe2ff" color="#1a73e8"]
         }
 
@@ -99,6 +101,7 @@ digraph beestgraph {
         penwidth=1.5
         margin=16
 
+        // ── Intake streams ──
         subgraph cluster_intake {
             label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#e8a317"><B>Intake Streams</B></FONT>>
             style="filled,rounded"
@@ -107,21 +110,39 @@ digraph beestgraph {
             penwidth=1.0
             margin=12
 
-            cron_keep   [label="Cron Job\n*/15 * * * *\nPoll keep.md inbox" fillcolor="#fff3cd" color="#e8a317"]
-            watchdog    [label="Python Watchdog\nReal-time inotify\n~/vault/inbox/" fillcolor="#fff3cd" color="#e8a317"]
+            cron_keep   [label="Cron Poller\n*/15 * * * *\nPoll keep.md inbox" fillcolor="#fff3cd" color="#e8a317"]
+            watcher     [label="Watcher\ninotify on 01-inbox/\nReal-time file detection" fillcolor="#fff3cd" color="#e8a317"]
         }
 
+        // ── AI classification ──
         subgraph cluster_agent {
-            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#e8a317"><B>AI Agent</B></FONT>>
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#e8a317"><B>AI Classifier</B></FONT>>
             style="filled,rounded"
             color="#e8a317"
             bgcolor="#fef7e0"
             penwidth=1.0
             margin=12
 
-            claude_code [label=<<B>Claude Code</B><BR/>Headless Mode  ·  Opus 4.6<BR/><FONT POINT-SIZE="8">CLAUDE.md context · Custom skills</FONT>> fillcolor="#e8a317" fontcolor="white" color="#b8860b" penwidth=1.5]
+            claude_code [label=<<B>Claude Code</B><BR/>Headless Mode  ·  Opus 4.6<BR/><FONT POINT-SIZE="8">Classify · Extract · Summarize · Link</FONT>> fillcolor="#e8a317" fontcolor="white" color="#b8860b" penwidth=1.5]
         }
 
+        // ── Qualification pipeline ──
+        subgraph cluster_qualification {
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#e8a317"><B>Qualification Pipeline</B></FONT>>
+            style="filled,rounded"
+            color="#e8a317"
+            bgcolor="#fef7e0"
+            penwidth=1.0
+            margin=12
+
+            inbox_stage  [label="01-inbox/\nRaw captures land here" fillcolor="#fff3cd" color="#e8a317"]
+            queue_stage  [label="02-queue/\nAI-classified, awaiting\nhuman approval" fillcolor="#fff3cd" color="#e8a317"]
+            tg_notify    [label="Telegram Notification\nApprove / Reject / Edit" fillcolor="#fff3cd" color="#e8a317"]
+            permanent    [label="07-resources/ etc.\nApproved → permanent\nstorage location" fillcolor="#fff3cd" color="#e8a317"]
+            rejected     [label="08-archive/rejected/\nRejected items" fillcolor="#fff3cd" color="#e8a317"]
+        }
+
+        // ── MCP servers ──
         subgraph cluster_mcp {
             label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#e8a317"><B>MCP Constellation</B></FONT>>
             style="filled,rounded"
@@ -132,46 +153,63 @@ digraph beestgraph {
 
             mcp_keep     [label="keep.md MCP\nlist_inbox · get_item\nmark_done · search" fillcolor="#e8f0fe" color="#1a73e8"]
             mcp_fs       [label="Filesystem MCP\nread · write · list\nsearch_files" fillcolor="#fff3cd" color="#e8a317"]
-            mcp_falkor   [label="FalkorDB MCP\nNL → Cypher\nraw queries" fillcolor="#e6f4ea" color="#1e8e3e"]
+            mcp_falkor   [label="FalkorDB MCP\nNL to Cypher\nraw queries" fillcolor="#e6f4ea" color="#1e8e3e"]
         }
+
+        // ── Heartbeat ──
+        heartbeat [label="Heartbeat Daemon\nHealth check every 5 min\nCalDAV + vault logging" fillcolor="#fff3cd" color="#e8a317"]
     }
 
     // ════════════════════════════════════════════════════════
-    //  STORAGE LAYER
+    //  STORAGE LAYER  (mirrored stores)
     // ════════════════════════════════════════════════════════
     subgraph cluster_storage {
-        label=<<FONT FACE="Helvetica Neue" POINT-SIZE="13" COLOR="#1e8e3e"><B>STORAGE LAYER</B>  ·  2 TB NVMe</FONT>>
+        label=<<FONT FACE="Helvetica Neue" POINT-SIZE="13" COLOR="#1e8e3e"><B>STORAGE LAYER</B>  ·  2 TB NVMe  ·  mirrored stores</FONT>>
         style="dashed,rounded"
         color="#1e8e3e"
         bgcolor="#f4faf6"
         penwidth=1.5
         margin=16
 
-        subgraph cluster_graph {
-            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1e8e3e"><B>Graph Database</B></FONT>>
+        // ── Mirrored core: vault <-> graph ──
+        subgraph cluster_mirror {
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1e8e3e"><B>Mirrored Knowledge Stores</B></FONT>>
             style="filled,rounded"
             color="#1e8e3e"
             bgcolor="#e6f4ea"
             penwidth=1.0
             margin=12
 
+            vault [label=<<B>Obsidian Vault</B><BR/>Markdown files<BR/><FONT POINT-SIZE="8">01-inbox/ · 02-queue/ · 03-fleeting/<BR/>05-projects/ · 06-areas/ · 07-resources/ · 08-archive/</FONT>> fillcolor="#c8e6c9" color="#1e8e3e" penwidth=1.5]
             falkordb [label=<<B>FalkorDB</B><BR/>In-memory graph · GraphBLAS<BR/><FONT POINT-SIZE="8">OpenCypher · Full-text · Vector index</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
+
+            // Mirror edge
+            vault -> falkordb [dir=both label="  mirrored  " color="#1e8e3e" style=bold penwidth=2.0]
         }
 
-        subgraph cluster_vault {
-            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1e8e3e"><B>Obsidian Vault</B></FONT>>
+        // ── CalDAV ──
+        subgraph cluster_caldav {
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1e8e3e"><B>Calendar Store</B></FONT>>
             style="filled,rounded"
             color="#1e8e3e"
             bgcolor="#e6f4ea"
             penwidth=1.0
             margin=12
 
-            vault_inbox [label="inbox/\nNew captures" fillcolor="#c8e6c9" color="#1e8e3e"]
-            vault_know  [label="knowledge/\nProcessed articles" fillcolor="#c8e6c9" color="#1e8e3e"]
-            vault_para  [label="projects/ · areas/\nresources/ · archives/" fillcolor="#c8e6c9" color="#1e8e3e"]
-            syncthing   [label=<<B>Syncthing</B><BR/>P2P vault sync<BR/><FONT POINT-SIZE="8">All devices</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
+            radicale [label=<<B>Radicale CalDAV</B><BR/>Events · Heartbeats<BR/><FONT POINT-SIZE="8">:5232</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
         }
 
+        // ── Sync ──
+        subgraph cluster_sync {
+            label=<<FONT FACE="Helvetica Neue" POINT-SIZE="10" COLOR="#1e8e3e"><B>Vault Sync</B></FONT>>
+            style="filled,rounded"
+            color="#1e8e3e"
+            bgcolor="#e6f4ea"
+            penwidth=1.0
+            margin=12
+
+            obs_sync [label=<<B>Obsidian Sync</B><BR/>Headless client on Pi<BR/><FONT POINT-SIZE="8">E2E encrypted · All devices</FONT>> fillcolor="#1e8e3e" fontcolor="white" color="#0d652d" penwidth=1.5]
+        }
     }
 
     // ════════════════════════════════════════════════════════
@@ -185,11 +223,13 @@ digraph beestgraph {
         penwidth=1.5
         margin=16
 
+        obsidian   [label=<<B>Obsidian App</B><BR/>All devices<BR/><FONT POINT-SIZE="8">via Obsidian Sync</FONT>> fillcolor="#fce8e6" color="#d93025"]
+        web_ui     [label=<<B>beestgraph Web UI</B><BR/>Dashboard · Graph Explorer · Timeline<BR/><FONT POINT-SIZE="8">Next.js + Cytoscape.js  ·  :3001</FONT>> fillcolor="#d93025" fontcolor="white" color="#a50e0e" penwidth=1.5]
+        telegram   [label=<<B>Telegram Bot</B><BR/>Chat · Search · Qualify · Approve<BR/><FONT POINT-SIZE="8">Claude-powered conversation</FONT>> fillcolor="#fce8e6" color="#d93025"]
         falkor_ui  [label=<<B>FalkorDB Browser</B><BR/>Graph viz · Cypher editor<BR/><FONT POINT-SIZE="8">:3000</FONT>> fillcolor="#fce8e6" color="#d93025"]
-        web_ui     [label=<<B>beestgraph Web UI</B><BR/>Cytoscape.js · Search<BR/><FONT POINT-SIZE="8">Next.js  ·  :3001</FONT>> fillcolor="#d93025" fontcolor="white" color="#a50e0e" penwidth=1.5]
-        telegram   [label="Telegram Bot\n/status /process\n/search /recent" fillcolor="#fce8e6" color="#d93025"]
-        ssh_tmux   [label="SSH + tmux + mosh\nClaude Code interactive" fillcolor="#fce8e6" color="#d93025"]
-        obsidian   [label="Obsidian Desktop\n& Mobile" fillcolor="#fce8e6" color="#d93025"]
+        caldav_cli [label="CalDAV Clients\niOS Calendar · Thunderbird\netc." fillcolor="#fce8e6" color="#d93025"]
+        ssh_tmux   [label="SSH + tmux\nClaude Code interactive" fillcolor="#fce8e6" color="#d93025"]
+        vault_cli  [label="vault CLI\nobsidian-headless-cli" fillcolor="#fce8e6" color="#d93025"]
     }
 
     // ════════════════════════════════════════════════════════
@@ -210,41 +250,65 @@ digraph beestgraph {
     // ════════════════════════════════════════════════════════
     //  EDGES — Capture → Processing
     // ════════════════════════════════════════════════════════
+
+    // keep.md → cron poller
     keep_cloud  -> cron_keep    [label="  MCP poll  " color="#1a73e8"]
-    obs_clipper -> vault_inbox  [label="  save to vault  " color="#1a73e8"]
-    obs_manual  -> vault_inbox  [color="#1a73e8"]
-    vault_inbox -> watchdog     [label="  inotify  " color="#e8a317"]
+
+    // Direct capture → vault inbox
+    obs_clipper -> inbox_stage  [label="  save to vault  " color="#1a73e8"]
+    obs_manual  -> inbox_stage  [color="#1a73e8"]
+    tg_add      -> inbox_stage  [label="  /add  " color="#1a73e8"]
+    webui_entry -> inbox_stage  [label="  /entry  " color="#1a73e8"]
+
+    // Inbox → watcher
+    inbox_stage -> watcher      [label="  inotify  " color="#e8a317"]
 
     // ── Intake → Agent ──
     cron_keep -> claude_code [color="#e8a317"]
-    watchdog  -> claude_code [color="#e8a317"]
+    watcher   -> claude_code [color="#e8a317"]
 
     // ── Agent ↔ MCP ──
     claude_code -> mcp_keep     [dir=both color="#1a73e8"]
     claude_code -> mcp_fs       [dir=both color="#e8a317"]
     claude_code -> mcp_falkor   [dir=both color="#1e8e3e"]
 
+    // ── Qualification pipeline flow ──
+    claude_code -> queue_stage  [label="  classify  " color="#e8a317"]
+    queue_stage -> tg_notify    [label="  notify  " color="#e8a317"]
+    tg_notify   -> permanent    [label="  approve  " color="#1e8e3e"]
+    tg_notify   -> rejected     [label="  reject  " color="#d93025"]
+
     // ── MCP → Storage ──
     mcp_keep     -> keep_cloud  [label="  API calls  " style=dashed color="#1a73e8"]
-    mcp_fs       -> vault_inbox [color="#e8a317"]
-    mcp_fs       -> vault_know  [color="#e8a317"]
-    mcp_fs       -> vault_para  [color="#e8a317"]
+    mcp_fs       -> vault       [color="#e8a317"]
     mcp_falkor   -> falkordb    [color="#1e8e3e"]
 
-    // ── Vault sync ──
-    vault_know -> syncthing [dir=both style=dashed color="#1e8e3e"]
-    vault_para -> syncthing [dir=both style=dashed color="#1e8e3e"]
+    // ── Permanent notes → storage ──
+    permanent -> vault    [color="#1e8e3e"]
+    permanent -> falkordb [color="#1e8e3e"]
 
-    // ── Access → Storage ──
-    falkor_ui -> falkordb   [color="#d93025"]
-    web_ui    -> falkordb   [color="#d93025"]
-    telegram  -> claude_code [label="  commands  " color="#d93025"]
-    ssh_tmux  -> claude_code [color="#d93025"]
-    obsidian  -> syncthing  [dir=both label="  vault sync  " color="#d93025"]
+    // ── Vault sync ──
+    vault -> obs_sync [dir=both style=dashed label="  sync  " color="#1e8e3e"]
+
+    // ── Heartbeat → CalDAV + vault ──
+    heartbeat -> radicale [label="  health events  " color="#e8a317"]
+    heartbeat -> vault    [label="  heartbeat.md  " style=dashed color="#e8a317"]
+
+    // ── Access → Storage / Services ──
+    falkor_ui  -> falkordb    [color="#d93025"]
+    web_ui     -> falkordb    [color="#d93025"]
+    web_ui     -> vault       [color="#d93025"]
+    telegram   -> claude_code [label="  chat + commands  " color="#d93025"]
+    telegram   -> tg_notify   [label="  approve/reject  " style=dashed color="#d93025"]
+    ssh_tmux   -> claude_code [color="#d93025"]
+    obsidian   -> obs_sync    [dir=both label="  Obsidian Sync  " color="#d93025"]
+    caldav_cli -> radicale    [dir=both label="  CalDAV  " color="#d93025"]
+    vault_cli  -> vault       [color="#d93025"]
 
     // ── Network ──
-    tailscale -> falkor_ui [style=dotted color="#8430ce"]
     tailscale -> web_ui    [style=dotted color="#8430ce"]
+    tailscale -> falkor_ui [style=dotted color="#8430ce"]
     tailscale -> ssh_tmux  [style=dotted color="#8430ce"]
+    tailscale -> radicale  [style=dotted color="#8430ce"]
     fios      -> tailscale [color="#8430ce"]
 }
