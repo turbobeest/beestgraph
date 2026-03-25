@@ -2,9 +2,11 @@
 
 On detecting a new ``.md`` file the watcher:
 1. Parses the file (frontmatter, links, tags, URLs).
-2. Runs the processor for entity extraction / categorisation.
-3. Ingests the parsed result into FalkorDB.
-4. Moves the file to its proper vault location based on topic.
+2. AI pre-classifies the content (type, topic, tags, quality, summary).
+3. Moves the file to the qualification queue for user review.
+4. Writes a notification JSON for the Telegram bot to pick up.
+
+When qualification is disabled, falls back to the legacy direct-ingest path.
 
 CLI entry point: ``python -m src.pipeline.watcher``
 """
@@ -21,11 +23,16 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from src.config import BeestgraphSettings, load_settings
-from src.pipeline.ingester import GraphIngester
+from src.pipeline.classifier import classify_document
 from src.pipeline.markdown_parser import ParsedDocument, parse_file
-from src.pipeline.processor import process_document
+from src.pipeline.qualification import QualificationQueue
 
 logger = structlog.get_logger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Legacy direct-ingest path (used when qualification is disabled)
+# ---------------------------------------------------------------------------
 
 
 def _resolve_destination(doc: ParsedDocument, settings: BeestgraphSettings) -> Path:
@@ -53,13 +60,18 @@ def _resolve_destination(doc: ParsedDocument, settings: BeestgraphSettings) -> P
     return dest_dir / Path(doc.path).name
 
 
-def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
-    """Parse, process, ingest, and relocate a single inbox markdown file.
+def _handle_new_file_legacy(filepath: Path, settings: BeestgraphSettings) -> None:
+    """Legacy path: parse, process, ingest, and relocate directly.
+
+    Used when qualification is disabled.
 
     Args:
         filepath: Absolute path to the new ``.md`` file.
         settings: Loaded application settings.
     """
+    from src.pipeline.ingester import GraphIngester
+    from src.pipeline.processor import process_document
+
     start = time.monotonic()
     vault_root = Path(settings.vault.path)
 
@@ -69,10 +81,8 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         logger.error("parse_failed", path=str(filepath), error=str(exc))
         return
 
-    # Run AI / fallback processing to enrich metadata
     doc = process_document(doc, enable_llm=settings.enable_llm_processing)
 
-    # Ingest into FalkorDB
     try:
         ingester = GraphIngester(settings.falkordb)
         ingester.ingest_parsed_document(doc)
@@ -80,7 +90,6 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         logger.error("ingest_failed", path=doc.path, error=str(exc))
         return
 
-    # Move to proper vault location
     dest = _resolve_destination(doc, settings)
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -96,6 +105,87 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         dest=str(dest),
         elapsed_ms=round(elapsed_ms, 1),
     )
+
+
+# ---------------------------------------------------------------------------
+# Qualification queue path (default)
+# ---------------------------------------------------------------------------
+
+
+def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
+    """Parse, classify, and route a new inbox file to the qualification queue.
+
+    Steps:
+    1. Parse the markdown file.
+    2. AI pre-classify (content type, topic, tags, quality, summary).
+    3. Add to the qualification queue.
+    4. Write a notification JSON for the Telegram bot.
+
+    Args:
+        filepath: Absolute path to the new ``.md`` file.
+        settings: Loaded application settings.
+    """
+    # Fall back to legacy path when qualification is disabled
+    if not settings.qualification.enabled:
+        _handle_new_file_legacy(filepath, settings)
+        return
+
+    start = time.monotonic()
+    vault_root = Path(settings.vault.path)
+
+    # 1. Parse the file
+    try:
+        doc = parse_file(filepath, vault_root=vault_root)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("parse_failed", path=str(filepath), error=str(exc))
+        return
+
+    # 2. AI pre-classify
+    try:
+        recommendation = classify_document(doc, enable_llm=settings.enable_llm_processing)
+    except Exception as exc:
+        logger.error("classification_failed", path=str(filepath), error=str(exc))
+        # Use safe defaults so we never lose a file
+        recommendation = {
+            "content_type": "article",
+            "topic": "",
+            "tags": sorted(doc.tags)[:10],
+            "quality": "medium",
+            "summary": "",
+        }
+
+    # 3. Add to qualification queue
+    queue = QualificationQueue(
+        vault_path=vault_root,
+        queue_dir=settings.qualification.queue_dir,
+    )
+    try:
+        item = queue.add_item(filepath, recommendation)
+    except (FileNotFoundError, OSError) as exc:
+        logger.error("queue_add_failed", path=str(filepath), error=str(exc))
+        return
+
+    # 4. Write notification for Telegram bot
+    if settings.qualification.notify_telegram:
+        try:
+            queue.write_notification(item)
+        except OSError as exc:
+            logger.warning("notification_write_failed", path=str(filepath), error=str(exc))
+
+    elapsed_ms = (time.monotonic() - start) * 1000
+    logger.info(
+        "inbox_item_queued",
+        path=doc.path,
+        queue_path=str(item.path),
+        content_type=recommendation.get("content_type"),
+        topic=recommendation.get("topic"),
+        elapsed_ms=round(elapsed_ms, 1),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Watchdog handler and runner
+# ---------------------------------------------------------------------------
 
 
 class _InboxHandler(FileSystemEventHandler):
@@ -124,6 +214,12 @@ def run_watcher(settings: BeestgraphSettings) -> None:
     """
     inbox = Path(settings.vault.path) / settings.vault.inbox_dir
     inbox.mkdir(parents=True, exist_ok=True)
+
+    # Ensure queue directory exists at startup
+    if settings.qualification.enabled:
+        queue_path = Path(settings.vault.path) / settings.qualification.queue_dir
+        queue_path.mkdir(parents=True, exist_ok=True)
+        logger.info("qualification_queue_ready", path=str(queue_path))
 
     handler = _InboxHandler(settings)
     observer = Observer()

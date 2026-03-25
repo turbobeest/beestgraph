@@ -1,12 +1,12 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: note
 slug: "{{ slug }}"
-source_url: "{{ source_url }}"
+source_url: ""
 source_type: "{{ source_type }}"
-source_domain: "{{ source_domain }}"
-author: "{{ author }}"
-date_published: {{ date_published }}
+source_domain: ""
+author: ""
+date_published:
 date_captured: {{ date_captured }}
 date_qualified: {{ date_qualified }}
 date_processed: {{ date_processed }}
@@ -26,15 +26,5 @@ qualified_by: ""
 qualification_notes: ""
 related_to: []
 ---
-
-## Summary
-
-{{ summary }}
-
-## Key Points
-
--
-
-## Notes
 
 {{ content }}

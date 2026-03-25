@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: tutorial
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,15 +25,26 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+difficulty: "{{ difficulty }}"
+prerequisites: []
+estimated_time: "{{ estimated_time }}"
 ---
 
-## Summary
+## Overview
 
 {{ summary }}
 
-## Key Points
+## Prerequisites
 
 -
+
+## Steps
+
+### Step 1
+
+### Step 2
+
+### Step 3
 
 ## Notes
 

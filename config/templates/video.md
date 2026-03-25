@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: video
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,6 +25,9 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+duration: "{{ duration }}"
+channel: "{{ channel }}"
+platform: "{{ platform }}"
 ---
 
 ## Summary
@@ -32,6 +35,10 @@ related_to: []
 {{ summary }}
 
 ## Key Points
+
+-
+
+## Timestamps
 
 -
 

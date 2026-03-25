@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: paper
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,15 +25,24 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+doi: "{{ doi }}"
+arxiv_id: "{{ arxiv_id }}"
+journal: "{{ journal }}"
+year: {{ year }}
+abstract: "{{ abstract }}"
 ---
 
-## Summary
+## Abstract
 
-{{ summary }}
+{{ abstract }}
 
-## Key Points
+## Key Findings
 
 -
+
+## Methodology
+
+## Relevance
 
 ## Notes
 

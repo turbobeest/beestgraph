@@ -143,6 +143,20 @@ class CalendarSettings(BaseSettings):
     calendar_name: str = "beestgraph"
 
 
+class QualificationSettings(BaseSettings):
+    """Qualification queue settings."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_QUALIFICATION_")
+
+    enabled: bool = True
+    timeout_hours: int = 24
+    notify_telegram: bool = True
+    auto_classify_fallback: bool = True
+    queue_dir: str = "queue"
+    poll_interval_seconds: int = 10
+    default_defer_hours: int = 4
+
+
 class BackupSettings(BaseSettings):
     """Backup configuration."""
 
@@ -177,6 +191,7 @@ class BeestgraphSettings(BaseSettings):
     web: WebSettings = Field(default_factory=WebSettings)
     heartbeat: HeartbeatSettings = Field(default_factory=HeartbeatSettings)
     calendar: CalendarSettings = Field(default_factory=CalendarSettings)
+    qualification: QualificationSettings = Field(default_factory=QualificationSettings)
     backup: BackupSettings = Field(default_factory=BackupSettings)
 
 
@@ -227,16 +242,14 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
         "web": WebSettings,
         "heartbeat": HeartbeatSettings,
         "calendar": CalendarSettings,
+        "qualification": QualificationSettings,
         "backup": BackupSettings,
     }
     for key, model_cls in _nested_models.items():
         if key in filtered and isinstance(filtered[key], dict):
             sub_keys = set(model_cls.model_fields.keys())
             # Filter to known keys and drop empty strings so env vars can override.
-            filtered[key] = {
-                k: v for k, v in filtered[key].items()
-                if k in sub_keys and v != ""
-            }
+            filtered[key] = {k: v for k, v in filtered[key].items() if k in sub_keys and v != ""}
     settings = BeestgraphSettings(**filtered)
     logger.info(
         "settings_loaded",

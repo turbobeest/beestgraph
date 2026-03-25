@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: recipe
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -12,7 +12,8 @@ date_qualified: {{ date_qualified }}
 date_processed: {{ date_processed }}
 status: qualifying
 para_category: resources
-topics: []
+topics:
+  - health/nutrition
 tags: []
 quality: medium
 summary: ""
@@ -25,15 +26,25 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+servings: {{ servings }}
+prep_time: "{{ prep_time }}"
+cook_time: "{{ cook_time }}"
+total_time: "{{ total_time }}"
+cuisine: "{{ cuisine }}"
+ingredients: []
 ---
 
 ## Summary
 
 {{ summary }}
 
-## Key Points
+## Ingredients
 
 -
+
+## Instructions
+
+1.
 
 ## Notes
 

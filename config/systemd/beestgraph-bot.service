@@ -29,7 +29,7 @@ SyslogIdentifier=beestgraph-bot
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/turbobeest/beestgraph /home/turbobeest/.cache/uv /home/turbobeest/.config/op
+ReadWritePaths=/home/turbobeest/beestgraph /home/turbobeest/.cache/uv /home/turbobeest/.config/op /home/turbobeest/vault
 PrivateTmp=yes
 
 [Install]

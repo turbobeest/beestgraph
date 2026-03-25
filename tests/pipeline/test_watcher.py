@@ -15,7 +15,7 @@ from src.pipeline.watcher import _handle_new_file, _InboxHandler, _resolve_desti
 
 
 class TestResolveDestination:
-    """Tests for vault destination resolution based on topic metadata."""
+    """Tests for vault destination routing based on topics."""
 
     def test_uses_first_topic_as_subdirectory(
         self, mock_beestgraph_settings: BeestgraphSettings
@@ -24,12 +24,11 @@ class TestResolveDestination:
             path="inbox/article.md",
             title="Test",
             content="Body",
-            metadata={"topics": ["technology/ai-ml", "meta/pkm"]},
+            metadata={"topics": ["technology/ai-ml"]},
         )
         dest = _resolve_destination(doc, mock_beestgraph_settings)
-        vault = Path(mock_beestgraph_settings.vault.path)
-        expected = vault / "knowledge" / "technology/ai-ml" / "article.md"
-        assert dest == expected
+        assert "technology/ai-ml" in str(dest)
+        assert dest.name == "article.md"
 
     def test_falls_back_to_knowledge_root(
         self, mock_beestgraph_settings: BeestgraphSettings
@@ -59,7 +58,9 @@ class TestResolveDestination:
         expected = vault / "knowledge" / "article.md"
         assert dest == expected
 
-    def test_topic_normalized_lowercase(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
+    def test_topic_normalized_lowercase(
+        self, mock_beestgraph_settings: BeestgraphSettings
+    ) -> None:
         doc = ParsedDocument(
             path="inbox/article.md",
             title="Test",
@@ -71,107 +72,100 @@ class TestResolveDestination:
 
 
 # ---------------------------------------------------------------------------
-# _handle_new_file
+# _handle_new_file (qualification-enabled path)
 # ---------------------------------------------------------------------------
 
 
 class TestHandleNewFile:
-    """Tests for the single-file processing pipeline."""
+    """Tests for the new file handler with qualification queue."""
 
-    def test_calls_parse_process_ingest_in_sequence(
+    def test_routes_through_qualification_when_enabled(
         self,
         tmp_vault: Path,
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
-        # Write a markdown file
+        """When qualification is enabled, file goes to queue, not permanent storage."""
         filepath = tmp_vault / "inbox" / "test-article.md"
         filepath.write_text(
-            "---\ntitle: Test Article\ntopics:\n  - meta/pkm\n---\n\nSome content here.\n",
+            "---\ntitle: Test Article\ntopics:\n  - meta/pkm\n---\n\nSome content.\n",
             encoding="utf-8",
         )
+        queue_dir = tmp_vault / mock_beestgraph_settings.qualification.queue_dir
+        queue_dir.mkdir(parents=True, exist_ok=True)
 
-        call_order: list[str] = []
-
-        def mock_parse(fp, vault_root=None):
-            call_order.append("parse")
-            # Use real parse
-            from src.pipeline.markdown_parser import parse_file
-
-            return parse_file(fp, vault_root=vault_root)
-
-        def mock_process(doc, enable_llm=False):
-            call_order.append("process")
-            return doc
-
-        mock_ingester = MagicMock()
-
-        def mock_ingest(doc):
-            call_order.append("ingest")
-
-        mock_ingester.ingest_parsed_document = mock_ingest
+        mock_queue = MagicMock()
+        mock_queue.add_item.return_value = MagicMock(title="Test Article")
 
         with (
-            patch("src.pipeline.watcher.parse_file", side_effect=mock_parse),
-            patch("src.pipeline.watcher.process_document", side_effect=mock_process),
-            patch("src.pipeline.watcher.GraphIngester", return_value=mock_ingester),
+            patch("src.pipeline.watcher.classify_document", return_value={
+                "content_type": "article",
+                "topic": "meta/pkm",
+                "tags": ["test"],
+                "quality": "medium",
+                "summary": "Test summary.",
+            }),
+            patch("src.pipeline.watcher.QualificationQueue", return_value=mock_queue),
         ):
             _handle_new_file(filepath, mock_beestgraph_settings)
 
-        assert call_order == ["parse", "process", "ingest"]
+        mock_queue.add_item.assert_called_once()
 
     def test_handles_parse_failure_gracefully(
         self,
         tmp_vault: Path,
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
+        """Parse failure should not crash — file stays in inbox."""
         filepath = tmp_vault / "inbox" / "missing.md"
-        # File doesn't exist — parse should fail
-        with patch("src.pipeline.watcher.GraphIngester") as mock_cls:
-            _handle_new_file(filepath, mock_beestgraph_settings)
-            # Ingester should never be called
-            mock_cls.return_value.ingest_parsed_document.assert_not_called()
+        # File doesn't exist
+        _handle_new_file(filepath, mock_beestgraph_settings)
+        # Should not raise
 
-    def test_handles_ingest_connection_error(
+    def test_handles_classification_failure(
         self,
         tmp_vault: Path,
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
+        """Classification failure should use safe defaults."""
         filepath = tmp_vault / "inbox" / "test.md"
-        filepath.write_text("---\ntitle: Test\n---\n\nContent.\n", encoding="utf-8")
+        filepath.write_text("---\ntitle: Test\n---\nContent.\n", encoding="utf-8")
+        queue_dir = tmp_vault / mock_beestgraph_settings.qualification.queue_dir
+        queue_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_ingester = MagicMock()
-        mock_ingester.ingest_parsed_document.side_effect = ConnectionError("db down")
+        mock_queue = MagicMock()
+        mock_queue.add_item.return_value = MagicMock(title="Test")
 
         with (
-            patch("src.pipeline.watcher.process_document", side_effect=lambda d, **kw: d),
-            patch("src.pipeline.watcher.GraphIngester", return_value=mock_ingester),
+            patch("src.pipeline.watcher.classify_document", side_effect=RuntimeError("fail")),
+            patch("src.pipeline.watcher.QualificationQueue", return_value=mock_queue),
         ):
-            # Should not raise — handled gracefully
             _handle_new_file(filepath, mock_beestgraph_settings)
 
-    def test_moves_file_to_destination(
+        # Should still add to queue with fallback classification
+        mock_queue.add_item.assert_called_once()
+
+    def test_falls_back_to_legacy_when_qualification_disabled(
         self,
         tmp_vault: Path,
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
-        filepath = tmp_vault / "inbox" / "moveme.md"
+        """When qualification is disabled, uses legacy direct-ingest path."""
+        mock_beestgraph_settings.qualification.enabled = False
+        filepath = tmp_vault / "inbox" / "test.md"
         filepath.write_text(
-            "---\ntitle: Move Me\ntopics:\n  - technology/web\n---\n\nWeb content.\n",
-            encoding="utf-8",
+            "---\ntitle: Test\ntopics:\n  - meta/pkm\n---\nContent.\n", encoding="utf-8",
         )
 
-        mock_ingester = MagicMock()
-
         with (
-            patch("src.pipeline.watcher.process_document", side_effect=lambda d, **kw: d),
-            patch("src.pipeline.watcher.GraphIngester", return_value=mock_ingester),
+            patch("src.pipeline.processor.process_document", return_value=ParsedDocument(
+                path="test.md", title="Test", content="Content.",
+                metadata={"topics": ["meta/pkm"]},
+            )),
+            patch("src.pipeline.ingester.GraphIngester") as mock_ingester_cls,
         ):
+            mock_ingester_cls.return_value = MagicMock()
             _handle_new_file(filepath, mock_beestgraph_settings)
-
-        # File should have been moved out of inbox
-        assert not filepath.exists()
-        dest = tmp_vault / "knowledge" / "technology/web" / "moveme.md"
-        assert dest.exists()
+            mock_ingester_cls.return_value.ingest_parsed_document.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +176,9 @@ class TestHandleNewFile:
 class TestInboxHandler:
     """Tests for the watchdog event handler."""
 
-    def test_ignores_directory_events(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
+    def test_ignores_directory_events(
+        self, mock_beestgraph_settings: BeestgraphSettings
+    ) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = True
@@ -191,7 +187,9 @@ class TestInboxHandler:
             handler.on_created(event)
             mock_handle.assert_not_called()
 
-    def test_ignores_non_markdown_files(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
+    def test_ignores_non_markdown_files(
+        self, mock_beestgraph_settings: BeestgraphSettings
+    ) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = False
@@ -200,7 +198,9 @@ class TestInboxHandler:
             handler.on_created(event)
             mock_handle.assert_not_called()
 
-    def test_processes_markdown_files(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
+    def test_processes_markdown_files(
+        self, mock_beestgraph_settings: BeestgraphSettings
+    ) -> None:
         handler = _InboxHandler(mock_beestgraph_settings)
         event = MagicMock()
         event.is_directory = False

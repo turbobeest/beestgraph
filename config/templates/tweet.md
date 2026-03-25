@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: tweet
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,16 +25,19 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+tweet_author: "{{ tweet_author }}"
+tweet_url: "{{ tweet_url }}"
+tweet_thread: false
+tweet_likes: {{ tweet_likes }}
+tweet_retweets: {{ tweet_retweets }}
 ---
 
-## Summary
-
-{{ summary }}
-
-## Key Points
-
--
-
-## Notes
+## Tweet
 
 {{ content }}
+
+## Context
+
+## Why This Matters
+
+{{ summary }}

@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: book
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,15 +25,26 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+isbn: "{{ isbn }}"
+publisher: "{{ publisher }}"
+pages: {{ pages }}
+genre: "{{ genre }}"
+rating: {{ rating }}
 ---
 
 ## Summary
 
 {{ summary }}
 
-## Key Points
+## Key Ideas
 
 -
+
+## Memorable Quotes
+
+-
+
+## How It Connects
 
 ## Notes
 

@@ -1,6 +1,6 @@
 ---
 title: "{{ title }}"
-content_type: article
+content_type: url
 slug: "{{ slug }}"
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
@@ -25,15 +25,12 @@ entities:
 qualified_by: ""
 qualification_notes: ""
 related_to: []
+meta_description: "{{ meta_description }}"
 ---
 
 ## Summary
 
 {{ summary }}
-
-## Key Points
-
--
 
 ## Notes
 
