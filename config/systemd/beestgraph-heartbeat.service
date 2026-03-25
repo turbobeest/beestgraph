@@ -1,0 +1,24 @@
+[Unit]
+Description=beestgraph heartbeat monitor
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/home/turbobeest/beestgraph
+EnvironmentFile=-/home/turbobeest/beestgraph/docker/.env
+ExecStart=/bin/bash -c 'source <(bash /home/turbobeest/beestgraph/scripts/load-secrets.sh) && exec /home/turbobeest/.local/bin/uv run python -m src.heartbeat.daemon --interval 300'
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-heartbeat
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/turbobeest/vault /home/turbobeest/beestgraph /home/turbobeest/.cache/uv /home/turbobeest/.config/op /home/turbobeest/.claude
+
+[Install]
+WantedBy=multi-user.target

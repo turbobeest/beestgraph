@@ -123,6 +123,26 @@ class WebSettings(BaseSettings):
     host: str = "0.0.0.0"  # noqa: S104
 
 
+class HeartbeatSettings(BaseSettings):
+    """Heartbeat monitor configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_HEARTBEAT_")
+
+    interval: int = 300
+    enabled: bool = True
+
+
+class CalendarSettings(BaseSettings):
+    """CalDAV / Radicale calendar settings."""
+
+    model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_CALENDAR_")
+
+    url: str = "http://localhost:5232"
+    username: str = "beestgraph"
+    password: str = ""
+    calendar_name: str = "beestgraph"
+
+
 class BackupSettings(BaseSettings):
     """Backup configuration."""
 
@@ -155,6 +175,8 @@ class BeestgraphSettings(BaseSettings):
     processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     web: WebSettings = Field(default_factory=WebSettings)
+    heartbeat: HeartbeatSettings = Field(default_factory=HeartbeatSettings)
+    calendar: CalendarSettings = Field(default_factory=CalendarSettings)
     backup: BackupSettings = Field(default_factory=BackupSettings)
 
 
@@ -203,6 +225,8 @@ def load_settings(config_path: Path | None = None) -> BeestgraphSettings:
         "processing": ProcessingSettings,
         "logging": LoggingSettings,
         "web": WebSettings,
+        "heartbeat": HeartbeatSettings,
+        "calendar": CalendarSettings,
         "backup": BackupSettings,
     }
     for key, model_cls in _nested_models.items():

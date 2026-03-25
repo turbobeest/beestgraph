@@ -31,6 +31,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  radicale:
+    image: tomsquest/docker-radicale:latest
+    container_name: beestgraph-radicale
+    platform: linux/arm64
+    restart: unless-stopped
+    ports:
+      - "5232:5232"
+    volumes:
+      - radicale-data:/data
+    environment:
+      - RADICALE_AUTH_TYPE=none  # Local network only, behind Tailscale
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:5232/.web/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
 volumes:
   falkordb-data:
+    driver: local
+  radicale-data:
     driver: local

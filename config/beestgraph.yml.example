@@ -97,6 +97,26 @@ web:
   # Bind address (0.0.0.0 for all interfaces, 127.0.0.1 for local only)
   host: 0.0.0.0
 
+# ── Heartbeat ────────────────────────────────────────────────
+heartbeat:
+  # Seconds between heartbeat checks (default: 5 minutes)
+  interval: 300
+
+  # Enable/disable the heartbeat monitor
+  enabled: true
+
+# ── CalDAV calendar ──────────────────────────────────────────
+calendar:
+  # Radicale server URL
+  url: http://localhost:5232
+
+  # Auth credentials (empty for no-auth, typical behind Tailscale)
+  username: ""
+  password: ""
+
+  # Calendar name in Radicale
+  calendar_name: beestgraph
+
 # ── Backup ──────────────────────────────────────────────────
 backup:
   # Directory to store backups

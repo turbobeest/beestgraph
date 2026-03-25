@@ -10,6 +10,7 @@ __all__ = [
     "bot",
     "config",
     "graph",
+    "heartbeat",
     "pipeline",
     "vault",
 ]

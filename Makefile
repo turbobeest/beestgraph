@@ -1,6 +1,7 @@
 # beestgraph/Makefile
 
 .PHONY: help setup install lint format test run-watcher run-poller run-bot run-all \
+        run-heartbeat run-heartbeat-once \
         docker-up docker-down docker-logs web-dev web-build init-schema backup clean
 
 PYTHON := python3
@@ -50,6 +51,12 @@ run-all: ## Start all Python services (watcher + bot)
 	echo "Watcher PID: $$WATCHER_PID"; \
 	echo "Starting Telegram bot (Ctrl+C stops both)..."; \
 	$(UV) run python -m src.bot.telegram_bot
+
+run-heartbeat: ## Run heartbeat monitor daemon
+	$(UV) run python -m src.heartbeat.daemon
+
+run-heartbeat-once: ## Run single heartbeat check
+	$(UV) run python -m src.heartbeat.daemon --once
 
 # ── Docker ───────────────────────────────────────────────────
 
