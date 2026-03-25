@@ -1,30 +1,43 @@
 ---
+id: "{{ id }}"
 title: "{{ title }}"
-content_type: note
-slug: "{{ slug }}"
+aliases: []
+created: {{ created }}
+modified: {{ modified }}
+published: ""
+source_date: ""
+type: note
+status: qualifying
+maturity: raw
+para: resources
+visibility: private
+topics: []
+tags: []
+mocs: []
+summary: ""
+key_points: []
 source_url: ""
 source_type: "{{ source_type }}"
 source_domain: ""
 author: ""
-date_published:
-date_captured: {{ date_captured }}
-date_qualified: {{ date_qualified }}
-date_processed: {{ date_processed }}
-status: qualifying
-para_category: resources
-topics: []
-tags: []
 quality: medium
-summary: ""
-key_points: []
+qualified_by: ""
+qualification_notes: ""
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-qualified_by: ""
-qualification_notes: ""
-related_to: []
+related: []
 ---
 
+# {{ title }}
+
+> {{ summary }}
+
 {{ content }}
+
+## Connections
+
+- Sparked by:
+- Related:

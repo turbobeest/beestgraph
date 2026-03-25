@@ -54,18 +54,18 @@ Tim Berners-Lee invented the World Wide Web. Jane Doe wrote this article.
 
 @pytest.fixture
 def tmp_vault(tmp_path: Path) -> Path:
-    """Create a temporary vault directory with an inbox/ subdirectory."""
-    inbox = tmp_path / "inbox"
-    inbox.mkdir()
-    knowledge = tmp_path / "knowledge"
-    knowledge.mkdir()
+    """Create a temporary vault directory with numbered lifecycle dirs."""
+    (tmp_path / "01-inbox").mkdir()
+    (tmp_path / "02-queue").mkdir()
+    (tmp_path / "07-resources").mkdir()
+    (tmp_path / "08-archive").mkdir()
     return tmp_path
 
 
 @pytest.fixture
 def sample_markdown(tmp_vault: Path) -> Path:
     """Write a sample markdown file with full frontmatter into the tmp vault inbox."""
-    filepath = tmp_vault / "inbox" / "kg-article.md"
+    filepath = tmp_vault / "01-inbox" / "kg-article.md"
     filepath.write_text(_SAMPLE_FRONTMATTER, encoding="utf-8")
     return filepath
 
@@ -130,8 +130,6 @@ def mock_beestgraph_settings(tmp_vault: Path) -> BeestgraphSettings:
         ),
         vault=VaultSettings(
             path=str(tmp_vault),
-            inbox_dir="inbox",
-            knowledge_dir="knowledge",
         ),
     )
 

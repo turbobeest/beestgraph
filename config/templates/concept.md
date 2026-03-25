@@ -18,6 +18,12 @@ entities:
     - "{{ title }}"
   organizations: []
 status: inbox
+id: "{{ id }}"
+maturity: raw
+visibility: private
+mocs: []
+related: []
+key_points: []
 ---
 
 ## Definition

@@ -79,18 +79,27 @@ class TelegramSettings(BaseSettings):
 
 
 class VaultSettings(BaseSettings):
-    """Obsidian vault paths."""
+    """Obsidian vault paths.
+
+    Directory names use numbered prefixes (``00-meta``, ``01-inbox``, etc.)
+    so they sort in lifecycle order inside Obsidian's file explorer.
+    """
 
     model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_VAULT_")
 
     path: str = str(Path.home() / "vault")
-    inbox_dir: str = "inbox"
-    knowledge_dir: str = "knowledge"
-    templates_dir: str = "templates"
-    projects_dir: str = "projects"
-    areas_dir: str = "areas"
-    resources_dir: str = "resources"
-    archives_dir: str = "archives"
+    meta_dir: str = "00-meta"
+    inbox_dir: str = "01-inbox"
+    queue_dir: str = "02-queue"
+    fleeting_dir: str = "03-fleeting"
+    daily_dir: str = "04-daily"
+    projects_dir: str = "05-projects"
+    areas_dir: str = "06-areas"
+    resources_dir: str = "07-resources"
+    archive_dir: str = "08-archive"
+    attachments_dir: str = "09-attachments"
+    templates_dir: str = "00-meta/templates"
+    mocs_dir: str = "00-meta/mocs"
 
 
 class ProcessingSettings(BaseSettings):
@@ -144,7 +153,11 @@ class CalendarSettings(BaseSettings):
 
 
 class QualificationSettings(BaseSettings):
-    """Qualification queue settings."""
+    """Qualification queue settings.
+
+    The queue directory is now managed by :class:`VaultSettings` as
+    ``queue_dir`` (``02-queue``).  This class only holds behaviour knobs.
+    """
 
     model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_QUALIFICATION_")
 
@@ -152,7 +165,6 @@ class QualificationSettings(BaseSettings):
     timeout_hours: int = 24
     notify_telegram: bool = True
     auto_classify_fallback: bool = True
-    queue_dir: str = "queue"
     poll_interval_seconds: int = 10
     default_defer_hours: int = 4
 

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # Range indexes: (label, property)
 RANGE_INDEXES: list[tuple[str, str]] = [
@@ -25,12 +25,17 @@ RANGE_INDEXES: list[tuple[str, str]] = [
     ("Document", "status"),
     ("Document", "para_category"),
     ("Document", "source_type"),
+    ("Document", "id"),
+    ("Document", "maturity"),
+    ("Document", "content_type"),
+    ("Document", "visibility"),
     ("Tag", "normalized_name"),
     ("Topic", "name"),
     ("Person", "normalized_name"),
     ("Concept", "normalized_name"),
     ("Source", "url"),
     ("Project", "name"),
+    ("MOC", "normalized_name"),
 ]
 
 # Full-text indexes: (label, [properties])
@@ -38,6 +43,7 @@ FULLTEXT_INDEXES: list[tuple[str, list[str]]] = [
     ("Document", ["title", "content", "summary"]),
     ("Tag", ["name"]),
     ("Concept", ["name", "description"]),
+    ("MOC", ["name", "description"]),
 ]
 
 
@@ -87,7 +93,7 @@ async def ensure_schema(graph: Graph) -> int:
     """Create all indexes and record schema version. Idempotent.
 
     Applies range indexes, full-text indexes, and upserts the SchemaVersion
-    metadata node. Safe to call multiple times — existing indexes are silently
+    metadata node. Safe to call multiple times -- existing indexes are silently
     skipped by FalkorDB.
 
     Args:

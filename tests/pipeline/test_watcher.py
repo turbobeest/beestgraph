@@ -41,7 +41,7 @@ class TestResolveDestination:
         )
         dest = _resolve_destination(doc, mock_beestgraph_settings)
         vault = Path(mock_beestgraph_settings.vault.path)
-        expected = vault / "knowledge" / "article.md"
+        expected = vault / "07-resources" / "article.md"
         assert dest == expected
 
     def test_empty_topics_list_falls_back(
@@ -55,7 +55,7 @@ class TestResolveDestination:
         )
         dest = _resolve_destination(doc, mock_beestgraph_settings)
         vault = Path(mock_beestgraph_settings.vault.path)
-        expected = vault / "knowledge" / "article.md"
+        expected = vault / "07-resources" / "article.md"
         assert dest == expected
 
     def test_topic_normalized_lowercase(self, mock_beestgraph_settings: BeestgraphSettings) -> None:
@@ -83,12 +83,12 @@ class TestHandleNewFile:
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
         """When qualification is enabled, file goes to queue, not permanent storage."""
-        filepath = tmp_vault / "inbox" / "test-article.md"
+        filepath = tmp_vault / "01-inbox" / "test-article.md"
         filepath.write_text(
             "---\ntitle: Test Article\ntopics:\n  - meta/pkm\n---\n\nSome content.\n",
             encoding="utf-8",
         )
-        queue_dir = tmp_vault / mock_beestgraph_settings.qualification.queue_dir
+        queue_dir = tmp_vault / mock_beestgraph_settings.vault.queue_dir
         queue_dir.mkdir(parents=True, exist_ok=True)
 
         mock_queue = MagicMock()
@@ -117,7 +117,7 @@ class TestHandleNewFile:
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
         """Parse failure should not crash — file stays in inbox."""
-        filepath = tmp_vault / "inbox" / "missing.md"
+        filepath = tmp_vault / "01-inbox" / "missing.md"
         # File doesn't exist
         _handle_new_file(filepath, mock_beestgraph_settings)
         # Should not raise
@@ -128,9 +128,9 @@ class TestHandleNewFile:
         mock_beestgraph_settings: BeestgraphSettings,
     ) -> None:
         """Classification failure should use safe defaults."""
-        filepath = tmp_vault / "inbox" / "test.md"
+        filepath = tmp_vault / "01-inbox" / "test.md"
         filepath.write_text("---\ntitle: Test\n---\nContent.\n", encoding="utf-8")
-        queue_dir = tmp_vault / mock_beestgraph_settings.qualification.queue_dir
+        queue_dir = tmp_vault / mock_beestgraph_settings.vault.queue_dir
         queue_dir.mkdir(parents=True, exist_ok=True)
 
         mock_queue = MagicMock()
@@ -152,7 +152,7 @@ class TestHandleNewFile:
     ) -> None:
         """When qualification is disabled, uses legacy direct-ingest path."""
         mock_beestgraph_settings.qualification.enabled = False
-        filepath = tmp_vault / "inbox" / "test.md"
+        filepath = tmp_vault / "01-inbox" / "test.md"
         filepath.write_text(
             "---\ntitle: Test\ntopics:\n  - meta/pkm\n---\nContent.\n",
             encoding="utf-8",

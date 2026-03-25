@@ -1,47 +1,57 @@
 ---
+id: "{{ id }}"
 title: "{{ title }}"
-content_type: video
-slug: "{{ slug }}"
+aliases: []
+created: {{ created }}
+modified: {{ modified }}
+published: ""
+source_date: {{ source_date }}
+type: video
+status: qualifying
+maturity: raw
+para: resources
+visibility: private
+topics: []
+tags: []
+mocs: []
+summary: ""
+key_points: []
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
 source_domain: "{{ source_domain }}"
 author: "{{ author }}"
-date_published: {{ date_published }}
-date_captured: {{ date_captured }}
-date_qualified: {{ date_qualified }}
-date_processed: {{ date_processed }}
-status: qualifying
-para_category: resources
-topics: []
-tags: []
 quality: medium
-summary: ""
-key_points: []
+qualified_by: ""
+qualification_notes: ""
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-qualified_by: ""
-qualification_notes: ""
-related_to: []
+related: []
 duration: "{{ duration }}"
 channel: "{{ channel }}"
 platform: "{{ platform }}"
 ---
 
-## Summary
+# {{ title }}
 
-{{ summary }}
-
-## Key Points
-
--
-
-## Timestamps
-
--
+> {{ summary }}
 
 ## Notes
 
-{{ content }}
+- **00:00** —
+- **05:00** —
+- **10:00** —
+
+## Key Takeaways
+
+-
+
+## Connections
+
+- Related:
+
+## Sources
+
+- [{{ channel }}]({{ source_url }}) ({{ duration }})

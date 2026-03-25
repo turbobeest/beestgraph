@@ -40,18 +40,24 @@ run_cypher "CREATE INDEX FOR (d:Document) ON (d.source_url)"
 run_cypher "CREATE INDEX FOR (d:Document) ON (d.status)"
 run_cypher "CREATE INDEX FOR (d:Document) ON (d.para_category)"
 run_cypher "CREATE INDEX FOR (d:Document) ON (d.source_type)"
+run_cypher "CREATE INDEX FOR (d:Document) ON (d.id)"
+run_cypher "CREATE INDEX FOR (d:Document) ON (d.maturity)"
+run_cypher "CREATE INDEX FOR (d:Document) ON (d.content_type)"
+run_cypher "CREATE INDEX FOR (d:Document) ON (d.visibility)"
 run_cypher "CREATE INDEX FOR (t:Tag) ON (t.normalized_name)"
 run_cypher "CREATE INDEX FOR (tp:Topic) ON (tp.name)"
 run_cypher "CREATE INDEX FOR (p:Person) ON (p.normalized_name)"
 run_cypher "CREATE INDEX FOR (c:Concept) ON (c.normalized_name)"
 run_cypher "CREATE INDEX FOR (s:Source) ON (s.url)"
 run_cypher "CREATE INDEX FOR (pr:Project) ON (pr.name)"
+run_cypher "CREATE INDEX FOR (m:MOC) ON (m.normalized_name)"
 
 # ── Full-text indexes ────────────────────────────────────────
 log "Creating full-text search indexes..."
 run_cypher "CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'content', 'summary')"
 run_cypher "CALL db.idx.fulltext.createNodeIndex('Tag', 'name')"
 run_cypher "CALL db.idx.fulltext.createNodeIndex('Concept', 'name', 'description')"
+run_cypher "CALL db.idx.fulltext.createNodeIndex('MOC', 'name', 'description')"
 
 # ── Seed the starter taxonomy as Topic nodes ─────────────────
 log "Seeding starter taxonomy..."
@@ -99,6 +105,10 @@ for entry in "${TOPICS[@]}"; do
         run_cypher "MATCH (child:Topic {name: '${name}'}), (parent:Topic {name: '${parent}'}) MERGE (child)-[:SUBTOPIC_OF]->(parent)"
     fi
 done
+
+# ── Schema version ────────────────────────────────────────────
+log "Recording schema version..."
+run_cypher "MERGE (sv:SchemaVersion {version: 3}) SET sv.applied_at = '$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
 
 # ── Verify ───────────────────────────────────────────────────
 log "Verifying schema..."

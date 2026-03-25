@@ -23,17 +23,25 @@ logger = structlog.get_logger(__name__)
 
 _MERGE_DOCUMENT = """
 MERGE (d:Document {path: $path})
-SET d.title       = $title,
-    d.content     = $content,
-    d.summary     = $summary,
-    d.status      = $status,
+SET d.title         = $title,
+    d.content       = $content,
+    d.summary       = $summary,
+    d.status        = $status,
     d.para_category = $para_category,
-    d.source_type = $source_type,
-    d.source_url  = $source_url,
-    d.author      = $author,
-    d.created_at  = $created_at,
-    d.updated_at  = $updated_at,
-    d.processed_at = $processed_at
+    d.source_type   = $source_type,
+    d.source_url    = $source_url,
+    d.author        = $author,
+    d.created_at    = $created_at,
+    d.updated_at    = $updated_at,
+    d.processed_at  = $processed_at,
+    d.id            = $id,
+    d.maturity      = $maturity,
+    d.content_type  = $content_type,
+    d.visibility    = $visibility,
+    d.quality       = $quality,
+    d.modified_at   = $modified_at,
+    d.published_at  = $published_at,
+    d.source_domain = $source_domain
 RETURN d.path AS path
 """
 
@@ -167,6 +175,15 @@ class GraphIngester:
             "created_at": str(meta.get("date_captured", now)),
             "updated_at": now,
             "processed_at": now,
+            # New v3 fields
+            "id": str(meta.get("id", "")),
+            "maturity": str(meta.get("maturity", "raw")),
+            "content_type": str(meta.get("content_type", "")),
+            "visibility": str(meta.get("visibility", "private")),
+            "quality": str(meta.get("quality", "")),
+            "modified_at": str(meta.get("modified", now)),
+            "published_at": str(meta.get("published", "")),
+            "source_domain": str(meta.get("source_domain", "")),
         }
         self._graph().query(_MERGE_DOCUMENT, params)
         logger.debug("upserted_document", path=doc.path)

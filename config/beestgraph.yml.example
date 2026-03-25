@@ -10,17 +10,19 @@ vault:
   # Absolute path to the Obsidian vault root directory
   path: ~/vault
 
-  # Subdirectory where new captures land (monitored by watchdog)
-  inbox_dir: inbox
-
-  # Subdirectory for processed articles organized by topic
-  knowledge_dir: knowledge
-
-  # PARA method directories
-  projects_dir: projects
-  areas_dir: areas
-  resources_dir: resources
-  archives_dir: archives
+  # Numbered lifecycle directories
+  meta_dir: 00-meta
+  inbox_dir: 01-inbox
+  queue_dir: 02-queue
+  fleeting_dir: 03-fleeting
+  daily_dir: 04-daily
+  projects_dir: 05-projects
+  areas_dir: 06-areas
+  resources_dir: 07-resources
+  archive_dir: 08-archive
+  attachments_dir: 09-attachments
+  templates_dir: 00-meta/templates
+  mocs_dir: 00-meta/mocs
 
 # ── FalkorDB ────────────────────────────────────────────────
 falkordb:

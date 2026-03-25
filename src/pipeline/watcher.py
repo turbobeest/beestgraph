@@ -24,6 +24,7 @@ from watchdog.observers import Observer
 
 from src.config import BeestgraphSettings, load_settings
 from src.pipeline.classifier import classify_document
+from src.pipeline.formatter import format_on_capture
 from src.pipeline.markdown_parser import ParsedDocument, parse_file
 from src.pipeline.qualification import QualificationQueue
 
@@ -39,8 +40,8 @@ def _resolve_destination(doc: ParsedDocument, settings: BeestgraphSettings) -> P
     """Determine where to move a processed document inside the vault.
 
     The target directory is derived from the first topic in the frontmatter
-    (e.g. ``technology/ai-ml`` -> ``knowledge/technology/ai-ml/``).  Falls
-    back to the ``knowledge/`` root when no topic is present.
+    (e.g. ``technology/ai-ml`` -> ``07-resources/technology/ai-ml/``).  Falls
+    back to the ``07-resources/`` root when no topic is present.
 
     Args:
         doc: The parsed document with metadata.
@@ -56,7 +57,7 @@ def _resolve_destination(doc: ParsedDocument, settings: BeestgraphSettings) -> P
     else:
         topic_dir = ""
 
-    dest_dir = vault / settings.vault.knowledge_dir / topic_dir
+    dest_dir = vault / settings.vault.resources_dir / topic_dir
     return dest_dir / Path(doc.path).name
 
 
@@ -80,6 +81,18 @@ def _handle_new_file_legacy(filepath: Path, settings: BeestgraphSettings) -> Non
     except (FileNotFoundError, ValueError) as exc:
         logger.error("parse_failed", path=str(filepath), error=str(exc))
         return
+
+    # Apply capture formatting and write back
+    formatted_body = format_on_capture(doc.content, title=doc.title)
+    if formatted_body != doc.content:
+        import frontmatter as fm
+
+        raw = filepath.read_text(encoding="utf-8")
+        post = fm.loads(raw)
+        post.content = formatted_body
+        filepath.write_text(fm.dumps(post), encoding="utf-8")
+        logger.info("capture_formatted", path=str(filepath))
+        doc = parse_file(filepath, vault_root=vault_root)
 
     doc = process_document(doc, enable_llm=settings.enable_llm_processing)
 
@@ -140,6 +153,33 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         logger.error("parse_failed", path=str(filepath), error=str(exc))
         return
 
+    # 1b. Apply capture formatting and write back
+    formatted_body = format_on_capture(doc.content, title=doc.title)
+    if formatted_body != doc.content:
+        import frontmatter as fm
+
+        raw = filepath.read_text(encoding="utf-8")
+        post = fm.loads(raw)
+        post.content = formatted_body
+        filepath.write_text(fm.dumps(post), encoding="utf-8")
+        logger.info("capture_formatted", path=str(filepath))
+        # Re-parse to pick up any changes
+        doc = parse_file(filepath, vault_root=vault_root)
+
+    # 1c. Security scan — detect PII, API keys, financial data
+    from src.pipeline.security_scanner import scan_content
+
+    scan_result = scan_content(doc.content)
+    force_private = scan_result.forced_private
+    if scan_result.has_findings:
+        logger.warning(
+            "security_scan_alert",
+            path=str(filepath),
+            findings=len(scan_result.findings),
+            forced_private=force_private,
+            summary=scan_result.summary,
+        )
+
     # 2. AI pre-classify
     try:
         recommendation = classify_document(doc, enable_llm=settings.enable_llm_processing)
@@ -154,10 +194,15 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
             "summary": "",
         }
 
+    # Override visibility if security scan found sensitive data
+    if force_private:
+        recommendation["visibility"] = "private"
+        recommendation["security_findings"] = scan_result.summary
+
     # 3. Add to qualification queue
     queue = QualificationQueue(
         vault_path=vault_root,
-        queue_dir=settings.qualification.queue_dir,
+        queue_dir=settings.vault.queue_dir,
     )
     try:
         item = queue.add_item(filepath, recommendation)
@@ -217,7 +262,7 @@ def run_watcher(settings: BeestgraphSettings) -> None:
 
     # Ensure queue directory exists at startup
     if settings.qualification.enabled:
-        queue_path = Path(settings.vault.path) / settings.qualification.queue_dir
+        queue_path = Path(settings.vault.path) / settings.vault.queue_dir
         queue_path.mkdir(parents=True, exist_ok=True)
         logger.info("qualification_queue_ready", path=str(queue_path))
 

@@ -232,7 +232,7 @@ def check_vault(vault_path: str | None = None) -> CheckResult:
                 message=f"Vault not found: {root}",
             )
 
-        inbox = root / "inbox"
+        inbox = root / "01-inbox"
         inbox_count = len(list(inbox.glob("*.md"))) if inbox.is_dir() else 0
         total_notes = len(list(root.rglob("*.md")))
 

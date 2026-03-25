@@ -1,38 +1,42 @@
 ---
+id: "{{ id }}"
 title: "{{ title }}"
-content_type: tutorial
-slug: "{{ slug }}"
+aliases: []
+created: {{ created }}
+modified: {{ modified }}
+published: ""
+source_date: {{ source_date }}
+type: tutorial
+status: qualifying
+maturity: raw
+para: resources
+visibility: private
+topics: []
+tags: []
+mocs: []
+summary: ""
+key_points: []
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
 source_domain: "{{ source_domain }}"
 author: "{{ author }}"
-date_published: {{ date_published }}
-date_captured: {{ date_captured }}
-date_qualified: {{ date_qualified }}
-date_processed: {{ date_processed }}
-status: qualifying
-para_category: resources
-topics: []
-tags: []
 quality: medium
-summary: ""
-key_points: []
+qualified_by: ""
+qualification_notes: ""
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-qualified_by: ""
-qualification_notes: ""
-related_to: []
+related: []
 difficulty: "{{ difficulty }}"
 prerequisites: []
 estimated_time: "{{ estimated_time }}"
 ---
 
-## Overview
+# {{ title }}
 
-{{ summary }}
+> {{ summary }}
 
 ## Prerequisites
 
@@ -40,12 +44,22 @@ estimated_time: "{{ estimated_time }}"
 
 ## Steps
 
-### Step 1
+### Step 1: {{ step_title }}
 
-### Step 2
+{{ step_content }}
 
-### Step 3
+### Step 2: {{ step_title }}
 
-## Notes
+{{ step_content }}
 
-{{ content }}
+## Key Takeaways
+
+-
+
+## Connections
+
+- Related:
+
+## Sources
+
+- [{{ source_domain }}]({{ source_url }})

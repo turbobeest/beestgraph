@@ -1,16 +1,16 @@
-(https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-ARM64-blue.svg)](https://www.docker.com/)
-<p><p><p></p></p>
-# beestgraph
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+]
-
-> AI-augmented personal knowledge graph -- self-hosted on a Raspberry Pi 5
-
 <p align="center">
   <img src="beestgraph.jpg" alt="beestgraph — a beast made of knowledge" width="600">
+</p>
+
+<p align="center">
+  <strong>AI-augmented personal knowledge graph — self-hosted on a Raspberry Pi 5</strong>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.11%2B-blue.svg" alt="Python 3.11+"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-22%2B-green.svg" alt="Node 22+"></a>
+  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-ARM64-blue.svg" alt="Docker"></a>
 </p>
 
 ---

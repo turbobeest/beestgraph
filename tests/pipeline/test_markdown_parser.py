@@ -147,34 +147,34 @@ class TestParseFile:
 
     def test_path_relative_to_vault(self, sample_markdown: Path, tmp_vault: Path) -> None:
         doc = parse_file(sample_markdown, vault_root=tmp_vault)
-        assert doc.path == "inbox/kg-article.md"
+        assert doc.path == "01-inbox/kg-article.md"
 
     def test_handles_missing_frontmatter(self, tmp_vault: Path) -> None:
-        bare = tmp_vault / "inbox" / "bare.md"
+        bare = tmp_vault / "01-inbox" / "bare.md"
         bare.write_text("# Just a heading\n\nSome content.\n", encoding="utf-8")
         doc = parse_file(bare, vault_root=tmp_vault)
         assert doc.title == "Just a heading"
         assert doc.metadata == {}
 
     def test_handles_file_not_found(self, tmp_vault: Path) -> None:
-        missing = tmp_vault / "inbox" / "nonexistent.md"
+        missing = tmp_vault / "01-inbox" / "nonexistent.md"
         with pytest.raises(FileNotFoundError):
             parse_file(missing, vault_root=tmp_vault)
 
     def test_title_fallback_to_h1(self, tmp_vault: Path) -> None:
-        no_fm = tmp_vault / "inbox" / "no-fm.md"
+        no_fm = tmp_vault / "01-inbox" / "no-fm.md"
         no_fm.write_text("# My Article Title\n\nBody text.\n", encoding="utf-8")
         doc = parse_file(no_fm, vault_root=tmp_vault)
         assert doc.title == "My Article Title"
 
     def test_title_fallback_to_filename(self, tmp_vault: Path) -> None:
-        no_title = tmp_vault / "inbox" / "my-cool-article.md"
+        no_title = tmp_vault / "01-inbox" / "my-cool-article.md"
         no_title.write_text("Just body text, no heading, no frontmatter.\n", encoding="utf-8")
         doc = parse_file(no_title, vault_root=tmp_vault)
         assert doc.title == "My Cool Article"
 
     def test_empty_tags_in_frontmatter(self, tmp_vault: Path) -> None:
-        md = tmp_vault / "inbox" / "empty-tags.md"
+        md = tmp_vault / "01-inbox" / "empty-tags.md"
         md.write_text("---\ntitle: Test\ntags: []\n---\n\nBody.\n", encoding="utf-8")
         doc = parse_file(md, vault_root=tmp_vault)
         # No frontmatter tags, no inline tags

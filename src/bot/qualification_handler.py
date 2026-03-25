@@ -5,6 +5,10 @@ Watches for notification JSON files written by the pipeline watcher,
 sends Telegram messages with AI recommendations, and handles user
 responses to approve, modify, reject, or defer queue items.
 
+Supports visibility (private/shared/public) and maturity (fleeting/permanent)
+controls. Default approval ("ok") sends items to fleeting; "approve permanent"
+or "publish" sends directly to the resources tree.
+
 Usage::
 
     # Integrated via telegram_bot.py — not invoked directly.
@@ -47,6 +51,12 @@ _known_chat_ids: set[int] = set()
 # chat_id -> asyncio.Task for deferred reminders
 _deferred_tasks: dict[int, asyncio.Task] = {}  # type: ignore[type-arg]
 
+# Valid visibility values
+_VALID_VISIBILITIES = {"private", "shared", "public"}
+
+# Valid maturity values
+_VALID_MATURITIES = {"raw", "fleeting", "permanent"}
+
 
 # ---------------------------------------------------------------------------
 # MarkdownV2 helper
@@ -79,6 +89,9 @@ def _escape_md(text: str) -> str:
 def _format_qualification_message(notification: dict) -> str:
     """Format a qualification Telegram message from notification data.
 
+    Includes visibility and maturity recommendations alongside type, topic,
+    tags, quality, and summary.
+
     Args:
         notification: Parsed notification JSON with recommended fields.
 
@@ -93,6 +106,8 @@ def _format_qualification_message(notification: dict) -> str:
     tags = notification.get("recommended_tags", [])
     tag_list = ", ".join(_escape_md(t) for t in tags) if tags else "none"
     quality = _escape_md(notification.get("recommended_quality", "medium"))
+    visibility = _escape_md(notification.get("recommended_visibility", "private"))
+    maturity = _escape_md(notification.get("recommended_maturity", "fleeting"))
     summary = _escape_md(notification.get("recommended_summary", ""))
 
     source_line = f"[Link]({source_url})" if source_url else "no URL"
@@ -107,16 +122,18 @@ def _format_qualification_message(notification: dict) -> str:
         f"  Topic: `{recommended_topic}`\n"
         f"  Tags: {tag_list}\n"
         f"  Quality: {quality}\n"
+        f"  Visibility: {visibility}\n"
+        f"  Maturity: {maturity}\n"
         f"  Summary: {summary}\n\n"
         f"Reply:\n"
-        f"  \\- `ok` \\- accept as\\-is\n"
-        f"  \\- `type paper` \\- change type\n"
-        f"  \\- `topic science/cs` \\- change topic\n"
-        f"  \\- `add tag X` \\- add a tag\n"
-        f"  \\- `remove tag X` \\- remove a tag\n"
-        f"  \\- `quality high` \\- change quality\n"
-        f"  \\- `later` or `later 9pm` \\- remind me\n"
-        f"  \\- `reject` \\- archive it"
+        f"  \u2705 `ok` \\— accept as\\-is \\(fleeting\\)\n"
+        f"  \u2705 `publish` \\— approve as permanent\n"
+        f"  \u270f\ufe0f `type paper` \\— change type\n"
+        f"  \u270f\ufe0f `public` \\— make it public\n"
+        f"  \u270f\ufe0f `shared` \\— share with peers\n"
+        f"  \u270f\ufe0f `private` \\— keep it private\n"
+        f"  \u23f0 `later` or `later 9pm` \\— remind me\n"
+        f"  \u274c `reject`"
     )
 
 
@@ -135,6 +152,8 @@ def _format_updated_message(notification: dict) -> str:
     tags = notification.get("recommended_tags", [])
     tag_list = ", ".join(_escape_md(t) for t in tags) if tags else "none"
     quality = _escape_md(notification.get("recommended_quality", "medium"))
+    visibility = _escape_md(notification.get("recommended_visibility", "private"))
+    maturity = _escape_md(notification.get("recommended_maturity", "fleeting"))
     summary = _escape_md(notification.get("recommended_summary", ""))
 
     return (
@@ -143,8 +162,10 @@ def _format_updated_message(notification: dict) -> str:
         f"  Topic: `{recommended_topic}`\n"
         f"  Tags: {tag_list}\n"
         f"  Quality: {quality}\n"
+        f"  Visibility: {visibility}\n"
+        f"  Maturity: {maturity}\n"
         f"  Summary: {summary}\n\n"
-        f"Approve? Reply `ok` or keep editing\\."
+        f"Approve? Reply `ok` \\(fleeting\\) or `publish` \\(permanent\\) or keep editing\\."
     )
 
 
@@ -214,17 +235,84 @@ def _update_queue_frontmatter(
         return False
 
 
-def _move_to_published(
-    vault_path: str, queue_dir: str, knowledge_dir: str, filename: str, data: dict
+def _move_to_fleeting(
+    vault_path: str, queue_dir: str, fleeting_dir: str, filename: str, data: dict
 ) -> str | None:
-    """Move a queue file to its permanent location in the knowledge tree.
+    """Move a queue file to the fleeting directory.
 
-    Updates frontmatter status to 'published' and sets timestamps.
+    Updates frontmatter status to 'fleeting' and maturity to 'fleeting'.
 
     Args:
         vault_path: Absolute path to the vault root.
         queue_dir: Queue subdirectory name.
-        knowledge_dir: Knowledge subdirectory name.
+        fleeting_dir: Fleeting subdirectory name (e.g. ``03-fleeting``).
+        filename: Markdown filename in the queue.
+        data: Current notification/classification data.
+
+    Returns:
+        The new file path relative to vault, or None on failure.
+    """
+    source = Path(vault_path) / queue_dir / filename
+    if not source.exists():
+        return None
+
+    dest_dir = Path(vault_path) / fleeting_dir
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / filename
+
+    try:
+        now = datetime.now(UTC).isoformat()
+        content = source.read_text(encoding="utf-8")
+        if content.startswith("---"):
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                fm = yaml.safe_load(parts[1]) or {}
+                fm["status"] = "fleeting"
+                fm["maturity"] = "fleeting"
+                fm["modified"] = now
+                fm["qualified_by"] = "user"
+                # Apply any recommended fields from data
+                if data.get("recommended_type"):
+                    fm["type"] = data["recommended_type"]
+                if data.get("recommended_topic"):
+                    fm["topics"] = [data["recommended_topic"]]
+                if data.get("recommended_tags"):
+                    fm["tags"] = data["recommended_tags"]
+                if data.get("recommended_quality"):
+                    fm["quality"] = data["recommended_quality"]
+                if data.get("recommended_visibility"):
+                    fm["visibility"] = data["recommended_visibility"]
+                if data.get("recommended_summary"):
+                    fm["summary"] = data["recommended_summary"]
+                new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
+                content = f"---\n{new_yaml}---{parts[2]}"
+
+        dest.write_text(content, encoding="utf-8")
+        source.unlink()
+        rel_path = str(dest.relative_to(vault_path))
+        logger.info("item_fleeting", source=filename, destination=rel_path)
+        return rel_path
+    except Exception as exc:
+        logger.error("move_to_fleeting_failed", file=filename, error=str(exc))
+        return None
+
+
+def _move_to_published(
+    vault_path: str,
+    queue_dir: str,
+    resources_dir: str,
+    filename: str,
+    data: dict,
+) -> str | None:
+    """Move a queue file to its permanent location in the resources tree.
+
+    Updates frontmatter status to 'published', maturity to 'permanent',
+    and sets timestamps.
+
+    Args:
+        vault_path: Absolute path to the vault root.
+        queue_dir: Queue subdirectory name.
+        resources_dir: Resources subdirectory name (e.g. ``07-resources``).
         filename: Markdown filename in the queue.
         data: Current notification/classification data.
 
@@ -238,9 +326,8 @@ def _move_to_published(
     content_type = data.get("recommended_type", "article")
     topic = data.get("recommended_topic", "uncategorized")
 
-    # Build destination: knowledge/<type_plural>/<topic>/
-    type_dir = _pluralize_type(content_type)
-    dest_dir = Path(vault_path) / knowledge_dir / type_dir / topic.replace("/", "/")
+    # Build destination: resources/<topic>/
+    dest_dir = Path(vault_path) / resources_dir / topic.replace("/", "/")
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / filename
 
@@ -252,9 +339,21 @@ def _move_to_published(
             if len(parts) >= 3:
                 fm = yaml.safe_load(parts[1]) or {}
                 fm["status"] = "published"
-                fm["date_qualified"] = now
-                fm["date_processed"] = now
-                fm["content_type"] = content_type
+                fm["maturity"] = "permanent"
+                fm["published"] = now
+                fm["modified"] = now
+                fm["qualified_by"] = "user"
+                fm["type"] = content_type
+                if data.get("recommended_topic"):
+                    fm["topics"] = [data["recommended_topic"]]
+                if data.get("recommended_tags"):
+                    fm["tags"] = data["recommended_tags"]
+                if data.get("recommended_quality"):
+                    fm["quality"] = data["recommended_quality"]
+                if data.get("recommended_visibility"):
+                    fm["visibility"] = data["recommended_visibility"]
+                if data.get("recommended_summary"):
+                    fm["summary"] = data["recommended_summary"]
                 new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
                 content = f"---\n{new_yaml}---{parts[2]}"
 
@@ -268,13 +367,13 @@ def _move_to_published(
         return None
 
 
-def _move_to_rejected(vault_path: str, queue_dir: str, archives_dir: str, filename: str) -> bool:
+def _move_to_rejected(vault_path: str, queue_dir: str, archive_dir: str, filename: str) -> bool:
     """Move a queue file to the rejected archive.
 
     Args:
         vault_path: Absolute path to the vault root.
         queue_dir: Queue subdirectory name.
-        archives_dir: Archives subdirectory name.
+        archive_dir: Archive subdirectory name.
         filename: Markdown filename in the queue.
 
     Returns:
@@ -284,7 +383,7 @@ def _move_to_rejected(vault_path: str, queue_dir: str, archives_dir: str, filena
     if not source.exists():
         return False
     try:
-        rejected_dir = Path(vault_path) / archives_dir / "rejected"
+        rejected_dir = Path(vault_path) / archive_dir / "rejected"
         rejected_dir.mkdir(parents=True, exist_ok=True)
         dest = rejected_dir / filename
 
@@ -294,7 +393,8 @@ def _move_to_rejected(vault_path: str, queue_dir: str, archives_dir: str, filena
             if len(parts) >= 3:
                 fm = yaml.safe_load(parts[1]) or {}
                 fm["status"] = "rejected"
-                fm["date_qualified"] = datetime.now(UTC).isoformat()
+                fm["modified"] = datetime.now(UTC).isoformat()
+                fm["qualified_by"] = "user"
                 new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
                 content = f"---\n{new_yaml}---{parts[2]}"
 
@@ -371,9 +471,11 @@ def _list_queue_items(vault_path: str, queue_dir: str) -> list[dict]:
             {
                 "filename": f.name,
                 "title": fm.get("title", f.stem),
-                "content_type": fm.get("content_type", "unknown"),
+                "content_type": fm.get("type", fm.get("content_type", "unknown")),
                 "topics": fm.get("topics", []),
                 "status": fm.get("status", "qualifying"),
+                "visibility": fm.get("visibility", "private"),
+                "maturity": fm.get("maturity", "raw"),
             }
         )
     return items
@@ -456,7 +558,7 @@ async def cmd_queue(message: Message, settings: BeestgraphSettings, **_kwargs: o
     """
     logger.info("queue_command", user_id=message.from_user.id if message.from_user else None)
 
-    items = _list_queue_items(settings.vault.path, settings.qualification.queue_dir)
+    items = _list_queue_items(settings.vault.path, settings.vault.queue_dir)
 
     if not items:
         await message.answer("No items in the qualification queue\\.", parse_mode="MarkdownV2")
@@ -468,7 +570,10 @@ async def cmd_queue(message: Message, settings: BeestgraphSettings, **_kwargs: o
         ctype = _escape_md(item["content_type"])
         topics = item.get("topics", [])
         topic_str = _escape_md(topics[0]) if topics else "uncategorized"
-        lines.append(f"{i}\\. *{title}*\n   Type: `{ctype}` \\| Topic: `{topic_str}`")
+        vis = _escape_md(item.get("visibility", "private"))
+        lines.append(
+            f"{i}\\. *{title}*\n   Type: `{ctype}` \\| Topic: `{topic_str}` \\| Visibility: {vis}"
+        )
 
     lines.append("\nUse /approve or /reject with an item name\\.")
     await message.answer("\n".join(lines), parse_mode="MarkdownV2")
@@ -479,8 +584,9 @@ async def cmd_approve(message: Message, settings: BeestgraphSettings, **_kwargs:
     """Approve the most recent or specified queue item.
 
     Usage:
-        /approve — approve last presented item
-        /approve knowledge-graphs-intro — approve by name
+        /approve — approve last presented item (fleeting)
+        /approve permanent — approve as permanent
+        /approve knowledge-graphs-intro — approve by name (fleeting)
 
     Args:
         message: Incoming Telegram message.
@@ -491,12 +597,20 @@ async def cmd_approve(message: Message, settings: BeestgraphSettings, **_kwargs:
 
     chat_id = message.chat.id
     parts = message.text.split(maxsplit=1)
-    target_name = parts[1].strip() if len(parts) > 1 else None
+    arg = parts[1].strip() if len(parts) > 1 else None
+
+    # Check if "permanent" or "publish" is the argument
+    permanent = False
+    target_name = arg
+    if arg and arg.lower() in ("permanent", "publish"):
+        permanent = True
+        target_name = None
 
     logger.info(
         "approve_command",
         user_id=message.from_user.id if message.from_user else None,
         target=target_name,
+        permanent=permanent,
     )
 
     # Resolve which item to approve
@@ -509,25 +623,43 @@ async def cmd_approve(message: Message, settings: BeestgraphSettings, **_kwargs:
         return
 
     filename = data["filename"]
-    dest = _move_to_published(
-        settings.vault.path,
-        settings.qualification.queue_dir,
-        settings.vault.knowledge_dir,
-        filename,
-        data,
-    )
 
-    if dest:
-        title = _escape_md(data.get("title", filename))
-        safe_dest = _escape_md(dest)
-        await message.answer(
-            f"\\u2705 *Published:* {title}\nMoved to `{safe_dest}`",
-            parse_mode="MarkdownV2",
+    if permanent:
+        dest = _move_to_published(
+            settings.vault.path,
+            settings.vault.queue_dir,
+            settings.vault.resources_dir,
+            filename,
+            data,
         )
-        # Clear active qualification for this chat
-        _active_qualifications.pop(chat_id, None)
+        if dest:
+            title = _escape_md(data.get("title", filename))
+            safe_dest = _escape_md(dest)
+            await message.answer(
+                f"\u2705 *Published \\(permanent\\):* {title}\n`{safe_dest}`",
+                parse_mode="MarkdownV2",
+            )
+        else:
+            await message.answer("Failed to publish item\\. Check logs\\.", parse_mode="MarkdownV2")
     else:
-        await message.answer("Failed to publish item\\. Check logs\\.", parse_mode="MarkdownV2")
+        dest = _move_to_fleeting(
+            settings.vault.path,
+            settings.vault.queue_dir,
+            settings.vault.fleeting_dir,
+            filename,
+            data,
+        )
+        if dest:
+            title = _escape_md(data.get("title", filename))
+            safe_dest = _escape_md(dest)
+            await message.answer(
+                f"\u2705 *Approved \\(fleeting\\):* {title}\n`{safe_dest}`",
+                parse_mode="MarkdownV2",
+            )
+        else:
+            await message.answer("Failed to approve item\\. Check logs\\.", parse_mode="MarkdownV2")
+
+    _active_qualifications.pop(chat_id, None)
 
 
 @qualification_router.message(Command("reject"))
@@ -562,15 +694,15 @@ async def cmd_reject(message: Message, settings: BeestgraphSettings, **_kwargs: 
     filename = data["filename"]
     success = _move_to_rejected(
         settings.vault.path,
-        settings.qualification.queue_dir,
-        settings.vault.archives_dir,
+        settings.vault.queue_dir,
+        settings.vault.archive_dir,
         filename,
     )
 
     if success:
         title = _escape_md(data.get("title", filename))
         await message.answer(
-            f"\\u274c *Rejected:* {title}\nMoved to archives/rejected\\.",
+            f"\u274c *Rejected:* {title}\nMoved to archive/rejected\\.",
             parse_mode="MarkdownV2",
         )
         _active_qualifications.pop(chat_id, None)
@@ -622,7 +754,7 @@ async def cmd_later(
     title = _escape_md(data.get("title", "item"))
     time_str = _escape_md(f"{hours:.1f} hours")
     await message.answer(
-        f"\\u23f0 *Deferred:* {title}\nI'll remind you in {time_str}\\.",
+        f"\u23f0 *Deferred:* {title}\nI'll remind you in {time_str}\\.",
         parse_mode="MarkdownV2",
     )
 
@@ -645,6 +777,8 @@ async def cmd_later(
 _QUALIFICATION_KEYWORDS = {
     "ok",
     "approve",
+    "approve permanent",
+    "publish",
     "yes",
     "y",
     "\U0001f44d",
@@ -653,6 +787,9 @@ _QUALIFICATION_KEYWORDS = {
     "n",
     "\U0001f44e",
     "later",
+    "public",
+    "private",
+    "shared",
 }
 
 
@@ -682,7 +819,17 @@ def is_qualification_response(chat_id: int, text: str) -> bool:
         return True
 
     # Prefixed commands
-    prefixes = ("type ", "topic ", "add tag ", "remove tag ", "quality ", "later ")
+    prefixes = (
+        "type ",
+        "topic ",
+        "add tag ",
+        "remove tag ",
+        "quality ",
+        "visibility ",
+        "maturity ",
+        "later ",
+        "approve ",
+    )
     return any(text_lower.startswith(p) for p in prefixes)
 
 
@@ -692,6 +839,8 @@ async def handle_qualification_response(
     """Process an inline qualification response from the user.
 
     Called from the main chat_handler when a qualification response is detected.
+    Handles visibility (public/private/shared), maturity (fleeting/permanent),
+    and the existing type/topic/tag/quality commands.
 
     Args:
         message: Incoming Telegram message.
@@ -719,13 +868,13 @@ async def handle_qualification_response(
         filename=data.get("filename"),
     )
 
-    # --- ok / approve ---
+    # --- ok / approve (-> fleeting) ---
     if text_lower in ("ok", "approve", "yes", "y", "\U0001f44d"):
         filename = data["filename"]
-        dest = _move_to_published(
+        dest = _move_to_fleeting(
             settings.vault.path,
-            settings.qualification.queue_dir,
-            settings.vault.knowledge_dir,
+            settings.vault.queue_dir,
+            settings.vault.fleeting_dir,
             filename,
             data,
         )
@@ -733,7 +882,29 @@ async def handle_qualification_response(
             title = _escape_md(data.get("title", filename))
             safe_dest = _escape_md(dest)
             await message.answer(
-                f"\\u2705 *Published:* {title}\n`{safe_dest}`",
+                f"\u2705 *Approved \\(fleeting\\):* {title}\n`{safe_dest}`",
+                parse_mode="MarkdownV2",
+            )
+        else:
+            await message.answer("Failed to approve\\. Check logs\\.", parse_mode="MarkdownV2")
+        _active_qualifications.pop(chat_id, None)
+        return True
+
+    # --- approve permanent / publish (-> permanent in resources) ---
+    if text_lower in ("approve permanent", "publish"):
+        filename = data["filename"]
+        dest = _move_to_published(
+            settings.vault.path,
+            settings.vault.queue_dir,
+            settings.vault.resources_dir,
+            filename,
+            data,
+        )
+        if dest:
+            title = _escape_md(data.get("title", filename))
+            safe_dest = _escape_md(dest)
+            await message.answer(
+                f"\u2705 *Published \\(permanent\\):* {title}\n`{safe_dest}`",
                 parse_mode="MarkdownV2",
             )
         else:
@@ -746,13 +917,13 @@ async def handle_qualification_response(
         filename = data["filename"]
         success = _move_to_rejected(
             settings.vault.path,
-            settings.qualification.queue_dir,
-            settings.vault.archives_dir,
+            settings.vault.queue_dir,
+            settings.vault.archive_dir,
             filename,
         )
         if success:
             title = _escape_md(data.get("title", filename))
-            await message.answer(f"\\u274c *Rejected:* {title}", parse_mode="MarkdownV2")
+            await message.answer(f"\u274c *Rejected:* {title}", parse_mode="MarkdownV2")
         else:
             await message.answer("Failed to reject\\. Check logs\\.", parse_mode="MarkdownV2")
         _active_qualifications.pop(chat_id, None)
@@ -767,7 +938,7 @@ async def handle_qualification_response(
         title = _escape_md(data.get("title", "item"))
         time_str = _escape_md(f"{hours:.1f} hours")
         await message.answer(
-            f"\\u23f0 *Deferred:* {title}\nReminder in {time_str}\\.",
+            f"\u23f0 *Deferred:* {title}\nReminder in {time_str}\\.",
             parse_mode="MarkdownV2",
         )
 
@@ -778,6 +949,52 @@ async def handle_qualification_response(
         _deferred_tasks[chat_id] = task
         return True
 
+    # --- visibility: public / private / shared (bare keyword) ---
+    if text_lower in _VALID_VISIBILITIES:
+        data["recommended_visibility"] = text_lower
+        _active_qualifications[chat_id] = data
+        _update_queue_frontmatter(
+            settings.vault.path,
+            settings.vault.queue_dir,
+            data["filename"],
+            {"visibility": text_lower},
+        )
+        msg = _format_updated_message(data)
+        await message.answer(msg, parse_mode="MarkdownV2")
+        return True
+
+    # --- visibility <level> (explicit prefix) ---
+    if text_lower.startswith("visibility "):
+        new_vis = text[11:].strip().lower()
+        if new_vis in _VALID_VISIBILITIES:
+            data["recommended_visibility"] = new_vis
+            _active_qualifications[chat_id] = data
+            _update_queue_frontmatter(
+                settings.vault.path,
+                settings.vault.queue_dir,
+                data["filename"],
+                {"visibility": new_vis},
+            )
+            msg = _format_updated_message(data)
+            await message.answer(msg, parse_mode="MarkdownV2")
+            return True
+
+    # --- maturity <level> ---
+    if text_lower.startswith("maturity "):
+        new_mat = text[9:].strip().lower()
+        if new_mat in _VALID_MATURITIES:
+            data["recommended_maturity"] = new_mat
+            _active_qualifications[chat_id] = data
+            _update_queue_frontmatter(
+                settings.vault.path,
+                settings.vault.queue_dir,
+                data["filename"],
+                {"maturity": new_mat},
+            )
+            msg = _format_updated_message(data)
+            await message.answer(msg, parse_mode="MarkdownV2")
+            return True
+
     # --- type <new_type> ---
     if text_lower.startswith("type "):
         new_type = text[5:].strip()
@@ -785,9 +1002,9 @@ async def handle_qualification_response(
         _active_qualifications[chat_id] = data
         _update_queue_frontmatter(
             settings.vault.path,
-            settings.qualification.queue_dir,
+            settings.vault.queue_dir,
             data["filename"],
-            {"content_type": new_type},
+            {"type": new_type},
         )
         msg = _format_updated_message(data)
         await message.answer(msg, parse_mode="MarkdownV2")
@@ -800,7 +1017,7 @@ async def handle_qualification_response(
         _active_qualifications[chat_id] = data
         _update_queue_frontmatter(
             settings.vault.path,
-            settings.qualification.queue_dir,
+            settings.vault.queue_dir,
             data["filename"],
             {"topics": [new_topic]},
         )
@@ -818,7 +1035,7 @@ async def handle_qualification_response(
         _active_qualifications[chat_id] = data
         _update_queue_frontmatter(
             settings.vault.path,
-            settings.qualification.queue_dir,
+            settings.vault.queue_dir,
             data["filename"],
             {"tags": tags},
         )
@@ -835,7 +1052,7 @@ async def handle_qualification_response(
         _active_qualifications[chat_id] = data
         _update_queue_frontmatter(
             settings.vault.path,
-            settings.qualification.queue_dir,
+            settings.vault.queue_dir,
             data["filename"],
             {"tags": tags},
         )
@@ -851,7 +1068,7 @@ async def handle_qualification_response(
             _active_qualifications[chat_id] = data
             _update_queue_frontmatter(
                 settings.vault.path,
-                settings.qualification.queue_dir,
+                settings.vault.queue_dir,
                 data["filename"],
                 {"quality": new_quality},
             )
@@ -886,7 +1103,7 @@ def _resolve_target(
         return _active_qualifications.get(chat_id)
 
     # Search by name in the queue
-    queue_path = Path(settings.vault.path) / settings.qualification.queue_dir
+    queue_path = Path(settings.vault.path) / settings.vault.queue_dir
     if not queue_path.exists():
         return None
 
@@ -895,15 +1112,18 @@ def _resolve_target(
         candidate = queue_path / f"{target_name}{suffix}"
         if candidate.exists():
             fm = _read_queue_frontmatter(
-                settings.vault.path, settings.qualification.queue_dir, candidate.name
+                settings.vault.path, settings.vault.queue_dir, candidate.name
             )
             return {
+                "id": fm.get("id", ""),
                 "filename": candidate.name,
                 "title": fm.get("title", candidate.stem),
-                "recommended_type": fm.get("content_type", "article"),
+                "recommended_type": fm.get("type", fm.get("content_type", "article")),
                 "recommended_topic": (fm.get("topics", [None]) or [None])[0] or "",
                 "recommended_tags": fm.get("tags", []),
                 "recommended_quality": fm.get("quality", "medium"),
+                "recommended_visibility": fm.get("visibility", "private"),
+                "recommended_maturity": fm.get("maturity", "raw"),
                 "recommended_summary": fm.get("summary", ""),
                 "source_url": fm.get("source_url", ""),
                 "source_type": fm.get("source_type", ""),
@@ -912,16 +1132,17 @@ def _resolve_target(
     # Try partial match
     for f in queue_path.glob("*.md"):
         if target_name.lower() in f.stem.lower():
-            fm = _read_queue_frontmatter(
-                settings.vault.path, settings.qualification.queue_dir, f.name
-            )
+            fm = _read_queue_frontmatter(settings.vault.path, settings.vault.queue_dir, f.name)
             return {
+                "id": fm.get("id", ""),
                 "filename": f.name,
                 "title": fm.get("title", f.stem),
-                "recommended_type": fm.get("content_type", "article"),
+                "recommended_type": fm.get("type", fm.get("content_type", "article")),
                 "recommended_topic": (fm.get("topics", [None]) or [None])[0] or "",
                 "recommended_tags": fm.get("tags", []),
                 "recommended_quality": fm.get("quality", "medium"),
+                "recommended_visibility": fm.get("visibility", "private"),
+                "recommended_maturity": fm.get("maturity", "raw"),
                 "recommended_summary": fm.get("summary", ""),
                 "source_url": fm.get("source_url", ""),
                 "source_type": fm.get("source_type", ""),
@@ -996,6 +1217,23 @@ async def start_notification_poller(bot: Bot, settings: BeestgraphSettings) -> N
     the pipeline watcher. Each file triggers a Telegram notification to
     the first allowed user.
 
+    The notification JSON should include::
+
+        {
+            "id": "20260325013335",
+            "filename": "docker-networking.md",
+            "title": "Understanding Docker Networking",
+            "source_url": "https://docs.docker.com/network/",
+            "source_type": "manual",
+            "recommended_type": "tutorial",
+            "recommended_topic": "technology/infrastructure",
+            "recommended_tags": ["docker", "networking"],
+            "recommended_quality": "high",
+            "recommended_visibility": "private",
+            "recommended_maturity": "fleeting",
+            "recommended_summary": "Guide to Docker container networking..."
+        }
+
     This runs as a long-lived background task.
 
     Args:
@@ -1024,6 +1262,11 @@ async def start_notification_poller(bot: Bot, settings: BeestgraphSettings) -> N
         for f in sorted(notifications_dir.glob("*.json")):
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
+
+                # Ensure new fields have defaults for backward compat
+                data.setdefault("recommended_visibility", "private")
+                data.setdefault("recommended_maturity", "fleeting")
+
                 msg = _format_qualification_message(data)
 
                 # Send to allowed users, or known users if no allowlist

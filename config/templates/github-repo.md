@@ -1,52 +1,63 @@
 ---
+id: "{{ id }}"
 title: "{{ title }}"
-content_type: github-repo
-slug: "{{ slug }}"
+aliases: []
+created: {{ created }}
+modified: {{ modified }}
+published: ""
+source_date: {{ source_date }}
+type: github-repo
+status: qualifying
+maturity: raw
+para: resources
+visibility: private
+topics: []
+tags: []
+mocs: []
+summary: ""
+key_points: []
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
 source_domain: "github.com"
 author: "{{ author }}"
-date_published: {{ date_published }}
-date_captured: {{ date_captured }}
-date_qualified: {{ date_qualified }}
-date_processed: {{ date_processed }}
-status: qualifying
-para_category: resources
-topics: []
-tags: []
 quality: medium
-summary: ""
-key_points: []
+qualified_by: ""
+qualification_notes: ""
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-qualified_by: ""
-qualification_notes: ""
-related_to: []
+related: []
 github_repo: "{{ github_repo }}"
 github_stars: {{ github_stars }}
-github_forks: {{ github_forks }}
 language: "{{ language }}"
 license: "{{ license }}"
-last_commit: {{ last_commit }}
 ---
+
+# {{ title }}
+
+> {{ summary }}
 
 ## Overview
 
-{{ summary }}
+{{ content }}
 
-## Why It's Interesting
+**Language:** {{ language }}
+**Stars:** {{ github_stars }} | **License:** {{ license }}
+
+## Why This Matters
+
+
 
 ## Key Features
 
 -
 
-## Tech Stack
+## Connections
 
--
+- Related:
 
-## Notes
+## Sources
 
-{{ content }}
+- [GitHub: {{ github_repo }}]({{ source_url }})

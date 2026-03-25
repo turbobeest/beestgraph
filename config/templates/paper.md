@@ -1,36 +1,44 @@
 ---
+id: "{{ id }}"
 title: "{{ title }}"
-content_type: paper
-slug: "{{ slug }}"
+aliases: []
+created: {{ created }}
+modified: {{ modified }}
+published: ""
+source_date: {{ source_date }}
+type: paper
+status: qualifying
+maturity: raw
+para: resources
+visibility: private
+topics: []
+tags: []
+mocs: []
+summary: ""
+key_points: []
 source_url: "{{ source_url }}"
 source_type: "{{ source_type }}"
 source_domain: "{{ source_domain }}"
 author: "{{ author }}"
-date_published: {{ date_published }}
-date_captured: {{ date_captured }}
-date_qualified: {{ date_qualified }}
-date_processed: {{ date_processed }}
-status: qualifying
-para_category: resources
-topics: []
-tags: []
 quality: medium
-summary: ""
-key_points: []
+qualified_by: ""
+qualification_notes: ""
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-qualified_by: ""
-qualification_notes: ""
-related_to: []
+related: []
 doi: "{{ doi }}"
 arxiv_id: "{{ arxiv_id }}"
 journal: "{{ journal }}"
 year: {{ year }}
 abstract: "{{ abstract }}"
 ---
+
+# {{ title }}
+
+> {{ summary }}
 
 ## Abstract
 
@@ -42,8 +50,17 @@ abstract: "{{ abstract }}"
 
 ## Methodology
 
-## Relevance
 
-## Notes
 
-{{ content }}
+## Key Takeaways
+
+-
+
+## Connections
+
+- Related:
+
+## Sources
+
+- [DOI: {{ doi }}](https://doi.org/{{ doi }})
+- [arXiv: {{ arxiv_id }}](https://arxiv.org/abs/{{ arxiv_id }})

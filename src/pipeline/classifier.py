@@ -10,12 +10,19 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from datetime import UTC, datetime
 
 import structlog
 
 from src.pipeline.markdown_parser import ParsedDocument
 
 logger = structlog.get_logger(__name__)
+
+
+def _generate_zettelkasten_id() -> str:
+    """Return a Zettelkasten timestamp ID in ``YYYYMMDDHHMMSS`` format (UTC)."""
+    return datetime.now(tz=UTC).strftime("%Y%m%d%H%M%S")
+
 
 # ---------------------------------------------------------------------------
 # Content types (canonical list)
@@ -278,6 +285,8 @@ def _llm_classify(doc: ParsedDocument) -> dict[str, object]:
         "tags": data.get("tags", []),
         "quality": quality,
         "summary": data.get("summary", ""),
+        "visibility": "private",
+        "id": _generate_zettelkasten_id(),
     }
 
 
@@ -353,6 +362,8 @@ def classify_document(doc: ParsedDocument, enable_llm: bool = True) -> dict[str,
         "tags": tags,
         "quality": quality,
         "summary": summary,
+        "visibility": "private",
+        "id": _generate_zettelkasten_id(),
     }
 
     logger.info(

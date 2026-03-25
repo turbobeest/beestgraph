@@ -1,7 +1,7 @@
 """Qualification queue for content review before permanent storage.
 
 Manages the lifecycle of captured items as they move from inbox through
-user review to permanent vault residency.  Items sit in ``~/vault/queue/``
+user review to permanent vault residency.  Items sit in ``~/vault/02-queue/``
 with enriched frontmatter until approved, rejected, or auto-classified
 after a configurable timeout.
 """
@@ -16,6 +16,8 @@ from pathlib import Path
 
 import frontmatter
 import structlog
+
+from src.pipeline.formatter import format_on_qualify, validate_for_publication
 
 logger = structlog.get_logger(__name__)
 
@@ -178,13 +180,15 @@ class QualificationQueue:
     def __init__(
         self,
         vault_path: Path,
-        queue_dir: str = "queue",
-        notifications_dir: str = ".notifications",
+        queue_dir: str = "02-queue",
+        notifications_dir: str | None = None,
     ) -> None:
         self._vault_path = Path(vault_path)
         self._queue_path = self._vault_path / queue_dir
         self._queue_path.mkdir(parents=True, exist_ok=True)
-        self._notifications_path = self._vault_path / notifications_dir
+        # Notifications live inside the queue directory itself.
+        notif_dir = notifications_dir or f"{queue_dir}/.notifications"
+        self._notifications_path = self._vault_path / notif_dir
         self._notifications_path.mkdir(parents=True, exist_ok=True)
 
     @property
@@ -242,6 +246,9 @@ class QualificationQueue:
             post.metadata["summary"] = recommendation["summary"]
         if not post.metadata.get("quality"):
             post.metadata["quality"] = recommendation.get("quality", "medium")
+
+        # Apply qualification formatting to the body
+        post.content = format_on_qualify(post.content, post.metadata)
 
         # Write updated frontmatter to source before moving
         updated_content = frontmatter.dumps(post)
@@ -331,7 +338,7 @@ class QualificationQueue:
         """Move approved item from queue to permanent vault location.
 
         Updates frontmatter with final classification, sets status=published,
-        and moves to ``~/vault/knowledge/<content_type_plural>/<topic>/``.
+        and moves to ``~/vault/07-resources/<topic>/``.
 
         Args:
             item: The QualificationItem to approve.
@@ -339,11 +346,10 @@ class QualificationQueue:
         Returns:
             The new permanent path.
         """
-        # Build destination: knowledge/<type_plural>/<topic>/
-        type_dir = _pluralize_type(item.final_type)
+        # Build destination: 07-resources/<topic>/
         topic_dir = item.final_topic.replace(" ", "-").lower() if item.final_topic else ""
 
-        dest_dir = self._vault_path / "knowledge" / type_dir
+        dest_dir = self._vault_path / "07-resources"
         if topic_dir:
             dest_dir = dest_dir / topic_dir
         dest_dir.mkdir(parents=True, exist_ok=True)
@@ -376,6 +382,14 @@ class QualificationQueue:
             },
         )
 
+        # Validate for publication — log warnings but don't block
+        raw = item.path.read_text(encoding="utf-8")
+        post = frontmatter.loads(raw)
+        pub_issues = validate_for_publication(post.content, post.metadata)
+        if pub_issues:
+            for issue in pub_issues:
+                logger.warning("publication_issue", path=str(item.path), issue=issue)
+
         shutil.move(str(item.path), str(dest_path))
         logger.info(
             "item_approved",
@@ -383,19 +397,20 @@ class QualificationQueue:
             dest=str(dest_path),
             content_type=item.final_type,
             topic=item.final_topic,
+            publication_issues=len(pub_issues),
         )
         return dest_path
 
     def reject_item(self, item: QualificationItem) -> Path:
-        """Move rejected item to archives/rejected/.
+        """Move rejected item to 08-archive/rejected/.
 
         Args:
             item: The QualificationItem to reject.
 
         Returns:
-            The new path in the archives.
+            The new path in the archive.
         """
-        reject_dir = self._vault_path / "archives" / "rejected"
+        reject_dir = self._vault_path / "08-archive" / "rejected"
         reject_dir.mkdir(parents=True, exist_ok=True)
 
         dest_path = reject_dir / item.path.name

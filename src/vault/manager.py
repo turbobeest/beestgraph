@@ -17,7 +17,7 @@ from src.config import VaultSettings
 logger = structlog.get_logger(__name__)
 
 # Top-level starter topics from the taxonomy.  Used by ensure_vault_structure
-# to pre-create ``knowledge/<topic>/`` directories.
+# to pre-create ``07-resources/<topic>/`` directories.
 _DEFAULT_TOPICS: list[str] = [
     "technology",
     "technology/programming",
@@ -52,43 +52,61 @@ _DEFAULT_TOPICS: list[str] = [
     "meta/workflows",
 ]
 
-# PARA directories that live at the vault root.
-_PARA_DIRS: list[str] = ["projects", "areas", "resources", "archives"]
-
 
 def ensure_vault_structure(settings: VaultSettings) -> None:
     """Create all expected vault directories if they do not already exist.
 
-    Creates the inbox, knowledge/<topic>, PARA directories (projects, areas,
-    resources, archives), and the templates directory.
+    Creates numbered lifecycle directories (``00-meta`` through
+    ``09-attachments``), topic sub-trees under ``07-resources/``,
+    and the MOC / template / dashboard folders under ``00-meta/``.
 
     Args:
         settings: Vault path configuration.
     """
     vault = Path(settings.path)
 
-    # Inbox
-    (vault / settings.inbox_dir).mkdir(parents=True, exist_ok=True)
+    # Numbered lifecycle directories
+    for dir_attr in (
+        "meta_dir",
+        "inbox_dir",
+        "queue_dir",
+        "fleeting_dir",
+        "daily_dir",
+        "projects_dir",
+        "areas_dir",
+        "resources_dir",
+        "archive_dir",
+        "attachments_dir",
+    ):
+        (vault / getattr(settings, dir_attr)).mkdir(parents=True, exist_ok=True)
 
-    # Knowledge topic tree
-    knowledge = vault / settings.knowledge_dir
-    for topic in _DEFAULT_TOPICS:
-        (knowledge / topic).mkdir(parents=True, exist_ok=True)
-
-    # PARA directories
-    for para_dir in _PARA_DIRS:
-        (vault / para_dir).mkdir(parents=True, exist_ok=True)
-
-    # Templates
+    # Meta sub-directories
     (vault / settings.templates_dir).mkdir(parents=True, exist_ok=True)
+    (vault / settings.mocs_dir).mkdir(parents=True, exist_ok=True)
+    (vault / settings.meta_dir / "dashboards").mkdir(parents=True, exist_ok=True)
+    (vault / settings.meta_dir / "settings").mkdir(parents=True, exist_ok=True)
+
+    # Topic tree under resources
+    resources = vault / settings.resources_dir
+    for topic in _DEFAULT_TOPICS:
+        (resources / topic).mkdir(parents=True, exist_ok=True)
+
+    # Archive sub-directories
+    (vault / settings.archive_dir / "projects").mkdir(parents=True, exist_ok=True)
+    (vault / settings.archive_dir / "rejected").mkdir(parents=True, exist_ok=True)
 
     logger.info("vault_structure_ensured", vault=str(vault))
 
 
-def resolve_destination(doc_path: str, topic: str, settings: VaultSettings) -> Path:
+def resolve_destination(
+    doc_path: str,
+    topic: str,
+    settings: VaultSettings,
+    content_type: str = "",
+) -> Path:
     """Determine where a processed document should live in the vault.
 
-    The file is placed under ``knowledge/<topic>/`` using its original
+    The file is placed under ``07-resources/<topic>/`` using its original
     filename.  The *topic* string may contain slashes for sub-topics
     (e.g. ``technology/ai-ml``).  It is normalised to lowercase with
     spaces replaced by hyphens.
@@ -97,20 +115,22 @@ def resolve_destination(doc_path: str, topic: str, settings: VaultSettings) -> P
         doc_path: Original filename or path of the document (only the
             basename is used).
         topic: Topic slug such as ``"technology/ai-ml"``.  An empty
-            string places the file directly in the knowledge root.
+            string places the file directly in the resources root.
         settings: Vault path configuration.
+        content_type: Optional content type (unused for now; reserved
+            for future type-based sub-directories).
 
     Returns:
         Absolute destination ``Path`` for the file.
     """
     vault = Path(settings.path)
     topic_dir = topic.strip().replace(" ", "-").lower() if topic else ""
-    dest_dir = vault / settings.knowledge_dir / topic_dir
+    dest_dir = vault / settings.resources_dir / topic_dir
     return dest_dir / Path(doc_path).name
 
 
-def move_to_knowledge(src: Path, topic: str, settings: VaultSettings) -> Path:
-    """Move a file into the knowledge directory under the given topic.
+def move_to_resources(src: Path, topic: str, settings: VaultSettings) -> Path:
+    """Move a file into the resources directory under the given topic.
 
     Creates intermediate directories as needed.  If a file with the same
     name already exists at the destination, the move will overwrite it
@@ -139,6 +159,10 @@ def move_to_knowledge(src: Path, topic: str, settings: VaultSettings) -> Path:
     return dest
 
 
+# Keep the old name as an alias for backwards compatibility.
+move_to_knowledge = move_to_resources
+
+
 def list_inbox(settings: VaultSettings) -> list[Path]:
     """Return a sorted list of ``.md`` files in the vault inbox.
 
@@ -163,15 +187,19 @@ def get_vault_stats(settings: VaultSettings) -> dict[str, int]:
         settings: Vault path configuration.
 
     Returns:
-        Dict mapping directory names (``inbox``, ``knowledge``,
-        ``projects``, ``areas``, ``resources``, ``archives``) to
-        the number of markdown files they contain (recursively).
+        Dict mapping directory names to the number of markdown files
+        they contain (recursively).
     """
     vault = Path(settings.path)
     sections = [
         settings.inbox_dir,
-        settings.knowledge_dir,
-        *_PARA_DIRS,
+        settings.queue_dir,
+        settings.fleeting_dir,
+        settings.daily_dir,
+        settings.projects_dir,
+        settings.areas_dir,
+        settings.resources_dir,
+        settings.archive_dir,
     ]
 
     stats: dict[str, int] = {}

@@ -41,7 +41,7 @@ class TestBuildFulltextIndexQueries:
 
     def test_returns_correct_count(self) -> None:
         queries = _build_fulltext_index_queries()
-        assert len(queries) == 3
+        assert len(queries) == 4
 
     def test_includes_document_fields(self) -> None:
         query = _build_fulltext_index_queries()[0]
