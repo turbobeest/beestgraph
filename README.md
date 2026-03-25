@@ -7,7 +7,9 @@
 
 > AI-augmented personal knowledge graph -- self-hosted on a Raspberry Pi 5
 
-![beestgraph](docs/images/beestgraph-hero.png)
+<p align="center">
+  <img src="beestgraph.jpg" alt="beestgraph — a beast made of knowledge" width="600">
+</p>
 
 ---
 
