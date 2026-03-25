@@ -73,6 +73,11 @@ trap release_lock EXIT
 # ── Acquire lock ─────────────────────────────────────────────
 acquire_lock
 
+# ── Load secrets from 1Password ────────────────────────────────
+if [[ -f "${PROJECT_DIR}/scripts/load-secrets.sh" ]]; then
+    source <(bash "${PROJECT_DIR}/scripts/load-secrets.sh")
+fi
+
 # ── Run poller ───────────────────────────────────────────────
 log "Starting keep.md inbox processing..."
 START_TIME=$(date +%s)

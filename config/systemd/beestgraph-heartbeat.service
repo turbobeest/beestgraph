@@ -9,6 +9,7 @@ User=turbobeest
 Group=turbobeest
 WorkingDirectory=/home/turbobeest/beestgraph
 EnvironmentFile=-/home/turbobeest/beestgraph/docker/.env
+Environment=PATH=/home/turbobeest/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/bin/bash -c 'source <(bash /home/turbobeest/beestgraph/scripts/load-secrets.sh) && exec /home/turbobeest/.local/bin/uv run python -m src.heartbeat.daemon --interval 300'
 Restart=on-failure
 RestartSec=30

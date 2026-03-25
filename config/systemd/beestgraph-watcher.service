@@ -10,6 +10,7 @@ User=turbobeest
 Group=turbobeest
 WorkingDirectory=/home/turbobeest/beestgraph
 EnvironmentFile=-/home/turbobeest/beestgraph/docker/.env
+Environment=PATH=/home/turbobeest/.local/bin:/usr/local/bin:/usr/bin:/bin
 
 # Load secrets from 1Password, then start the watcher
 ExecStart=/bin/bash -c 'source <(bash /home/turbobeest/beestgraph/scripts/load-secrets.sh) && exec /home/turbobeest/.local/bin/uv run python -m src.pipeline.watcher --config /home/turbobeest/beestgraph/config/beestgraph.yml'

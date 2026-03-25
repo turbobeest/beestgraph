@@ -37,7 +37,7 @@ class KeepMDSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="BEESTGRAPH_KEEPMD_")
 
-    api_url: str = "https://keep.md/mcp"
+    api_url: str = "https://keep.md/api"
     api_key: str = ""
     polling_interval_minutes: int = 15
     poll_interval: int = 900
