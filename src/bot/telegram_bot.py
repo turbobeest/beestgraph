@@ -373,6 +373,10 @@ RULES:
 - If the graph context doesn't contain relevant info, say so honestly.
 - Suggest /search or /add commands when appropriate.
 - Never make up documents or facts that aren't in the context.
+- Notes marked [PRIVATE] — you may reference their TITLE but NEVER reveal content.
+- Notes marked [SHARED] — you may reference title and summary only.
+- Notes marked [PUBLIC] — full content is available.
+- NEVER guess or infer private note content from titles alone.
 """
 
 
@@ -399,8 +403,10 @@ async def _build_graph_context(graph: Graph) -> str:
     except Exception:  # noqa: S110
         pass
 
-    # Recent documents (last 10)
+    # Recent documents (last 10) — filtered by visibility
     try:
+        from src.pipeline.privacy import filter_for_llm
+
         cypher, params = recent_documents(n=10)
         result = await asyncio.to_thread(graph.query, cypher, params)
         if result.result_set:
@@ -409,10 +415,9 @@ async def _build_graph_context(graph: Graph) -> str:
                 node = row[0]
                 title = node.properties.get("title", "Untitled")
                 summary = node.properties.get("summary", "")
-                line = f"  - {title}"
-                if summary:
-                    line += f": {summary[:150]}"
-                doc_lines.append(line)
+                visibility = node.properties.get("visibility", "private")
+                line = filter_for_llm(title, "", summary, visibility)
+                doc_lines.append(f"  - {line}")
             sections.append("RECENT DOCUMENTS:\n" + "\n".join(doc_lines))
     except Exception:  # noqa: S110
         pass

@@ -194,9 +194,19 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
             "summary": "",
         }
 
-    # Override visibility if security scan found sensitive data
-    if force_private:
-        recommendation["visibility"] = "private"
+    # 2b. Deterministic privacy classification
+    from src.pipeline.privacy import classify_visibility
+
+    recommendation["visibility"] = classify_visibility(
+        content_type=recommendation.get("content_type", ""),
+        para=doc.metadata.get("para_category", doc.metadata.get("para", "")),
+        source_type=doc.metadata.get("source_type", ""),
+        title=doc.title,
+        content=doc.content,
+        security_scan_passed=not force_private,
+    )
+    recommendation["security_scan_passed"] = not force_private
+    if scan_result.has_findings:
         recommendation["security_findings"] = scan_result.summary
 
     # 3. Add to qualification queue

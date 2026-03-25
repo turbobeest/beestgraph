@@ -107,33 +107,38 @@ def _format_qualification_message(notification: dict) -> str:
     tag_list = ", ".join(_escape_md(t) for t in tags) if tags else "none"
     quality = _escape_md(notification.get("recommended_quality", "medium"))
     visibility = _escape_md(notification.get("recommended_visibility", "private"))
-    maturity = _escape_md(notification.get("recommended_maturity", "fleeting"))
     summary = _escape_md(notification.get("recommended_summary", ""))
 
     source_line = f"[Link]({source_url})" if source_url else "no URL"
+
+    # Security scan indicator
+    security_findings = notification.get("security_findings", "")
+    scan_passed = not security_findings
+    if scan_passed:
+        security_line = "\U0001f50d Security scan: PASSED"
+    else:
+        security_line = f"\u26a0\ufe0f Security: {_escape_md(security_findings[:80])}"
+
+    # Visibility icon
+    vis_icon = "\U0001f513" if visibility == "public" else "\U0001f512"
 
     return (
         f"\U0001f4e5 *New item captured:*\n\n"
         f"*{title}*\n"
         f"Source: {source_line}\n"
         f"Via: {source_type}\n\n"
-        f"\U0001f916 *My recommendation:*\n"
-        f"  Type: `{recommended_type}`\n"
-        f"  Topic: `{recommended_topic}`\n"
+        f"  Type: `{recommended_type}` \\| Topic: `{recommended_topic}`\n"
         f"  Tags: {tag_list}\n"
-        f"  Quality: {quality}\n"
-        f"  Visibility: {visibility}\n"
-        f"  Maturity: {maturity}\n"
-        f"  Summary: {summary}\n\n"
+        f"  Quality: {quality} \\| Summary: {summary}\n\n"
+        f"{vis_icon} *Visibility: {visibility}*\n"
+        f"{security_line}\n\n"
         f"Reply:\n"
-        f"  \u2705 `ok` \\— accept as\\-is \\(fleeting\\)\n"
-        f"  \u2705 `publish` \\— approve as permanent\n"
-        f"  \u270f\ufe0f `type paper` \\— change type\n"
-        f"  \u270f\ufe0f `public` \\— make it public\n"
-        f"  \u270f\ufe0f `shared` \\— share with peers\n"
-        f"  \u270f\ufe0f `private` \\— keep it private\n"
-        f"  \u23f0 `later` or `later 9pm` \\— remind me\n"
-        f"  \u274c `reject`"
+        f"  `ok` \\— fleeting \\(private\\)\n"
+        f"  `ok public` \\— fleeting \\(public\\)\n"
+        f"  `publish` \\— permanent \\(private\\)\n"
+        f"  `publish public` \\— permanent \\(public\\)\n"
+        f"  `type X` \\| `topic X` \\| `add tag X`\n"
+        f"  `later` \\| `reject`"
     )
 
 
@@ -868,9 +873,35 @@ async def handle_qualification_response(
         filename=data.get("filename"),
     )
 
+    # --- Determine visibility modifier ---
+    wants_public = text_lower.endswith(" public")
+    wants_shared = text_lower.endswith(" shared")
+    base_command = text_lower.replace(" public", "").replace(" shared", "").strip()
+    target_visibility = "public" if wants_public else ("shared" if wants_shared else "private")
+
+    # Validate public eligibility
+    if wants_public:
+        from src.pipeline.privacy import validate_can_be_public
+
+        issues = validate_can_be_public(
+            content_type=data.get("recommended_type", ""),
+            para=data.get("para", "resources"),
+            title=data.get("title", ""),
+            content="",
+            security_scan_passed=not data.get("security_findings"),
+        )
+        if issues:
+            issue_text = _escape_md("; ".join(issues))
+            await message.answer(
+                f"\U0001f512 Cannot make public: {issue_text}\nApproving as *private* instead\\.",
+                parse_mode="MarkdownV2",
+            )
+            target_visibility = "private"
+
     # --- ok / approve (-> fleeting) ---
-    if text_lower in ("ok", "approve", "yes", "y", "\U0001f44d"):
+    if base_command in ("ok", "approve", "yes", "y", "\U0001f44d"):
         filename = data["filename"]
+        data["_target_visibility"] = target_visibility
         dest = _move_to_fleeting(
             settings.vault.path,
             settings.vault.queue_dir,
@@ -879,10 +910,12 @@ async def handle_qualification_response(
             data,
         )
         if dest:
+            vis_icon = "\U0001f513" if target_visibility == "public" else "\U0001f512"
             title = _escape_md(data.get("title", filename))
             safe_dest = _escape_md(dest)
             await message.answer(
-                f"\u2705 *Approved \\(fleeting\\):* {title}\n`{safe_dest}`",
+                f"\u2705 *Approved \\(fleeting\\):* {title}\n"
+                f"{vis_icon} {_escape_md(target_visibility)}\n`{safe_dest}`",
                 parse_mode="MarkdownV2",
             )
         else:
@@ -891,7 +924,7 @@ async def handle_qualification_response(
         return True
 
     # --- approve permanent / publish (-> permanent in resources) ---
-    if text_lower in ("approve permanent", "publish"):
+    if base_command in ("approve permanent", "publish"):
         filename = data["filename"]
         dest = _move_to_published(
             settings.vault.path,
