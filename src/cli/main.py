@@ -120,11 +120,18 @@ def project(
 
 
 @app.command()
-def health() -> None:
+def health(
+    quick: Annotated[bool, typer.Option("--quick", help="Quick: services only.")] = False,
+    full: Annotated[bool, typer.Option("--full", help="Full vault audit.")] = False,
+    sources: Annotated[bool, typer.Option("--sources", help="Verify source URLs.")] = False,
+    inbox: Annotated[bool, typer.Option("--inbox", help="Inbox backlog count.")] = False,
+) -> None:
     """Run system health checks."""
     from src.cli.commands.health import HealthCommand
 
-    _print_result(HealthCommand().run_without_agent())
+    _print_result(HealthCommand().run_without_agent(
+        quick=quick, full=full, sources=sources, inbox=inbox,
+    ))
 
 
 @app.command(name="init")
@@ -206,6 +213,27 @@ def ingest(
     _print_result(IngestCommand().run_without_agent(
         url_or_path=url_or_path, title=title, active=active, use_agent=use_agent,
     ))
+
+
+@app.command()
+def recap(
+    period: Annotated[str, typer.Option(help="Look-back period (e.g. 7d, 30d).")] = "7d",
+) -> None:
+    """Narrative summary of recent knowledge graph activity."""
+    from src.cli.commands.recap import RecapCommand
+
+    _print_result(RecapCommand().run_without_agent(period=period))
+
+
+@app.command()
+def review(
+    daily: Annotated[bool, typer.Option("--daily", help="Create daily review.")] = False,
+    weekly: Annotated[bool, typer.Option("--weekly", help="Create weekly review.")] = False,
+) -> None:
+    """Structured daily or weekly review."""
+    from src.cli.commands.review import ReviewCommand
+
+    _print_result(ReviewCommand().run_without_agent(daily=daily, weekly=weekly))
 
 
 @app.command()

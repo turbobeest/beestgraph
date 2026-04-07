@@ -1,0 +1,35 @@
+[Unit]
+Description=beestgraph Vault → FalkorDB Incremental Sync
+Documentation=https://github.com/terbeest/beestgraph
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/home/turbobeest/beestgraph
+EnvironmentFile=-/home/turbobeest/beestgraph/docker/.env
+Environment=PATH=/home/turbobeest/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+ExecStart=/home/turbobeest/.local/bin/uv run python -m src.automation.watcher --config /home/turbobeest/beestgraph/config/beestgraph.yml
+
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-vault-sync
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/turbobeest/vault /home/turbobeest/beestgraph /home/turbobeest/.cache/uv /home/turbobeest/.config/op
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

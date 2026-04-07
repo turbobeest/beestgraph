@@ -175,7 +175,7 @@ class TestHealth:
     def test_returns_success(self, tmp_path: Path) -> None:
         from src.cli.commands.health import HealthCommand
 
-        with patch("src.cli.commands.health.run_all_checks", return_value=[]):
+        with patch("src.heartbeat.checks.run_all_checks", return_value=[]):
             result = HealthCommand().run_without_agent()
 
         assert result.success
