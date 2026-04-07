@@ -58,10 +58,6 @@ def _ensure_uid(doc: ParsedDocument, filepath: Path) -> ParsedDocument:
     filepath.write_text(fm.dumps(post), encoding="utf-8")
     logger.info("uid_generated", path=str(filepath), uid=uid)
 
-    # Re-parse so the returned doc includes the new uid
-    vault_root = filepath.parents[1] if filepath.parent.name else filepath.parent
-    # Best-effort: caller will supply vault_root via settings, but we can
-    # derive it from the original doc.path relationship.
     from dataclasses import replace as _replace
 
     updated_meta = dict(doc.metadata)

@@ -31,6 +31,7 @@ dependencies = [
     "click>=8.0",
     "caldav>=1.0",
     "icalendar>=6.0",
+    "typer[all]>=0.24.1",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +48,9 @@ Homepage = "https://github.com/terbeest/beestgraph"
 Documentation = "https://github.com/terbeest/beestgraph/tree/main/docs"
 Repository = "https://github.com/terbeest/beestgraph"
 Issues = "https://github.com/terbeest/beestgraph/issues"
+
+[project.scripts]
+bg = "src.cli.main:app"
 
 [build-system]
 requires = ["hatchling"]
