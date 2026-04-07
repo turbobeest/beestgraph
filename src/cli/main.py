@@ -134,12 +134,30 @@ def health(
     ))
 
 
+@app.command()
+def context(
+    level: Annotated[int, typer.Option(help="Context depth: 0-3.")] = 1,
+    clipboard: Annotated[bool, typer.Option("--clipboard", help="Copy to clipboard.")] = False,
+    file: Annotated[str | None, typer.Option("--file", help="Write to file.")] = None,
+) -> None:
+    """Assemble a context bundle for LLM sessions."""
+    from src.cli.commands.context import ContextCommand
+
+    _print_result(ContextCommand().run_without_agent(
+        level=level, clipboard=clipboard, file=file,
+    ))
+
+
 @app.command(name="init")
-def init_cmd() -> None:
-    """Bootstrap new vault directories (entities/, raw/)."""
+def init_cmd(
+    identity: Annotated[
+        bool, typer.Option("--identity", help="Create identity.md only.")
+    ] = False,
+) -> None:
+    """Bootstrap new vault directories (entities/, raw/, identity.md)."""
     from src.cli.commands.init import InitCommand
 
-    _print_result(InitCommand().run_without_agent())
+    _print_result(InitCommand().run_without_agent(identity=identity))
 
 
 @app.command()

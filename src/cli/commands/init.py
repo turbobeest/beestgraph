@@ -59,47 +59,88 @@ version: 1
 """
 
 
+_IDENTITY_TEMPLATE = """---
+uid: "{uid}"
+title: "Identity"
+type: note
+status: published
+dates:
+  created: {date}
+  modified: {date}
+---
+
+# Identity
+
+**Who I am:** [write a 2-3 sentence description of yourself]
+
+**Current focus:** [what you're working on right now, 1-2 sentences]
+
+**Active projects:**
+- [Project name] — [one sentence status]
+
+**Recent decisions:**
+- [Decision made recently and why]
+
+**LLM preferences:**
+- [How you like AI to communicate with you]
+- [Any topics to be especially careful about]
+"""
+
+
 class InitCommand(BaseCommand):
     """Create new vault directories and root files."""
 
     def run_without_agent(self, **kwargs) -> Result:
+        identity_only: bool = kwargs.get("identity", False)
+
         settings = load_settings()
         vault = Path(settings.vault.path)
+        now = datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
         created: list[str] = []
         existed: list[str] = []
 
-        for d in _NEW_DIRS:
-            target = vault / d
-            if target.exists():
-                existed.append(d)
+        if not identity_only:
+            for d in _NEW_DIRS:
+                target = vault / d
+                if target.exists():
+                    existed.append(d)
+                else:
+                    target.mkdir(parents=True, exist_ok=True)
+                    created.append(d)
+
+            # index.md
+            index_path = vault / "index.md"
+            if index_path.exists():
+                existed.append("index.md")
             else:
-                target.mkdir(parents=True, exist_ok=True)
-                created.append(d)
+                index_path.write_text(
+                    _INDEX_FRONTMATTER.format(uid=generate_id(), date=now),
+                    encoding="utf-8",
+                )
+                created.append("index.md")
 
-        now = datetime.now(tz=UTC).strftime("%Y-%m-%d")
+            # log.md
+            log_path = vault / "log.md"
+            if log_path.exists():
+                existed.append("log.md")
+            else:
+                log_path.write_text(
+                    _LOG_FRONTMATTER.format(uid=generate_id(), date=now),
+                    encoding="utf-8",
+                )
+                created.append("log.md")
 
-        # index.md
-        index_path = vault / "index.md"
-        if index_path.exists():
-            existed.append("index.md")
+        # identity.md (always checked, created by --identity or full init)
+        identity_path = vault / "identity.md"
+        if identity_path.exists():
+            existed.append("identity.md")
         else:
-            index_path.write_text(
-                _INDEX_FRONTMATTER.format(uid=generate_id(), date=now),
+            identity_path.write_text(
+                _IDENTITY_TEMPLATE.format(uid=generate_id(), date=now),
                 encoding="utf-8",
             )
-            created.append("index.md")
-
-        # log.md
-        log_path = vault / "log.md"
-        if log_path.exists():
-            existed.append("log.md")
-        else:
-            log_path.write_text(
-                _LOG_FRONTMATTER.format(uid=generate_id(), date=now),
-                encoding="utf-8",
-            )
-            created.append("log.md")
+            created.append("identity.md")
 
         lines: list[str] = []
         if created:
