@@ -1,11 +1,12 @@
 ---
-# Article template — derived from universal.md
-# For: web articles, blog posts, news stories
+# Repo template — derived from universal.md
+# For: GitHub repository notes
+# Replaces: github-repo.md
 
 # Tier 1
 uid: ""
 title: "{{ title }}"
-type: article
+type: repo
 tags: []
 status: inbox
 dates:
@@ -14,12 +15,12 @@ dates:
   processed: null
   modified: {{ created }}
 
-# Tier 2 — article priority fields
+# Tier 2 — repo priority fields
 source:
   type: "{{ source_type }}"
   url: "{{ source_url }}"
   author: "{{ author }}"
-  publisher: "{{ publisher }}"
+  publisher: ""
   via: ""
   context: ""
 para: resources
@@ -37,14 +38,9 @@ engagement:
   status: unread
 summary: ""
 key_claims: []
-questions: []
-action_items: []
 connections:
   supports: []
-  contradicts: []
   extends: []
-  supersedes: []
-  inspired_by: []
   related: []
 version: 1
 ---

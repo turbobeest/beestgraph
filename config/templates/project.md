@@ -1,28 +1,35 @@
 ---
+# Project template — derived from universal.md
+# For: active initiatives with goals/timeline
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-source_url: ""
-source_type: manual
-author: ""
-date_published:
-date_captured: {{ date_captured }}
-date_processed: {{ date_processed }}
-summary: "{{ summary }}"
-para_category: projects
-topics:
-  - {{ topic }}
-tags:
-  - {{ tag }}
-entities:
-  people: []
-  concepts: []
-  organizations: []
+type: project
+tags: []
 status: inbox
-id: "{{ id }}"
-maturity: raw
-visibility: private
-mocs: []
-related: []
-key_points: []
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+  due: null
+
+# Tier 2 — project priority fields
+area: ""
+source:
+  type: manual
+para: projects
+topics: []
+importance: 3
+content_stage: reference
+summary: ""
+action_items: []
+connections:
+  supports: []
+  extends: []
+  related: []
+version: 1
 ---
 
 ## Objective
@@ -38,9 +45,6 @@ key_points: []
 
 ## Key Decisions
 
-## Resources
+## Connections
 
--
-
-## Notes
-
+(none identified)

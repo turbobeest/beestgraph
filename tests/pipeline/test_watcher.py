@@ -98,10 +98,10 @@ class TestHandleNewFile:
             patch(
                 "src.pipeline.watcher.classify_document",
                 return_value={
-                    "content_type": "article",
+                    "type": "article",
                     "topic": "meta/pkm",
                     "tags": ["test"],
-                    "quality": "medium",
+                    "confidence": 0.5,
                     "summary": "Test summary.",
                 },
             ),

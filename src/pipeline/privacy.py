@@ -27,9 +27,9 @@ _ALWAYS_PRIVATE_TYPES: frozenset[str] = frozenset(
         "project",
         "area",
         "daily",
-        "fleeting",
+        "journal",
+        "decision",
         "meeting",
-        "thought",
         "person",
     }
 )
@@ -54,23 +54,21 @@ _PRIVATE_SOURCE_TYPES: frozenset[str] = frozenset(
 _PUBLIC_ELIGIBLE_TYPES: frozenset[str] = frozenset(
     {
         "article",
-        "paper",
-        "tutorial",
+        "concept",
         "reference",
-        "video",
-        "podcast",
-        "tweet",
-        "social-post",
-        "discussion",
-        "url",
-        "github-repo",
-        "github-issue",
-        "code-snippet",
-        "tool",
+        "note",
+        "quote",
         "book",
-        "course",
+        "film",
+        "podcast",
+        "thread",
+        "repo",
+        "email",
+        "tool",
         "recipe",
-        "product",
+        "event",
+        "collection",
+        "synthesis",
     }
 )
 

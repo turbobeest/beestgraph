@@ -134,9 +134,9 @@ export async function POST(
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const maturity = body.maturity ?? "fleeting";
-  if (maturity !== "fleeting" && maturity !== "permanent") {
-    return NextResponse.json({ error: "maturity must be 'fleeting' or 'permanent'" }, { status: 400 });
+  const contentStage = body.content_stage ?? "fleeting";
+  if (contentStage !== "fleeting" && contentStage !== "evergreen") {
+    return NextResponse.json({ error: "content_stage must be 'fleeting' or 'evergreen'" }, { status: 400 });
   }
 
   try {
@@ -151,23 +151,17 @@ export async function POST(
 
     const now = new Date().toISOString();
     data.modified = now;
-    data.qualified_by = "web";
-
-    if (body.visibility) {
-      data.visibility = body.visibility;
-    }
+    data.content_stage = contentStage;
 
     let destDir: string;
     let destination: string;
 
-    if (maturity === "fleeting") {
-      data.status = "fleeting";
-      data.maturity = "fleeting";
+    if (contentStage === "fleeting") {
+      data.status = "published";
       destDir = join(VAULT_PATH, FLEETING_DIR);
       destination = `${FLEETING_DIR}/${filename}`;
     } else {
       data.status = "published";
-      data.maturity = "permanent";
       data.published = now;
       const topic = Array.isArray(data.topics) && data.topics.length > 0
         ? String(data.topics[0])
@@ -186,8 +180,12 @@ export async function POST(
     try {
       const title = String(data.title ?? "");
       const summary = String(data.summary ?? "");
-      const sourceUrl = String(data.source_url ?? "");
-      const sourceType = String(data.source_type ?? "manual");
+      const sourceUrl = String(
+        data.source_url ?? (data.source as Record<string, unknown> | undefined)?.url ?? "",
+      );
+      const sourceType = String(
+        data.source_type ?? (data.source as Record<string, unknown> | undefined)?.type ?? "manual",
+      );
       const vaultPath = destination;
 
       await graphQuery(
@@ -205,7 +203,7 @@ export async function POST(
           summary,
           sourceUrl,
           sourceType,
-          status: maturity === "fleeting" ? "fleeting" : "published",
+          status: "published",
           now,
         },
       );

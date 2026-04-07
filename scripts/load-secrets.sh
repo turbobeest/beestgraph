@@ -17,13 +17,13 @@ if [[ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
 fi
 
 # Telegram bot token
-TOKEN="$(op read 'op://beestgraph/Telegram Bot/credential' 2>/dev/null || true)"
+TOKEN="$(op read 'op://AI-BEESTGRAPH/beestgraph-access-keys/Telegram/bot_token' 2>/dev/null || true)"
 if [[ -n "$TOKEN" ]]; then
     echo "export BEESTGRAPH_TELEGRAM_BOT_TOKEN='$TOKEN'"
 fi
 
 # keep.md API key
-KEY="$(op read 'op://beestgraph/keep.md/credential' 2>/dev/null || true)"
+KEY="$(op read 'op://AI-BEESTGRAPH/beestgraph-access-keys/Keep/api_key' 2>/dev/null || true)"
 if [[ -n "$KEY" ]]; then
     echo "export KEEPMD_API_KEY='$KEY'"
     echo "export BEESTGRAPH_KEEPMD_API_KEY='$KEY'"

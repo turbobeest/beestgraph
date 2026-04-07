@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { slugFromFilename } from "@/lib/queue";
+import { slugFromFilename, LEGACY_TYPE_MAP, LEGACY_QUALITY_MAP } from "@/lib/queue";
 import type { QueueItemDetail, UpdateBody } from "@/lib/queue";
 
 const VAULT_PATH = process.env.VAULT_PATH ?? join(process.env.HOME ?? "/root", "vault");
@@ -174,19 +174,40 @@ export async function GET(
     const topics = Array.isArray(data.topics) ? (data.topics as string[]) : [];
     const tags = Array.isArray(data.tags) ? (data.tags as string[]).map(String) : [];
 
+    // Resolve type with backwards compat for legacy names
+    const rawType = String(data.type ?? data.content_type ?? "");
+    const resolvedType = LEGACY_TYPE_MAP[rawType] ?? rawType;
+
+    // Resolve confidence: prefer numeric confidence, fall back from legacy quality
+    let confidence: number | null = null;
+    if (data.confidence !== undefined && data.confidence !== "") {
+      confidence = Number(data.confidence);
+    } else if (data.quality) {
+      confidence = LEGACY_QUALITY_MAP[String(data.quality)] ?? null;
+    }
+
+    // Resolve source_url: check both flat and nested forms
+    const sourceUrl = String(
+      data.source_url ?? (data.source as Record<string, unknown> | undefined)?.url ?? "",
+    );
+
+    // Resolve date_captured: check both flat and nested forms
+    const dateCaptured = String(
+      data.date_captured ?? (data.dates as Record<string, unknown> | undefined)?.captured ?? "",
+    );
+
     const item: QueueItemDetail = {
       slug,
       title: String(data.title ?? filename.replace(/\.md$/i, "")),
-      type: String(data.type ?? ""),
+      type: resolvedType,
       topic: topics[0] ?? "",
       tags,
-      visibility: String(data.visibility ?? "private"),
-      quality: String(data.quality ?? ""),
+      confidence,
       summary: String(data.summary ?? ""),
       securityFindings: String(data.security_findings ?? ""),
       filename,
-      dateCaptured: String(data.date_captured ?? ""),
-      sourceUrl: String(data.source_url ?? ""),
+      dateCaptured,
+      sourceUrl,
       content,
       frontmatter: data,
     };
@@ -232,8 +253,7 @@ export async function POST(
       data.topics = body.topic ? [body.topic] : [];
     }
     if (body.tags !== undefined) data.tags = body.tags;
-    if (body.visibility !== undefined) data.visibility = body.visibility;
-    if (body.quality !== undefined) data.quality = body.quality;
+    if (body.confidence !== undefined) data.confidence = body.confidence;
     if (body.summary !== undefined) data.summary = body.summary;
 
     data.modified = new Date().toISOString();
@@ -243,14 +263,25 @@ export async function POST(
     const topics = Array.isArray(data.topics) ? (data.topics as string[]) : [];
     const tags = Array.isArray(data.tags) ? (data.tags as string[]).map(String) : [];
 
+    // Resolve type for response
+    const respRawType = String(data.type ?? data.content_type ?? "");
+    const respType = LEGACY_TYPE_MAP[respRawType] ?? respRawType;
+
+    // Resolve confidence for response
+    let respConfidence: number | null = null;
+    if (data.confidence !== undefined && data.confidence !== "") {
+      respConfidence = Number(data.confidence);
+    } else if (data.quality) {
+      respConfidence = LEGACY_QUALITY_MAP[String(data.quality)] ?? null;
+    }
+
     return NextResponse.json({
       slug,
       title: String(data.title ?? ""),
-      type: String(data.type ?? ""),
+      type: respType,
       topic: topics[0] ?? "",
       tags,
-      visibility: String(data.visibility ?? "private"),
-      quality: String(data.quality ?? ""),
+      confidence: respConfidence,
       summary: String(data.summary ?? ""),
       securityFindings: String(data.security_findings ?? ""),
       filename,

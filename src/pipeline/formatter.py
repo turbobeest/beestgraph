@@ -39,14 +39,14 @@ _MOJIBAKE_MAP: dict[str, str] = {
     "\u00ef\u00bb\u00bf": "",
 }
 
-_TAKEAWAY_TYPES = frozenset({"article", "paper", "tutorial", "video", "book"})
+_TAKEAWAY_TYPES = frozenset({"article", "book", "film", "thread", "repo"})
 
 # Helpers -----------------------------------------------------------------------
 
 
 def generate_zettelkasten_id() -> str:
-    """Generate a Zettelkasten timestamp ID: YYYYMMDDHHMMSS."""
-    return datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    """Generate a Zettelkasten timestamp ID: YYYYMMDDHHMM."""
+    return datetime.now(UTC).strftime("%Y%m%d%H%M")
 
 
 def extract_domain(url: str) -> str:
@@ -207,11 +207,14 @@ def format_on_qualify(content: str, frontmatter: dict[str, object]) -> str:
     if summary:
         content = inject_summary_blockquote(content, summary)
 
-    ctype = str(frontmatter.get("content_type", frontmatter.get("type", "")))
+    ctype = str(frontmatter.get("type", frontmatter.get("content_type", "")))
     if ctype in _TAKEAWAY_TYPES:
         content = add_section_if_missing(content, "Key Takeaways", "- (to be added)")
 
+    source_nested = frontmatter.get("source", {})
     source_url = str(frontmatter.get("source_url", "") or "")
+    if not source_url and isinstance(source_nested, dict):
+        source_url = str(source_nested.get("url", "") or "")
     if source_url:
         domain = extract_domain(source_url)
         content = add_section_if_missing(content, "Sources", f"- [{domain}]({source_url})")
@@ -258,12 +261,16 @@ def validate_for_publication(content: str, frontmatter: dict[str, object]) -> li
             issues.append("Missing summary blockquote after H1")
 
     # 4. Key Takeaways for applicable types
-    ctype = str(frontmatter.get("content_type", frontmatter.get("type", "")))
+    ctype = str(frontmatter.get("type", frontmatter.get("content_type", "")))
     if ctype in _TAKEAWAY_TYPES and not has_section(content, "Key Takeaways"):
         issues.append(f"Missing 'Key Takeaways' section (required for '{ctype}')")
 
     # 5. Sources section for external captures
-    if str(frontmatter.get("source_url", "") or "") and not has_section(content, "Sources"):
+    source_nested = frontmatter.get("source", {})
+    has_source_url = str(frontmatter.get("source_url", "") or "")
+    if not has_source_url and isinstance(source_nested, dict):
+        has_source_url = str(source_nested.get("url", "") or "")
+    if has_source_url and not has_section(content, "Sources"):
         issues.append("Missing 'Sources' section (source_url present)")
 
     # 6. No bare URLs

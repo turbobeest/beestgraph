@@ -199,7 +199,7 @@ _CLAUDE_PROMPT = """Analyze this document and return ONLY a JSON object (no mark
     "concepts": ["Concept"],
     "organizations": ["Org"]
   }},
-  "para_category": "resources|projects|areas|archives"
+  "para": "resources|projects|areas|archives"
 }}
 
 Document title: {title}
@@ -253,8 +253,10 @@ def _llm_process(doc: ParsedDocument) -> ParsedDocument:
         meta["topics"] = extraction["topics"]
     if extraction.get("entities"):
         meta["entities"] = extraction["entities"]
-    if extraction.get("para_category"):
-        meta["para_category"] = extraction["para_category"]
+    if extraction.get("para"):
+        meta["para"] = extraction["para"]
+    elif extraction.get("para_category"):
+        meta["para"] = extraction["para_category"]
 
     return replace(doc, metadata=meta)
 

@@ -17,31 +17,48 @@ from src.pipeline.markdown_parser import ParsedDocument
 
 logger = structlog.get_logger(__name__)
 
+_QUALITY_TO_CONFIDENCE = {"low": 0.3, "medium": 0.5, "high": 0.85}
+_MATURITY_TO_STAGE = {"raw": "fleeting", "permanent": "evergreen"}
+
+
+def _to_confidence(value: object) -> float:
+    """Convert a confidence value to float, handling legacy quality strings."""
+    if isinstance(value, (int, float)):
+        return float(value)
+    return _QUALITY_TO_CONFIDENCE.get(str(value).lower(), 0.5)
+
+
+def _to_content_stage(value: object) -> str:
+    """Convert a content_stage or legacy maturity value to new spec values."""
+    s = str(value).lower()
+    return _MATURITY_TO_STAGE.get(s, s)
+
+
 # ---------------------------------------------------------------------------
 # Cypher templates (all use MERGE for idempotency)
 # ---------------------------------------------------------------------------
 
 _MERGE_DOCUMENT = """
 MERGE (d:Document {path: $path})
-SET d.title         = $title,
-    d.content       = $content,
-    d.summary       = $summary,
-    d.status        = $status,
-    d.para_category = $para_category,
-    d.source_type   = $source_type,
-    d.source_url    = $source_url,
-    d.author        = $author,
-    d.created_at    = $created_at,
-    d.updated_at    = $updated_at,
-    d.processed_at  = $processed_at,
-    d.id            = $id,
-    d.maturity      = $maturity,
-    d.content_type  = $content_type,
-    d.visibility    = $visibility,
-    d.quality       = $quality,
-    d.modified_at   = $modified_at,
-    d.published_at  = $published_at,
-    d.source_domain = $source_domain
+SET d.title             = $title,
+    d.content           = $content,
+    d.summary           = $summary,
+    d.status            = $status,
+    d.para              = $para,
+    d.source_type       = $source_type,
+    d.source_url        = $source_url,
+    d.author            = $author,
+    d.uid               = $uid,
+    d.type              = $type,
+    d.content_stage     = $content_stage,
+    d.importance        = $importance,
+    d.confidence        = $confidence,
+    d.engagement_status = $engagement_status,
+    d.created           = $created,
+    d.processed         = $processed,
+    d.modified          = $modified,
+    d.published         = $published,
+    d.captured          = $captured
 RETURN d.path AS path
 """
 
@@ -113,6 +130,90 @@ MERGE (s:Source {url: $source_url})
 MERGE (d)-[:DERIVED_FROM]->(s)
 """
 
+_MERGE_ORGANIZATION = """
+MERGE (o:Organization {normalized_name: $normalized_name})
+SET o.name = $name
+RETURN o.normalized_name AS normalized_name
+"""
+
+_MERGE_TOOL = """
+MERGE (tl:Tool {normalized_name: $normalized_name})
+SET tl.name = $name, tl.url = $url
+RETURN tl.normalized_name AS normalized_name
+"""
+
+_MERGE_PLACE = """
+MERGE (pl:Place {normalized_name: $normalized_name})
+SET pl.name = $name
+RETURN pl.normalized_name AS normalized_name
+"""
+
+_MERGE_DOC_MENTIONS_ORGANIZATION = """
+MERGE (d:Document {path: $doc_path})
+MERGE (o:Organization {normalized_name: $normalized_name})
+MERGE (d)-[r:MENTIONS]->(o)
+SET r.confidence = $confidence, r.context = $context
+"""
+
+_MERGE_DOC_MENTIONS_TOOL = """
+MERGE (d:Document {path: $doc_path})
+MERGE (tl:Tool {normalized_name: $normalized_name})
+MERGE (d)-[r:MENTIONS]->(tl)
+SET r.confidence = $confidence, r.context = $context
+"""
+
+_MERGE_DOC_MENTIONS_PLACE = """
+MERGE (d:Document {path: $doc_path})
+MERGE (pl:Place {normalized_name: $normalized_name})
+MERGE (d)-[r:MENTIONS]->(pl)
+SET r.confidence = $confidence, r.context = $context
+"""
+
+_MERGE_DOC_EXTENDS = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[:EXTENDS]->(b)
+"""
+
+_MERGE_DOC_INSPIRED_BY = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[:INSPIRED_BY]->(b)
+"""
+
+_MERGE_DOC_RELATED_TO = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[r:RELATED_TO]->(b)
+SET r.weight = $weight
+"""
+
+_MERGE_DOC_SUPPORTS = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[r:SUPPORTS]->(b)
+SET r.weight = $weight
+"""
+
+_MERGE_DOC_CONTRADICTS = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[r:CONTRADICTS]->(b)
+SET r.weight = $weight
+"""
+
+_MERGE_DOC_SUPERSEDES = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[:SUPERSEDES]->(b)
+"""
+
+_MERGE_DOC_CHILD_OF = """
+MERGE (a:Document {path: $from_path})
+MERGE (b:Document {path: $to_path})
+MERGE (a)-[:CHILD_OF]->(b)
+"""
+
 
 class GraphIngester:
     """Manages a FalkorDB connection and exposes idempotent upsert methods.
@@ -162,28 +263,31 @@ class GraphIngester:
         """
         now = datetime.now(tz=UTC).isoformat()
         meta = doc.metadata
+        dates = meta.get("dates", {}) if isinstance(meta.get("dates"), dict) else {}
+        source = meta.get("source", {}) if isinstance(meta.get("source"), dict) else {}
         params = {
             "path": doc.path,
             "title": doc.title,
             "content": doc.content,
             "summary": str(meta.get("summary", "")),
             "status": str(meta.get("status", "inbox")),
-            "para_category": str(meta.get("para_category", "")),
-            "source_type": str(meta.get("source_type", "")),
-            "source_url": str(meta.get("source_url", "")),
-            "author": str(meta.get("author", "")),
-            "created_at": str(meta.get("date_captured", now)),
-            "updated_at": now,
-            "processed_at": now,
-            # New v3 fields
-            "id": str(meta.get("id", "")),
-            "maturity": str(meta.get("maturity", "raw")),
-            "content_type": str(meta.get("content_type", "")),
-            "visibility": str(meta.get("visibility", "private")),
-            "quality": str(meta.get("quality", "")),
-            "modified_at": str(meta.get("modified", now)),
-            "published_at": str(meta.get("published", "")),
-            "source_domain": str(meta.get("source_domain", "")),
+            "para": str(meta.get("para", meta.get("para_category", ""))),
+            "source_type": str(meta.get("source_type", source.get("type", ""))),
+            "source_url": str(meta.get("source_url", source.get("url", ""))),
+            "author": str(meta.get("author", source.get("author", ""))),
+            "uid": str(meta.get("uid", meta.get("id", ""))),
+            "type": str(meta.get("type", meta.get("content_type", ""))),
+            "content_stage": _to_content_stage(
+                meta.get("content_stage", meta.get("maturity", "fleeting"))
+            ),
+            "importance": meta.get("importance", 3),
+            "confidence": _to_confidence(meta.get("confidence", meta.get("quality", 0.5))),
+            "engagement_status": str(meta.get("engagement_status", "unread")),
+            "created": str(dates.get("created", meta.get("created_at", now))),
+            "processed": now,
+            "modified": str(dates.get("modified", meta.get("modified_at", now))),
+            "published": str(dates.get("published", meta.get("published_at", ""))),
+            "captured": str(dates.get("captured", meta.get("date_captured", now))),
         }
         self._graph().query(_MERGE_DOCUMENT, params)
         logger.debug("upserted_document", path=doc.path)
@@ -233,18 +337,19 @@ class GraphIngester:
         context: str = "",
         description: str = "",
     ) -> None:
-        """Create a MENTIONS edge from a document to a Person or Concept.
+        """Create a MENTIONS edge from a document to an entity node.
 
         Args:
             doc_path: Document vault path.
             entity_name: Display name of the entity.
-            entity_type: Either ``"person"`` or ``"concept"``.
+            entity_type: One of ``"person"``, ``"concept"``, ``"organization"``,
+                ``"tool"``, or ``"place"``.
             confidence: Extraction confidence score (0.0-1.0).
             context: Short text snippet where the mention was found.
             description: Optional description for Concept entities.
 
         Raises:
-            ValueError: If *entity_type* is not ``person`` or ``concept``.
+            ValueError: If *entity_type* is not a recognized entity type.
         """
         normalized = entity_name.strip().lower()
         params = {
@@ -264,8 +369,26 @@ class GraphIngester:
                 {"name": entity_name, "normalized_name": normalized, "description": description},
             )
             self._graph().query(_MERGE_DOC_MENTIONS_CONCEPT, params)
+        elif entity_type == "organization":
+            self._graph().query(
+                _MERGE_ORGANIZATION, {"name": entity_name, "normalized_name": normalized}
+            )
+            self._graph().query(_MERGE_DOC_MENTIONS_ORGANIZATION, params)
+        elif entity_type == "tool":
+            self._graph().query(
+                _MERGE_TOOL, {"name": entity_name, "normalized_name": normalized, "url": ""}
+            )
+            self._graph().query(_MERGE_DOC_MENTIONS_TOOL, params)
+        elif entity_type == "place":
+            self._graph().query(
+                _MERGE_PLACE, {"name": entity_name, "normalized_name": normalized}
+            )
+            self._graph().query(_MERGE_DOC_MENTIONS_PLACE, params)
         else:
-            raise ValueError(f"entity_type must be 'person' or 'concept', got '{entity_type}'")
+            raise ValueError(
+                f"entity_type must be 'person', 'concept', 'organization', 'tool', or 'place', "
+                f"got '{entity_type}'"
+            )
 
     def _upsert_source(self, url: str) -> None:
         """Create or update a Source node and link it to a document.
@@ -319,8 +442,12 @@ class GraphIngester:
             target_path = f"{link_target}.md"
             self.create_link(doc.path, target_path)
 
-        # Source URL
-        source_url = doc.metadata.get("source_url")
+        # Source URL (check both flat and nested frontmatter)
+        source_nested = doc.metadata.get("source", {})
+        if isinstance(source_nested, dict):
+            source_url = source_nested.get("url", "") or doc.metadata.get("source_url", "")
+        else:
+            source_url = doc.metadata.get("source_url", "")
         if isinstance(source_url, str) and source_url:
             self._upsert_source(source_url)
             self._graph().query(
@@ -335,6 +462,45 @@ class GraphIngester:
                 self.create_mention(doc.path, str(person), "person")
             for concept in entities.get("concepts", []) or []:
                 self.create_mention(doc.path, str(concept), "concept")
+            for org in entities.get("organizations", []) or []:
+                self.create_mention(doc.path, str(org), "organization")
+            for tool in entities.get("tools", []) or []:
+                self.create_mention(doc.path, str(tool), "tool")
+            for place in entities.get("places", []) or []:
+                self.create_mention(doc.path, str(place), "place")
+
+        # Connections from frontmatter (connections.* nested fields)
+        connections = doc.metadata.get("connections", {})
+        if isinstance(connections, dict):
+            rel_map = {
+                "supports": (_MERGE_DOC_SUPPORTS, True),
+                "contradicts": (_MERGE_DOC_CONTRADICTS, True),
+                "extends": (_MERGE_DOC_EXTENDS, False),
+                "supersedes": (_MERGE_DOC_SUPERSEDES, False),
+                "inspired_by": (_MERGE_DOC_INSPIRED_BY, False),
+                "related": (_MERGE_DOC_RELATED_TO, True),
+            }
+            for rel_key, (template, has_weight) in rel_map.items():
+                targets = connections.get(rel_key, [])
+                if isinstance(targets, list):
+                    for target in targets:
+                        target_path = f"{target}.md" if not str(target).endswith(".md") else str(target)
+                        params = {"from_path": doc.path, "to_path": target_path}
+                        if has_weight:
+                            params["weight"] = 1.0
+                        self._graph().query(template, params)
+
+        # CHILD_OF from up field
+        up_targets = doc.metadata.get("up", [])
+        if isinstance(up_targets, str):
+            up_targets = [up_targets]
+        if isinstance(up_targets, list):
+            for parent in up_targets:
+                parent_path = f"{parent}.md" if not str(parent).endswith(".md") else str(parent)
+                self._graph().query(
+                    _MERGE_DOC_CHILD_OF,
+                    {"from_path": doc.path, "to_path": parent_path},
+                )
 
         elapsed_ms = (time.monotonic() - start) * 1000
         logger.info(

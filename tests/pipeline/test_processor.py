@@ -271,7 +271,7 @@ class TestProcessDocument:
                     "concepts": ["Neural Network"],
                     "organizations": ["OpenAI"],
                 },
-                "para_category": "resources",
+                "para": "resources",
             }
         )
         mock_result = subprocess.CompletedProcess(
@@ -284,7 +284,7 @@ class TestProcessDocument:
             enriched = process_document(doc, enable_llm=True)
         assert enriched.metadata["summary"] == "AI-generated summary."
         assert enriched.metadata["topics"] == ["technology/ai-ml"]
-        assert enriched.metadata["para_category"] == "resources"
+        assert enriched.metadata["para"] == "resources"
 
     def test_llm_strips_markdown_fences(self) -> None:
         doc = ParsedDocument(

@@ -121,56 +121,116 @@ beestgraph/
 
 FalkorDB graph name: `beestgraph`
 
+Full specification: `docs/beestgraph-template-spec.md` (Sections 12–13)
+
 ### Node types
 
 ```cypher
 (:Document {
+  uid: STRING,            -- YYYYMMDDHHMM, primary key (immutable)
   path: STRING,           -- vault path relative to root
   title: STRING,
-  content: STRING,        -- full markdown body (for full-text search)
+  type: STRING,           -- see Type Registry (spec §8)
+  status: STRING,         -- inbox | processing | published | archived | draft
+  para: STRING,           -- projects | areas | resources | archives
+  importance: INT,        -- 1-5
+  confidence: FLOAT,      -- 0.0-1.0
+  content_stage: STRING,  -- fleeting | literature | evergreen | reference
   summary: STRING,        -- AI-generated 2-3 sentence summary
-  status: STRING,         -- inbox | processing | published | archived
-  para_category: STRING,  -- projects | areas | resources | archives
-  source_type: STRING,    -- keepmd | obsidian_clipper | manual
+  source_type: STRING,    -- keepmd | obsidian_clipper | manual | api | agent
   source_url: STRING,
-  created_at: STRING,     -- ISO 8601
-  updated_at: STRING,
-  processed_at: STRING
+  source_via: STRING,
+  source_context: STRING,
+  source_content_hash: STRING,
+  created: STRING,        -- ISO 8601 date
+  captured: STRING,       -- when info was encountered
+  processed: STRING,      -- ISO 8601 datetime (last agent pass)
+  modified: STRING,       -- last human edit
+  published: STRING,      -- source publication date
+  event_date: STRING,     -- for meetings/events
+  due: STRING,            -- for projects
+  reviewed: STRING,       -- last human re-evaluation
+  last_synthesis: STRING, -- last graph coherence check
+  expires: STRING,        -- knowledge expiration
+  archived: STRING,       -- archival timestamp
+  engagement_status: STRING, -- unread | read | reference
+  rating: INT,            -- 1-5
+  epistemic_effort: STRING, -- casual | moderate | thorough
+  lat: FLOAT,
+  lon: FLOAT,
+  location_name: STRING,
+  has_media: BOOLEAN,
+  cluster: INT,           -- community detection (auto-computed)
+  pinned: BOOLEAN,
+  hidden: BOOLEAN,
+  color_override: STRING,
+  version: INT
 })
 
 (:Tag { name: STRING, normalized_name: STRING })
 (:Topic { name: STRING, level: INT })
 (:Person { name: STRING, normalized_name: STRING })
 (:Concept { name: STRING, normalized_name: STRING, description: STRING })
+(:Organization { name: STRING, normalized_name: STRING })
+(:Tool { name: STRING, normalized_name: STRING, url: STRING })
+(:Place { name: STRING, normalized_name: STRING, lat: FLOAT, lon: FLOAT })
 (:Source { url: STRING, domain: STRING, name: STRING })
-(:Project { name: STRING, status: STRING, description: STRING })
 ```
 
 ### Relationship types
 
 ```cypher
-(Document)-[:LINKS_TO]->(Document)
+-- Document relationships
+(Document)-[:LINKS_TO]->(Document)              -- inline wikilinks
 (Document)-[:TAGGED_WITH]->(Tag)
 (Document)-[:BELONGS_TO]->(Topic)
-(Document)-[:MENTIONS {confidence: FLOAT, context: STRING}]->(Person|Concept)
+(Document)-[:MENTIONS {confidence}]->(Person|Concept|Organization|Tool|Place)
 (Document)-[:DERIVED_FROM]->(Source)
-(Topic)-[:SUBTOPIC_OF]->(Topic)
-(Document)-[:SUPPORTS]->(Document)
-(Document)-[:CONTRADICTS]->(Document)
+
+-- Typed connections (from connections.* frontmatter)
+(Document)-[:SUPPORTS {weight}]->(Document)
+(Document)-[:CONTRADICTS {weight}]->(Document)
+(Document)-[:EXTENDS]->(Document)
 (Document)-[:SUPERSEDES]->(Document)
+(Document)-[:INSPIRED_BY]->(Document)
+(Document)-[:RELATED_TO {weight}]->(Document)
+
+-- Hierarchy
+(Topic)-[:SUBTOPIC_OF]->(Topic)
+(Document)-[:CHILD_OF]->(Document)              -- from up: field
+
+-- Entity relationships
+(Person)-[:AFFILIATED_WITH]->(Organization)
+(Tool)-[:USED_BY]->(Project:Document)
+(Place)-[:LOCATED_IN]->(Place)
 ```
 
 ### Indexes
 
 ```cypher
+-- Range indexes
+CREATE INDEX FOR (d:Document) ON (d.uid)
 CREATE INDEX FOR (d:Document) ON (d.path)
-CREATE INDEX FOR (d:Document) ON (d.source_url)
+CREATE INDEX FOR (d:Document) ON (d.type)
 CREATE INDEX FOR (d:Document) ON (d.status)
+CREATE INDEX FOR (d:Document) ON (d.para)
+CREATE INDEX FOR (d:Document) ON (d.importance)
+CREATE INDEX FOR (d:Document) ON (d.created)
+CREATE INDEX FOR (d:Document) ON (d.captured)
+CREATE INDEX FOR (d:Document) ON (d.modified)
+CREATE INDEX FOR (d:Document) ON (d.expires)
 CREATE INDEX FOR (t:Tag) ON (t.normalized_name)
 CREATE INDEX FOR (tp:Topic) ON (tp.name)
 CREATE INDEX FOR (p:Person) ON (p.normalized_name)
 CREATE INDEX FOR (c:Concept) ON (c.normalized_name)
-CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'content', 'summary')
+CREATE INDEX FOR (o:Organization) ON (o.normalized_name)
+CREATE INDEX FOR (tl:Tool) ON (tl.normalized_name)
+CREATE INDEX FOR (pl:Place) ON (pl.normalized_name)
+
+-- Full-text indexes
+CALL db.idx.fulltext.createNodeIndex('Document', 'title', 'summary')
+CALL db.idx.fulltext.createNodeIndex('Tag', 'name')
+CALL db.idx.fulltext.createNodeIndex('Concept', 'name', 'description')
 ```
 
 ## MCP servers
@@ -260,34 +320,68 @@ topics:
 
 ## Markdown frontmatter template
 
-Every processed document gets this frontmatter:
+Full specification: `docs/beestgraph-template-spec.md`
+Canonical template: `config/templates/universal.md`
+
+The template uses a **3-tier system**: Tier 1 (universal, mandatory on every document), Tier 2 (type-conditional), Tier 3 (advanced, add when earned). The `type` field is the master key that determines which Tier 2 fields apply — see the Type Registry in the spec (§8).
+
+### Tier 1 fields (every document, all mandatory)
+
+`uid`, `title`, `type`, `tags`, `status`, `dates.created`, `dates.captured`, `dates.processed`, `dates.modified`, `source.type`
+
+### Minimum viable document (human creates this)
 
 ```yaml
 ---
-title: "Article Title"
-source_url: "https://..."
-source_type: keepmd | obsidian_clipper | manual
-author: "Author Name"
-date_published: 2026-01-15
-date_captured: 2026-01-16T10:30:00Z
-date_processed: 2026-01-16T10:45:00Z
-summary: "Two to three sentence AI-generated summary."
-para_category: resources
-topics:
-  - technology/ai-ml
-tags:
-  - knowledge-graphs
-  - falkordb
-entities:
-  people:
-    - "Name"
-  concepts:
-    - "Concept"
-  organizations:
-    - "Org"
-status: published
+title: "Quick thought about X"
+type: note
 ---
+The content goes here.
 ```
+
+### Agent-expanded result (after processing)
+
+```yaml
+---
+uid: "202604061430"
+title: "Quick thought about X"
+type: note
+tags: [meta-pkm]
+status: published
+dates:
+  created: 2026-04-06
+  captured: 2026-04-06
+  processed: 2026-04-06T14:31:00Z
+  modified: 2026-04-06
+source:
+  type: manual
+para: resources
+topics:
+  - meta/pkm
+content_stage: fleeting
+summary: "..."
+version: 1
+---
+The content goes here.
+
+## Connections
+
+(none identified)
+```
+
+### Critical convention: wikilink mirroring
+
+Every entry in `connections.*` frontmatter fields **must** also appear as an inline wikilink in a `## Connections` section at the end of the body. Obsidian does not index frontmatter link fields for backlinks — the body mirror is what makes connections visible in the graph view.
+
+### Agent processing rules
+
+1. **Tier 1 fields are mandatory** — missing Tier 1 after processing is a bug
+2. **`uid` is immutable** — never overwrite an existing uid
+3. **`dates.captured` is preserved** — never overwrite once set
+4. **`dates.processed` updates every pass** — ISO 8601 datetime with Z
+5. **Use MERGE not CREATE** — all graph writes are idempotent
+6. **Prefer omit over guess** — missing = "not yet known", wrong = metadata pollution
+7. **Entity names are normalized** — `lower(strip(name))` for dedup, match existing before creating
 
 ## Key dependencies
 

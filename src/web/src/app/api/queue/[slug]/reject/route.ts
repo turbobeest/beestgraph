@@ -132,9 +132,8 @@ export async function POST(
     const { data, content } = parseFrontmatter(raw);
 
     const now = new Date().toISOString();
-    data.status = "rejected";
+    data.status = "archived";
     data.modified = now;
-    data.qualified_by = "web";
 
     const rejectedDir = join(VAULT_PATH, ARCHIVE_DIR, "rejected");
     await mkdir(rejectedDir, { recursive: true });

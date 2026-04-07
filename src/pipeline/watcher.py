@@ -187,10 +187,11 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         logger.error("classification_failed", path=str(filepath), error=str(exc))
         # Use safe defaults so we never lose a file
         recommendation = {
-            "content_type": "article",
+            "type": "article",
             "topic": "",
             "tags": sorted(doc.tags)[:10],
-            "quality": "medium",
+            "confidence": 0.5,
+            "importance": 3,
             "summary": "",
         }
 
@@ -198,8 +199,8 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
     from src.pipeline.privacy import classify_visibility
 
     recommendation["visibility"] = classify_visibility(
-        content_type=recommendation.get("content_type", ""),
-        para=doc.metadata.get("para_category", doc.metadata.get("para", "")),
+        content_type=recommendation.get("type", recommendation.get("content_type", "")),
+        para=doc.metadata.get("para", doc.metadata.get("para_category", "")),
         source_type=doc.metadata.get("source_type", ""),
         title=doc.title,
         content=doc.content,
@@ -232,7 +233,7 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
         "inbox_item_queued",
         path=doc.path,
         queue_path=str(item.path),
-        content_type=recommendation.get("content_type"),
+        type=recommendation.get("type"),
         topic=recommendation.get("topic"),
         elapsed_ms=round(elapsed_ms, 1),
     )

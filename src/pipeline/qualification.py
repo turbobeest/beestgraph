@@ -52,7 +52,7 @@ class QualificationItem:
     user_notes: str = ""
 
     # Status
-    status: str = "qualifying"
+    status: str = "inbox"
     deferred_until: datetime | None = None
     telegram_message_id: int | None = None
 
@@ -116,7 +116,13 @@ def _item_from_post(post: frontmatter.Post, filepath: Path) -> QualificationItem
     """
     meta = post.metadata
 
-    captured_raw = meta.get("date_captured") or meta.get("created_at") or _now_iso()
+    dates = meta.get("dates", {}) if isinstance(meta.get("dates"), dict) else {}
+    captured_raw = (
+        dates.get("captured")
+        or meta.get("date_captured")
+        or meta.get("created_at")
+        or _now_iso()
+    )
     captured_at = _parse_datetime(captured_raw)
 
     deferred_raw = meta.get("deferred_until")
@@ -139,7 +145,7 @@ def _item_from_post(post: frontmatter.Post, filepath: Path) -> QualificationItem
         user_tags=meta.get("user_tags"),
         user_quality=meta.get("user_quality"),
         user_notes=str(meta.get("qualification_notes", "")),
-        status=str(meta.get("status", "qualifying")),
+        status=str(meta.get("status", "inbox")),
         deferred_until=deferred_until,
         telegram_message_id=meta.get("telegram_message_id"),
     )
@@ -227,14 +233,14 @@ class QualificationQueue:
         now = _now_iso()
 
         # Merge qualification metadata into frontmatter
-        post.metadata["status"] = "qualifying"
+        post.metadata["status"] = "inbox"
         post.metadata["original_path"] = str(source_path)
         post.metadata["date_captured"] = post.metadata.get("date_captured", now)
-        post.metadata["content_type"] = recommendation.get("content_type", "article")
-        post.metadata["recommended_type"] = recommendation.get("content_type", "article")
+        post.metadata["type"] = recommendation.get("type", recommendation.get("content_type", "article"))
+        post.metadata["recommended_type"] = recommendation.get("type", recommendation.get("content_type", "article"))
         post.metadata["recommended_topic"] = recommendation.get("topic", "")
         post.metadata["recommended_tags"] = list(recommendation.get("tags", []))
-        post.metadata["recommended_quality"] = recommendation.get("quality", "medium")
+        post.metadata["recommended_quality"] = str(recommendation.get("confidence", 0.5))
         post.metadata["recommended_summary"] = recommendation.get("summary", "")
 
         # Preserve existing topics/tags alongside recommendations
@@ -303,7 +309,7 @@ class QualificationQueue:
             try:
                 raw = filepath.read_text(encoding="utf-8")
                 post = frontmatter.loads(raw)
-                if post.metadata.get("status") == "qualifying":
+                if post.metadata.get("status") in ("inbox", "qualifying"):
                     items.append(_item_from_post(post, filepath))
             except (OSError, ValueError) as exc:
                 logger.warning("queue_item_skip", path=str(filepath), error=str(exc))
@@ -321,7 +327,7 @@ class QualificationQueue:
             try:
                 raw = filepath.read_text(encoding="utf-8")
                 post = frontmatter.loads(raw)
-                if post.metadata.get("status") != "qualifying":
+                if post.metadata.get("status") not in ("inbox", "qualifying"):
                     continue
                 deferred_raw = post.metadata.get("deferred_until")
                 if deferred_raw:
@@ -370,15 +376,12 @@ class QualificationQueue:
             item.path,
             {
                 "status": "published",
-                "content_type": item.final_type,
+                "type": item.final_type,
                 "topics": [item.final_topic] if item.final_topic else [],
                 "tags": item.final_tags,
-                "quality": item.final_quality,
+                "confidence": item.final_quality,
                 "summary": item.recommended_summary,
-                "qualified_by": "user" if item.user_type or item.user_topic else "auto",
-                "qualification_notes": item.user_notes,
-                "date_qualified": now,
-                "date_processed": now,
+                "dates.processed": now,
             },
         )
 
@@ -506,30 +509,33 @@ class QualificationQueue:
 
 _TYPE_PLURALS: dict[str, str] = {
     "article": "articles",
-    "paper": "papers",
-    "tutorial": "tutorials",
-    "reference": "reference",
-    "thought": "thoughts",
+    "concept": "concepts",
+    "reference": "references",
     "note": "notes",
-    "video": "videos",
-    "podcast": "podcasts",
-    "image": "images",
-    "pdf": "pdfs",
-    "tweet": "tweets",
-    "social-post": "social-posts",
-    "discussion": "discussions",
-    "url": "urls",
-    "github-repo": "github-repos",
-    "github-issue": "github-issues",
-    "code-snippet": "code-snippets",
-    "tool": "tools",
-    "recipe": "recipes",
-    "product": "products",
-    "place": "places",
-    "event": "events",
+    "quote": "quotes",
+    "project": "projects",
+    "decision": "decisions",
+    "meeting": "meetings",
+    "daily": "dailies",
+    "journal": "journals",
+    "moc": "mocs",
     "person": "people",
+    "organization": "organizations",
+    "tool": "tools",
+    "place": "places",
     "book": "books",
-    "course": "courses",
+    "film": "films",
+    "podcast": "podcasts",
+    "thread": "threads",
+    "repo": "repos",
+    "email": "emails",
+    "recipe": "recipes",
+    "event": "events",
+    "health": "health",
+    "financial": "financial",
+    "dream": "dreams",
+    "collection": "collections",
+    "synthesis": "syntheses",
 }
 
 

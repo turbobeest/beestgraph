@@ -1,43 +1,37 @@
 ---
-id: "{{ id }}"
+# Note template — derived from universal.md
+# For: quick thoughts, observations, reflections
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-aliases: []
-created: {{ created }}
-modified: {{ modified }}
-published: ""
-source_date: ""
 type: note
-status: qualifying
-maturity: raw
-para: resources
-visibility: private
-topics: []
 tags: []
-mocs: []
+status: inbox
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+
+# Tier 2
+source:
+  type: manual
+  context: ""
+para: resources
+topics: []
+content_stage: fleeting
 summary: ""
-key_points: []
-source_url: ""
-source_type: "{{ source_type }}"
-source_domain: ""
-author: ""
-quality: medium
-qualified_by: ""
-qualification_notes: ""
-entities:
-  people: []
-  concepts: []
-  organizations: []
-  tools: []
-related: []
+connections:
+  supports: []
+  contradicts: []
+  extends: []
+  related: []
+version: 1
 ---
-
-# {{ title }}
-
-> {{ summary }}
 
 {{ content }}
 
 ## Connections
 
-- Sparked by:
-- Related:
+(none identified)

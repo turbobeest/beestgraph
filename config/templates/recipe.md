@@ -1,49 +1,48 @@
 ---
-id: "{{ id }}"
+# Recipe template — derived from universal.md
+# For: cooking recipes, procedures
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-aliases: []
-created: {{ created }}
-modified: {{ modified }}
-published: ""
-source_date: {{ source_date }}
 type: recipe
-status: qualifying
-maturity: raw
+tags: []
+status: inbox
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+
+# Tier 2 — recipe priority fields
+source:
+  type: "{{ source_type }}"
+  url: "{{ source_url }}"
+  author: "{{ author }}"
+  publisher: "{{ publisher }}"
 para: resources
-visibility: private
 topics:
   - health/nutrition
-tags: []
-mocs: []
-summary: ""
-key_points: []
-source_url: "{{ source_url }}"
-source_type: "{{ source_type }}"
-source_domain: "{{ source_domain }}"
-author: "{{ author }}"
-quality: medium
-qualified_by: ""
-qualification_notes: ""
+importance: 3
+content_stage: reference
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-related: []
-servings: {{ servings }}
-prep_time: "{{ prep_time }}"
-cook_time: "{{ cook_time }}"
-cuisine: "{{ cuisine }}"
-ingredients: []
+  places: []
+engagement:
+  status: unread
+  rating: null
+summary: ""
+media:
+  images: []
+connections:
+  related: []
+version: 1
 ---
 
-# {{ title }}
-
-> {{ summary }}
-
 ## Ingredients
-
--
 
 ## Instructions
 
@@ -53,6 +52,6 @@ ingredients: []
 
 {{ content }}
 
-## Sources
+## Connections
 
-- [{{ source_domain }}]({{ source_url }})
+(none identified)

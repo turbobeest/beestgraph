@@ -47,7 +47,6 @@ class TestBuildFulltextIndexQueries:
         query = _build_fulltext_index_queries()[0]
         assert "Document" in query
         assert "'title'" in query
-        assert "'content'" in query
         assert "'summary'" in query
 
 

@@ -1,11 +1,12 @@
 ---
-# Article template — derived from universal.md
-# For: web articles, blog posts, news stories
+# Thread template — derived from universal.md
+# For: X/Twitter threads, discussions
+# Replaces: tweet.md
 
 # Tier 1
 uid: ""
 title: "{{ title }}"
-type: article
+type: thread
 tags: []
 status: inbox
 dates:
@@ -14,37 +15,27 @@ dates:
   processed: null
   modified: {{ created }}
 
-# Tier 2 — article priority fields
+# Tier 2 — thread priority fields
 source:
   type: "{{ source_type }}"
   url: "{{ source_url }}"
   author: "{{ author }}"
-  publisher: "{{ publisher }}"
+  publisher: ""
   via: ""
   context: ""
 para: resources
 topics: []
 importance: 3
-confidence: 0.8
 content_stage: literature
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-  places: []
-engagement:
-  status: unread
 summary: ""
 key_claims: []
-questions: []
-action_items: []
 connections:
   supports: []
-  contradicts: []
-  extends: []
-  supersedes: []
-  inspired_by: []
   related: []
 version: 1
 ---

@@ -20,7 +20,7 @@ author: "Jane Doe"
 date_captured: "2026-01-16T10:30:00Z"
 date_processed: "2026-01-16T10:45:00Z"
 summary: "An overview of knowledge graph technology and its applications."
-para_category: resources
+para: resources
 topics:
   - technology/ai-ml
   - meta/pkm

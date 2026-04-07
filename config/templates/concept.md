@@ -1,29 +1,44 @@
 ---
+# Concept template — derived from universal.md
+# For: ideas, frameworks, theories, definitions
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-source_url: ""
-source_type: manual
-author: ""
-date_published:
-date_captured: {{ date_captured }}
-date_processed: {{ date_processed }}
-summary: "{{ summary }}"
-para_category: resources
-topics:
-  - {{ topic }}
-tags:
-  - {{ tag }}
+type: concept
+tags: []
+status: inbox
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+
+# Tier 2 — concept priority fields
+aliases: []
+source:
+  type: manual
+para: resources
+topics: []
+importance: 3
+confidence: 0.8
+content_stage: evergreen
 entities:
   people: []
   concepts:
     - "{{ title }}"
   organizations: []
-status: inbox
-id: "{{ id }}"
-maturity: raw
-visibility: private
-mocs: []
-related: []
-key_points: []
+  tools: []
+  places: []
+summary: ""
+key_claims: []
+questions: []
+connections:
+  supports: []
+  contradicts: []
+  extends: []
+  related: []
+version: 1
 ---
 
 ## Definition
@@ -32,10 +47,6 @@ key_points: []
 
 ## Context
 
-## Related Concepts
+## Connections
 
--
-
-## Sources
-
--
+(none identified)

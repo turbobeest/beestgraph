@@ -1,29 +1,36 @@
 ---
+# Person template — derived from universal.md
+# For: individuals referenced across the graph
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-source_url: ""
-source_type: manual
-author: ""
-date_published:
-date_captured: {{ date_captured }}
-date_processed: {{ date_processed }}
-summary: "{{ summary }}"
-para_category: resources
-topics:
-  - {{ topic }}
-tags:
-  - {{ tag }}
+type: person
+tags: []
+status: inbox
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+
+# Tier 2 — person priority fields
+aliases: []
+role: ""
+source:
+  type: manual
+para: resources
+topics: []
+importance: 3
 entities:
   people:
     - "{{ title }}"
-  concepts: []
   organizations: []
-status: inbox
-id: "{{ id }}"
-maturity: raw
-visibility: private
-mocs: []
-related: []
-key_points: []
+  places: []
+summary: ""
+connections:
+  related: []
+version: 1
 ---
 
 ## About
@@ -32,15 +39,8 @@ key_points: []
 
 ## Affiliations
 
--
-
 ## Notable Work
-
--
 
 ## Connections
 
--
-
-## Notes
-
+(none identified)

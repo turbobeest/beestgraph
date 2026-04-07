@@ -5,40 +5,39 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import type { QueueItem, QueueItemDetail } from "@/lib/queue";
-import { CONTENT_TYPES, TOPICS, VISIBILITY_OPTIONS } from "@/lib/queue";
+import { CONTENT_TYPES, TOPICS, CONFIDENCE_OPTIONS } from "@/lib/queue";
 
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function VisibilitySegment({
+function ConfidenceSegment({
   value,
   onChange,
 }: {
-  value: string;
-  onChange: (v: string) => void;
+  value: number | null;
+  onChange: (v: number) => void;
 }) {
   return (
-    <div className="flex rounded-lg border border-gray-300 dark:border-gray-600" role="radiogroup" aria-label="Visibility">
-      {VISIBILITY_OPTIONS.map((opt) => (
+    <div className="flex rounded-lg border border-gray-300 dark:border-gray-600" role="radiogroup" aria-label="Confidence">
+      {CONFIDENCE_OPTIONS.map((opt) => (
         <button
-          key={opt}
+          key={opt.value}
           type="button"
           role="radio"
-          aria-checked={value === opt}
-          onClick={() => onChange(opt)}
+          aria-checked={value === opt.value}
+          onClick={() => onChange(opt.value)}
           className={`min-h-[44px] flex-1 px-3 py-2 text-sm font-medium transition-colors first:rounded-l-lg last:rounded-r-lg ${
-            value === opt
-              ? opt === "public"
+            value === opt.value
+              ? opt.value >= 0.7
                 ? "bg-green-600 text-white"
-                : opt === "shared"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-600 text-white"
+                : opt.value >= 0.4
+                  ? "bg-yellow-600 text-white"
+                  : "bg-red-600 text-white"
               : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           }`}
         >
-          {opt === "private" ? "\u{1f512}" : opt === "public" ? "\u{1f513}" : "\u{1f517}"}{" "}
-          {opt.charAt(0).toUpperCase() + opt.slice(1)}
+          {opt.label} ({opt.value})
         </button>
       ))}
     </div>
@@ -131,7 +130,7 @@ export default function QueueItemPage() {
   const [summary, setSummary] = useState("");
   const [type, setType] = useState("");
   const [topic, setTopic] = useState("");
-  const [visibility, setVisibility] = useState("private");
+  const [confidence, setConfidence] = useState<number | null>(null);
   const [tags, setTags] = useState<string[]>([]);
 
   // Fetch list for prev/next navigation
@@ -169,7 +168,7 @@ export default function QueueItemPage() {
         setSummary(data.summary);
         setType(data.type);
         setTopic(data.topic);
-        setVisibility(data.visibility);
+        setConfidence(data.confidence);
         setTags([...data.tags]);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load item");
@@ -205,26 +204,26 @@ export default function QueueItemPage() {
       const res = await fetch(`/api/queue/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, topic, tags, visibility, summary }),
+        body: JSON.stringify({ type, topic, tags, confidence, summary }),
       });
       if (!res.ok) throw new Error("Save failed");
     } catch (err) {
       console.error("Save error:", err);
     }
-  }, [item, slug, type, topic, tags, visibility, summary]);
+  }, [item, slug, type, topic, tags, confidence, summary]);
 
   // Actions
   const handleApprove = useCallback(
-    async (maturity: "fleeting" | "permanent") => {
+    async (contentStage: "fleeting" | "evergreen") => {
       if (!item) return;
-      setActionLoading(maturity);
+      setActionLoading(contentStage);
       // Save any pending changes first
       await saveChanges();
       try {
         const res = await fetch(`/api/queue/${slug}/approve`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ maturity, visibility }),
+          body: JSON.stringify({ content_stage: contentStage }),
         });
         if (!res.ok) throw new Error("Approve failed");
         goNext();
@@ -234,7 +233,7 @@ export default function QueueItemPage() {
         setActionLoading("");
       }
     },
-    [item, slug, visibility, saveChanges, goNext],
+    [item, slug, saveChanges, goNext],
   );
 
   const handleReject = useCallback(async () => {
@@ -350,14 +349,15 @@ export default function QueueItemPage() {
 
       {/* Status bar */}
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <span>
-          {visibility === "public" ? "\u{1f513}" : visibility === "shared" ? "\u{1f517}" : "\u{1f512}"}{" "}
-          {visibility}
-        </span>
-        <span>&middot;</span>
         <span>{type || "untyped"}</span>
         <span>&middot;</span>
         <span>{topic || "no topic"}</span>
+        {confidence !== null && (
+          <>
+            <span>&middot;</span>
+            <span>confidence: {confidence}</span>
+          </>
+        )}
         {item.sourceUrl && (
           <>
             <span>&middot;</span>
@@ -444,16 +444,16 @@ export default function QueueItemPage() {
         </select>
       </div>
 
-      {/* Visibility toggle */}
+      {/* Confidence toggle */}
       <div className="mt-6">
-        <h3 className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Visibility</h3>
-        <VisibilitySegment value={visibility} onChange={setVisibility} />
+        <h3 className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Confidence</h3>
+        <ConfidenceSegment value={confidence} onChange={setConfidence} />
       </div>
 
       {/* Sticky action buttons */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95 md:left-64">
         <div className="mx-auto flex max-w-7xl items-center gap-2">
-          {/* Approve (fleeting) — primary */}
+          {/* Approve as fleeting — primary */}
           <button
             type="button"
             onClick={() => void handleApprove("fleeting")}
@@ -463,14 +463,14 @@ export default function QueueItemPage() {
             {actionLoading === "fleeting" ? "..." : "Approve"}
           </button>
 
-          {/* Publish (permanent) — secondary */}
+          {/* Approve as evergreen — secondary */}
           <button
             type="button"
-            onClick={() => void handleApprove("permanent")}
+            onClick={() => void handleApprove("evergreen")}
             disabled={actionLoading !== ""}
             className="min-h-[44px] rounded-lg border border-brand-600 bg-white px-4 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-50 disabled:opacity-50 dark:bg-gray-800 dark:text-brand-400 dark:hover:bg-gray-700"
           >
-            {actionLoading === "permanent" ? "..." : "Publish"}
+            {actionLoading === "evergreen" ? "..." : "Evergreen"}
           </button>
 
           {/* Reject — danger */}

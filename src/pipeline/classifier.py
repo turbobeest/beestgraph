@@ -20,8 +20,8 @@ logger = structlog.get_logger(__name__)
 
 
 def _generate_zettelkasten_id() -> str:
-    """Return a Zettelkasten timestamp ID in ``YYYYMMDDHHMMSS`` format (UTC)."""
-    return datetime.now(tz=UTC).strftime("%Y%m%d%H%M%S")
+    """Return a Zettelkasten timestamp ID in ``YYYYMMDDHHMM`` format (UTC)."""
+    return datetime.now(tz=UTC).strftime("%Y%m%d%H%M")
 
 
 # ---------------------------------------------------------------------------
@@ -30,30 +30,33 @@ def _generate_zettelkasten_id() -> str:
 
 CONTENT_TYPES: list[str] = [
     "article",
-    "paper",
-    "tutorial",
+    "concept",
     "reference",
-    "thought",
     "note",
-    "video",
-    "podcast",
-    "image",
-    "pdf",
-    "tweet",
-    "social-post",
-    "discussion",
-    "url",
-    "github-repo",
-    "github-issue",
-    "code-snippet",
-    "tool",
-    "recipe",
-    "product",
-    "place",
-    "event",
+    "quote",
+    "project",
+    "decision",
+    "meeting",
+    "daily",
+    "journal",
+    "moc",
     "person",
+    "organization",
+    "tool",
+    "place",
     "book",
-    "course",
+    "film",
+    "podcast",
+    "thread",
+    "repo",
+    "email",
+    "recipe",
+    "event",
+    "health",
+    "financial",
+    "dream",
+    "collection",
+    "synthesis",
 ]
 
 # ---------------------------------------------------------------------------
@@ -61,22 +64,22 @@ CONTENT_TYPES: list[str] = [
 # ---------------------------------------------------------------------------
 
 _URL_TYPE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"github\.com/[^/]+/[^/]+/(?:issues|pull)/\d+"), "github-issue"),
-    (re.compile(r"github\.com/[^/]+/[^/]+/?$"), "github-repo"),
-    (re.compile(r"(x\.com|twitter\.com)/[^/]+/status/"), "tweet"),
-    (re.compile(r"youtube\.com/watch|youtu\.be/"), "video"),
-    (re.compile(r"vimeo\.com/\d+"), "video"),
-    (re.compile(r"arxiv\.org/(?:abs|pdf)/"), "paper"),
-    (re.compile(r"scholar\.google\.com"), "paper"),
-    (re.compile(r"\.pdf(?:\?|$)"), "pdf"),
-    (re.compile(r"reddit\.com/r/"), "discussion"),
-    (re.compile(r"news\.ycombinator\.com/item"), "discussion"),
-    (re.compile(r"stackoverflow\.com/questions/"), "discussion"),
-    (re.compile(r"linkedin\.com/posts/"), "social-post"),
-    (re.compile(r"mastodon\.\w+/"), "social-post"),
+    (re.compile(r"github\.com/[^/]+/[^/]+/(?:issues|pull)/\d+"), "article"),
+    (re.compile(r"github\.com/[^/]+/[^/]+/?$"), "repo"),
+    (re.compile(r"(x\.com|twitter\.com)/[^/]+/status/"), "thread"),
+    (re.compile(r"youtube\.com/watch|youtu\.be/"), "film"),
+    (re.compile(r"vimeo\.com/\d+"), "film"),
+    (re.compile(r"arxiv\.org/(?:abs|pdf)/"), "article"),
+    (re.compile(r"scholar\.google\.com"), "article"),
+    (re.compile(r"\.pdf(?:\?|$)"), "article"),
+    (re.compile(r"reddit\.com/r/"), "thread"),
+    (re.compile(r"news\.ycombinator\.com/item"), "thread"),
+    (re.compile(r"stackoverflow\.com/questions/"), "thread"),
+    (re.compile(r"linkedin\.com/posts/"), "thread"),
+    (re.compile(r"mastodon\.\w+/"), "thread"),
     (re.compile(r"podcasts?\.(apple|google)|spotify\.com/episode"), "podcast"),
     (re.compile(r"goodreads\.com/book/"), "book"),
-    (re.compile(r"coursera\.org/|udemy\.com/course/|edx\.org/"), "course"),
+    (re.compile(r"coursera\.org/|udemy\.com/course/|edx\.org/"), "reference"),
 ]
 
 
@@ -152,7 +155,7 @@ def _classify_by_content(content: str, title: str) -> str:
 
     tutorial_hits = sum(1 for kw in _TUTORIAL_KEYWORDS if kw in text)
     if tutorial_hits >= 2:
-        return "tutorial"
+        return "reference"
 
     reference_hits = sum(1 for kw in _REFERENCE_KEYWORDS if kw in text)
     if reference_hits >= 2:
@@ -161,7 +164,7 @@ def _classify_by_content(content: str, title: str) -> str:
     # Check for code-heavy content
     code_fence_count = content.count("```")
     if code_fence_count >= 4:
-        return "code-snippet"
+        return "reference"
 
     return "article"
 
@@ -174,14 +177,14 @@ _MIN_HIGH_QUALITY_LENGTH = 1500
 _MIN_MEDIUM_QUALITY_LENGTH = 400
 
 
-def _assess_quality(doc: ParsedDocument) -> str:
-    """Assess quality based on length, structure, and attribution.
+def _assess_confidence(doc: ParsedDocument) -> float:
+    """Assess confidence based on length, structure, and attribution.
 
     Args:
         doc: Parsed markdown document.
 
     Returns:
-        One of ``"high"``, ``"medium"``, or ``"low"``.
+        A confidence score between 0.0 and 1.0.
     """
     score = 0
     content_len = len(doc.content)
@@ -198,7 +201,10 @@ def _assess_quality(doc: ParsedDocument) -> str:
         score += 1
 
     # Attribution: has an author or source URL
-    if doc.metadata.get("author") or doc.metadata.get("source_url"):
+    source = doc.metadata.get("source", {})
+    has_author = doc.metadata.get("author") or (isinstance(source, dict) and source.get("author"))
+    has_url = doc.metadata.get("source_url") or (isinstance(source, dict) and source.get("url"))
+    if has_author or has_url:
         score += 1
 
     # Links and references indicate depth
@@ -206,10 +212,10 @@ def _assess_quality(doc: ParsedDocument) -> str:
         score += 1
 
     if score >= 4:
-        return "high"
+        return 0.85
     if score >= 2:
-        return "medium"
-    return "low"
+        return 0.5
+    return 0.3
 
 
 # ---------------------------------------------------------------------------
@@ -218,10 +224,10 @@ def _assess_quality(doc: ParsedDocument) -> str:
 
 _CLASSIFY_PROMPT = """Classify this document and return ONLY a JSON object (no markdown fences):
 {{
-  "content_type": "<one of: {types}>",
+  "type": "<one of: {types}>",
   "topic": "<topic/subtopic from taxonomy, e.g. technology/ai-ml>",
   "tags": ["tag1", "tag2", "tag3"],
-  "quality": "<high|medium|low>",
+  "confidence": <0.0-1.0 confidence score>,
   "summary": "<2-3 sentence summary>"
 }}
 
@@ -245,10 +251,14 @@ def _llm_classify(doc: ParsedDocument) -> dict[str, object]:
     Raises:
         RuntimeError: If the Claude Code subprocess fails.
     """
+    source = doc.metadata.get("source", {})
+    source_url = doc.metadata.get("source_url", "")
+    if not source_url and isinstance(source, dict):
+        source_url = source.get("url", "")
     prompt = _CLASSIFY_PROMPT.format(
         types=", ".join(CONTENT_TYPES),
         title=doc.title,
-        url=doc.metadata.get("source_url", ""),
+        url=source_url,
         content=doc.content[:4000],
     )
 
@@ -270,23 +280,26 @@ def _llm_classify(doc: ParsedDocument) -> dict[str, object]:
 
     data = json.loads(raw)
 
-    # Validate content_type
-    ct = data.get("content_type", "article")
+    # Validate type (accept both old "content_type" and new "type" keys)
+    ct = data.get("type", data.get("content_type", "article"))
     if ct not in CONTENT_TYPES:
         ct = "article"
 
-    quality = data.get("quality", "medium")
-    if quality not in ("high", "medium", "low"):
-        quality = "medium"
+    # Parse confidence: accept float directly or convert from quality string
+    raw_confidence = data.get("confidence", data.get("quality", 0.5))
+    if isinstance(raw_confidence, str):
+        confidence = {"high": 0.85, "medium": 0.5, "low": 0.3}.get(raw_confidence, 0.5)
+    else:
+        confidence = float(raw_confidence) if raw_confidence else 0.5
 
     return {
-        "content_type": ct,
+        "type": ct,
         "topic": data.get("topic", ""),
         "tags": data.get("tags", []),
-        "quality": quality,
+        "confidence": confidence,
+        "importance": 3,
         "summary": data.get("summary", ""),
-        "visibility": "private",
-        "id": _generate_zettelkasten_id(),
+        "uid": _generate_zettelkasten_id(),
     }
 
 
@@ -312,7 +325,7 @@ def classify_document(doc: ParsedDocument, enable_llm: bool = True) -> dict[str,
                 "document_classified",
                 path=doc.path,
                 method="llm",
-                content_type=classification["content_type"],
+                type=classification["type"],
             )
             return classification
         except (
@@ -330,7 +343,10 @@ def classify_document(doc: ParsedDocument, enable_llm: bool = True) -> dict[str,
             )
 
     # Fallback heuristic classification
+    source = doc.metadata.get("source", {})
     source_url = str(doc.metadata.get("source_url", ""))
+    if not source_url and isinstance(source, dict):
+        source_url = str(source.get("url", ""))
 
     # Content type: URL first, then content analysis
     content_type = _classify_by_url(source_url) or _classify_by_content(doc.content, doc.title)
@@ -344,8 +360,8 @@ def classify_document(doc: ParsedDocument, enable_llm: bool = True) -> dict[str,
     # Tags: combine frontmatter tags with inline tags
     tags = sorted(doc.tags)[:10]
 
-    # Quality
-    quality = _assess_quality(doc)
+    # Confidence
+    confidence = _assess_confidence(doc)
 
     # Summary: first substantial line
     summary = str(doc.metadata.get("summary", ""))
@@ -357,19 +373,19 @@ def classify_document(doc: ParsedDocument, enable_llm: bool = True) -> dict[str,
                 break
 
     classification = {
-        "content_type": content_type,
+        "type": content_type,
         "topic": topic,
         "tags": tags,
-        "quality": quality,
+        "confidence": confidence,
+        "importance": 3,
         "summary": summary,
-        "visibility": "private",
-        "id": _generate_zettelkasten_id(),
+        "uid": _generate_zettelkasten_id(),
     }
 
     logger.info(
         "document_classified",
         path=doc.path,
         method="fallback",
-        content_type=content_type,
+        type=content_type,
     )
     return classification

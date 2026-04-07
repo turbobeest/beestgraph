@@ -8,8 +8,7 @@ export interface QueueItem {
   type: string;
   topic: string;
   tags: string[];
-  visibility: string;
-  quality: string;
+  confidence: number | null;
   summary: string;
   securityFindings: string;
   filename: string;
@@ -23,16 +22,14 @@ export interface QueueItemDetail extends QueueItem {
 }
 
 export interface ApproveBody {
-  maturity: "fleeting" | "permanent";
-  visibility?: "public" | "private" | "shared";
+  content_stage: "fleeting" | "evergreen";
 }
 
 export interface UpdateBody {
   type?: string;
   topic?: string;
   tags?: string[];
-  visibility?: string;
-  quality?: string;
+  confidence?: number | null;
   summary?: string;
 }
 
@@ -49,21 +46,45 @@ export function filenameFromSlug(slug: string): string {
   return `${slug}.md`;
 }
 
-/** Content type options from the taxonomy. */
+/** Content type options from the type registry (spec S8). */
 export const CONTENT_TYPES = [
   "article",
-  "tutorial",
   "reference",
   "opinion",
   "tool",
-  "video",
+  "film",
   "podcast",
   "book",
-  "paper",
   "thread",
   "note",
   "bookmark",
+  "repo",
 ] as const;
+
+/** Map legacy type names to current spec values. */
+export const LEGACY_TYPE_MAP: Record<string, string> = {
+  "github-repo": "repo",
+  tweet: "thread",
+  paper: "article",
+  tutorial: "reference",
+  url: "article",
+  video: "film",
+  thought: "note",
+  "social-post": "thread",
+};
+
+/** Map legacy quality strings to confidence numbers. */
+export const LEGACY_QUALITY_MAP: Record<string, number> = {
+  low: 0.3,
+  medium: 0.5,
+  high: 0.8,
+};
+
+/** Map legacy maturity values to content_stage values. */
+export const LEGACY_MATURITY_MAP: Record<string, string> = {
+  raw: "fleeting",
+  permanent: "evergreen",
+};
 
 /** Topic options from the taxonomy. */
 export const TOPICS = [
@@ -100,4 +121,9 @@ export const TOPICS = [
   "meta/workflows",
 ] as const;
 
-export const VISIBILITY_OPTIONS = ["private", "shared", "public"] as const;
+/** Confidence presets for the UI. */
+export const CONFIDENCE_OPTIONS = [
+  { label: "Low", value: 0.3 },
+  { label: "Medium", value: 0.5 },
+  { label: "High", value: 0.8 },
+] as const;

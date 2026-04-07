@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { NextResponse } from "next/server";
 
-import { slugFromFilename } from "@/lib/queue";
+import { slugFromFilename, LEGACY_TYPE_MAP, LEGACY_QUALITY_MAP } from "@/lib/queue";
 import type { QueueItem } from "@/lib/queue";
 
 const VAULT_PATH = process.env.VAULT_PATH ?? join(process.env.HOME ?? "/root", "vault");
@@ -12,14 +12,17 @@ const QUEUE_DIR = process.env.QUEUE_DIR ?? "02-queue";
 interface Frontmatter {
   title?: string;
   type?: string;
+  content_type?: string;
   topics?: string[];
   tags?: string[];
-  visibility?: string;
+  confidence?: number | string;
   quality?: string;
   summary?: string;
   security_findings?: string;
   date_captured?: string;
+  dates?: { captured?: string; [key: string]: unknown };
   source_url?: string;
+  source?: { url?: string; type?: string; [key: string]: unknown };
   [key: string]: unknown;
 }
 
@@ -131,19 +134,40 @@ export async function GET(): Promise<NextResponse> {
 
         const topics = Array.isArray(data.topics) ? data.topics : [];
 
+        // Resolve type with backwards compat for legacy names
+        const rawType = String(data.type ?? data.content_type ?? "");
+        const resolvedType = LEGACY_TYPE_MAP[rawType] ?? rawType;
+
+        // Resolve confidence: prefer numeric confidence, fall back from legacy quality
+        let confidence: number | null = null;
+        if (data.confidence !== undefined && data.confidence !== "") {
+          confidence = Number(data.confidence);
+        } else if (data.quality) {
+          confidence = LEGACY_QUALITY_MAP[String(data.quality)] ?? null;
+        }
+
+        // Resolve source_url: check both flat and nested forms
+        const sourceUrl = String(
+          data.source_url ?? (data.source as Frontmatter | undefined)?.url ?? "",
+        );
+
+        // Resolve date_captured: check both flat and nested forms
+        const dateCaptured = String(
+          data.date_captured ?? (data.dates as Frontmatter | undefined)?.captured ?? "",
+        );
+
         items.push({
           slug: slugFromFilename(filename),
           title: String(data.title ?? filename.replace(/\.md$/i, "")),
-          type: String(data.type ?? ""),
+          type: resolvedType,
           topic: topics[0] ?? "",
           tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-          visibility: String(data.visibility ?? "private"),
-          quality: String(data.quality ?? ""),
+          confidence,
           summary: String(data.summary ?? ""),
           securityFindings: String(data.security_findings ?? ""),
           filename,
-          dateCaptured: String(data.date_captured ?? ""),
-          sourceUrl: String(data.source_url ?? ""),
+          dateCaptured,
+          sourceUrl,
         });
       } catch (err) {
         console.error(`Failed to read queue file ${filename}:`, err);

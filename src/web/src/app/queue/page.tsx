@@ -5,26 +5,33 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { QueueItem } from "@/lib/queue";
 
-function VisibilityIcon({ visibility }: { visibility: string }) {
-  if (visibility === "public") {
-    return <span className="text-green-500" title="Public" aria-label="Public">&#x1f513;</span>;
-  }
-  if (visibility === "shared") {
-    return <span className="text-blue-500" title="Shared" aria-label="Shared">&#x1f517;</span>;
-  }
-  return <span className="text-gray-400" title="Private" aria-label="Private">&#x1f512;</span>;
+function ConfidenceBadge({ confidence }: { confidence: number | null }) {
+  if (confidence === null) return null;
+  const label = confidence >= 0.7 ? "High" : confidence >= 0.4 ? "Med" : "Low";
+  const colors =
+    confidence >= 0.7
+      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+      : confidence >= 0.4
+        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${colors}`}>
+      {label} ({confidence})
+    </span>
+  );
 }
 
 function TypeBadge({ type }: { type: string }) {
   if (!type) return null;
   const colorMap: Record<string, string> = {
     article: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    tutorial: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
     reference: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
     tool: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    video: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    film: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
     note: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
     bookmark: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+    thread: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+    repo: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   };
   const colors = colorMap[type] ?? "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
   return (
@@ -174,8 +181,8 @@ export default function QueuePage() {
                     {item.title || "Untitled"}
                   </h3>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <VisibilityIcon visibility={item.visibility} />
                     <TypeBadge type={item.type} />
+                    <ConfidenceBadge confidence={item.confidence} />
                     {item.topic && (
                       <span className="text-xs text-gray-500 dark:text-gray-400">{item.topic}</span>
                     )}

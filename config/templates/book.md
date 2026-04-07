@@ -1,60 +1,58 @@
 ---
-id: "{{ id }}"
+# Book template — derived from universal.md
+# For: book notes, reviews, summaries
+
+# Tier 1
+uid: ""
 title: "{{ title }}"
-aliases: []
-created: {{ created }}
-modified: {{ modified }}
-published: ""
-source_date: {{ source_date }}
 type: book
-status: qualifying
-maturity: raw
-para: resources
-visibility: private
-topics: []
 tags: []
-mocs: []
-summary: ""
-key_points: []
-source_url: "{{ source_url }}"
-source_type: "{{ source_type }}"
-source_domain: "{{ source_domain }}"
-author: "{{ author }}"
-quality: medium
-qualified_by: ""
-qualification_notes: ""
+status: inbox
+dates:
+  created: {{ created }}
+  captured: {{ captured }}
+  processed: null
+  modified: {{ created }}
+  published: null
+
+# Tier 2 — book priority fields
+source:
+  type: "{{ source_type }}"
+  url: ""
+  author: "{{ author }}"
+  publisher: "{{ publisher }}"
+  via: ""
+  context: ""
+para: resources
+topics: []
+importance: 3
+confidence: 0.8
+content_stage: literature
 entities:
   people: []
   concepts: []
   organizations: []
   tools: []
-related: []
-isbn: "{{ isbn }}"
-publisher: "{{ publisher }}"
-pages: {{ pages }}
-genre: "{{ genre }}"
-rating: {{ rating }}
+  places: []
+engagement:
+  status: unread
+  rating: null
+summary: ""
+key_claims: []
+questions: []
+action_items: []
+connections:
+  supports: []
+  contradicts: []
+  extends: []
+  supersedes: []
+  inspired_by: []
+  related: []
+version: 1
 ---
 
-# {{ title }}
-
-> {{ summary }}
-
-## Highlights
-
-> {{ quote }}
-
-{{ annotation }}
-
-## Key Takeaways
-
--
+{{ content }}
 
 ## Connections
 
-- Related:
-
-## Sources
-
-- ISBN: {{ isbn }}
-- Author: {{ author }}
+(none identified)

@@ -5,9 +5,9 @@ Watches for notification JSON files written by the pipeline watcher,
 sends Telegram messages with AI recommendations, and handles user
 responses to approve, modify, reject, or defer queue items.
 
-Supports visibility (private/shared/public) and maturity (fleeting/permanent)
-controls. Default approval ("ok") sends items to fleeting; "approve permanent"
-or "publish" sends directly to the resources tree.
+Supports visibility (private/shared/public) and content_stage (fleeting/literature/
+evergreen/reference) controls. Default approval ("ok") sends items to fleeting;
+"approve permanent" or "publish" sends directly to the resources tree.
 
 Usage::
 
@@ -55,7 +55,7 @@ _deferred_tasks: dict[int, asyncio.Task] = {}  # type: ignore[type-arg]
 _VALID_VISIBILITIES = {"private", "shared", "public"}
 
 # Valid maturity values
-_VALID_MATURITIES = {"raw", "fleeting", "permanent"}
+_VALID_MATURITIES = {"fleeting", "literature", "evergreen", "reference"}
 
 
 # ---------------------------------------------------------------------------
@@ -224,7 +224,7 @@ def _move_to_fleeting(
 ) -> str | None:
     """Move a queue file to the fleeting directory.
 
-    Updates frontmatter status to 'fleeting' and maturity to 'fleeting'.
+    Updates frontmatter status to 'draft' and content_stage to 'fleeting'.
 
     Args:
         vault_path: Absolute path to the vault root.
@@ -251,10 +251,9 @@ def _move_to_fleeting(
             parts = content.split("---", 2)
             if len(parts) >= 3:
                 fm = yaml.safe_load(parts[1]) or {}
-                fm["status"] = "fleeting"
-                fm["maturity"] = "fleeting"
+                fm["status"] = "draft"
+                fm["content_stage"] = "fleeting"
                 fm["modified"] = now
-                fm["qualified_by"] = "user"
                 # Apply any recommended fields from data
                 if data.get("recommended_type"):
                     fm["type"] = data["recommended_type"]
@@ -263,9 +262,7 @@ def _move_to_fleeting(
                 if data.get("recommended_tags"):
                     fm["tags"] = data["recommended_tags"]
                 if data.get("recommended_quality"):
-                    fm["quality"] = data["recommended_quality"]
-                if data.get("recommended_visibility"):
-                    fm["visibility"] = data["recommended_visibility"]
+                    fm["confidence"] = data["recommended_quality"]
                 if data.get("recommended_summary"):
                     fm["summary"] = data["recommended_summary"]
                 new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
@@ -290,7 +287,7 @@ def _move_to_published(
 ) -> str | None:
     """Move a queue file to its permanent location in the resources tree.
 
-    Updates frontmatter status to 'published', maturity to 'permanent',
+    Updates frontmatter status to 'published', content_stage to 'evergreen',
     and sets timestamps.
 
     Args:
@@ -323,19 +320,16 @@ def _move_to_published(
             if len(parts) >= 3:
                 fm = yaml.safe_load(parts[1]) or {}
                 fm["status"] = "published"
-                fm["maturity"] = "permanent"
+                fm["content_stage"] = "evergreen"
                 fm["published"] = now
                 fm["modified"] = now
-                fm["qualified_by"] = "user"
                 fm["type"] = content_type
                 if data.get("recommended_topic"):
                     fm["topics"] = [data["recommended_topic"]]
                 if data.get("recommended_tags"):
                     fm["tags"] = data["recommended_tags"]
                 if data.get("recommended_quality"):
-                    fm["quality"] = data["recommended_quality"]
-                if data.get("recommended_visibility"):
-                    fm["visibility"] = data["recommended_visibility"]
+                    fm["confidence"] = data["recommended_quality"]
                 if data.get("recommended_summary"):
                     fm["summary"] = data["recommended_summary"]
                 new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
@@ -378,7 +372,6 @@ def _move_to_rejected(vault_path: str, queue_dir: str, archive_dir: str, filenam
                 fm = yaml.safe_load(parts[1]) or {}
                 fm["status"] = "rejected"
                 fm["modified"] = datetime.now(UTC).isoformat()
-                fm["qualified_by"] = "user"
                 new_yaml = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
                 content = f"---\n{new_yaml}---{parts[2]}"
 
@@ -402,30 +395,33 @@ def _pluralize_type(content_type: str) -> str:
     """
     plurals = {
         "article": "articles",
-        "paper": "papers",
-        "tutorial": "tutorials",
+        "concept": "concepts",
         "reference": "references",
-        "thought": "thoughts",
         "note": "notes",
-        "video": "videos",
-        "podcast": "podcasts",
-        "tweet": "tweets",
-        "social-post": "social-posts",
-        "discussion": "discussions",
-        "url": "urls",
-        "github-repo": "github-repos",
-        "github-issue": "github-issues",
-        "code-snippet": "code-snippets",
-        "tool": "tools",
-        "recipe": "recipes",
-        "product": "products",
-        "place": "places",
-        "event": "events",
+        "quote": "quotes",
+        "project": "projects",
+        "decision": "decisions",
+        "meeting": "meetings",
+        "daily": "dailies",
+        "journal": "journals",
+        "moc": "mocs",
         "person": "people",
+        "organization": "organizations",
+        "tool": "tools",
+        "place": "places",
         "book": "books",
-        "course": "courses",
-        "image": "images",
-        "pdf": "pdfs",
+        "film": "films",
+        "podcast": "podcasts",
+        "thread": "threads",
+        "repo": "repos",
+        "email": "emails",
+        "recipe": "recipes",
+        "event": "events",
+        "health": "health",
+        "financial": "financial",
+        "dream": "dreams",
+        "collection": "collections",
+        "synthesis": "syntheses",
     }
     return plurals.get(content_type, f"{content_type}s")
 
@@ -457,9 +453,9 @@ def _list_queue_items(vault_path: str, queue_dir: str) -> list[dict]:
                 "title": fm.get("title", f.stem),
                 "content_type": fm.get("type", fm.get("content_type", "unknown")),
                 "topics": fm.get("topics", []),
-                "status": fm.get("status", "qualifying"),
+                "status": fm.get("status", "inbox"),
                 "visibility": fm.get("visibility", "private"),
-                "maturity": fm.get("maturity", "raw"),
+                "content_stage": fm.get("content_stage", fm.get("maturity", "fleeting")),
             }
         )
     return items
@@ -811,6 +807,7 @@ def is_qualification_response(chat_id: int, text: str) -> bool:
         "quality ",
         "visibility ",
         "maturity ",
+        "content_stage ",
         "later ",
         "approve ",
     )
@@ -991,17 +988,18 @@ async def handle_qualification_response(
             await message.answer(msg, parse_mode="MarkdownV2")
             return True
 
-    # --- maturity <level> ---
-    if text_lower.startswith("maturity "):
-        new_mat = text[9:].strip().lower()
+    # --- maturity / content_stage <level> ---
+    if text_lower.startswith("maturity ") or text_lower.startswith("content_stage "):
+        prefix_len = 14 if text_lower.startswith("content_stage ") else 9
+        new_mat = text[prefix_len:].strip().lower()
         if new_mat in _VALID_MATURITIES:
-            data["recommended_maturity"] = new_mat
+            data["recommended_content_stage"] = new_mat
             _active_qualifications[chat_id] = data
             _update_queue_frontmatter(
                 settings.vault.path,
                 settings.vault.queue_dir,
                 data["filename"],
-                {"maturity": new_mat},
+                {"content_stage": new_mat},
             )
             msg = _format_updated_message(data, web_base_url=settings.web.public_url)
             await message.answer(msg, parse_mode="MarkdownV2")
@@ -1127,15 +1125,15 @@ def _resolve_target(
                 settings.vault.path, settings.vault.queue_dir, candidate.name
             )
             return {
-                "id": fm.get("id", ""),
+                "uid": fm.get("uid", fm.get("id", "")),
                 "filename": candidate.name,
                 "title": fm.get("title", candidate.stem),
                 "recommended_type": fm.get("type", fm.get("content_type", "article")),
                 "recommended_topic": (fm.get("topics", [None]) or [None])[0] or "",
                 "recommended_tags": fm.get("tags", []),
-                "recommended_quality": fm.get("quality", "medium"),
+                "recommended_quality": str(fm.get("confidence", fm.get("quality", "0.5"))),
                 "recommended_visibility": fm.get("visibility", "private"),
-                "recommended_maturity": fm.get("maturity", "raw"),
+                "recommended_content_stage": fm.get("content_stage", fm.get("maturity", "fleeting")),
                 "recommended_summary": fm.get("summary", ""),
                 "source_url": fm.get("source_url", ""),
                 "source_type": fm.get("source_type", ""),
@@ -1146,15 +1144,15 @@ def _resolve_target(
         if target_name.lower() in f.stem.lower():
             fm = _read_queue_frontmatter(settings.vault.path, settings.vault.queue_dir, f.name)
             return {
-                "id": fm.get("id", ""),
+                "uid": fm.get("uid", fm.get("id", "")),
                 "filename": f.name,
                 "title": fm.get("title", f.stem),
                 "recommended_type": fm.get("type", fm.get("content_type", "article")),
                 "recommended_topic": (fm.get("topics", [None]) or [None])[0] or "",
                 "recommended_tags": fm.get("tags", []),
-                "recommended_quality": fm.get("quality", "medium"),
+                "recommended_quality": str(fm.get("confidence", fm.get("quality", "0.5"))),
                 "recommended_visibility": fm.get("visibility", "private"),
-                "recommended_maturity": fm.get("maturity", "raw"),
+                "recommended_content_stage": fm.get("content_stage", fm.get("maturity", "fleeting")),
                 "recommended_summary": fm.get("summary", ""),
                 "source_url": fm.get("source_url", ""),
                 "source_type": fm.get("source_type", ""),
