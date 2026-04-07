@@ -1,4 +1,4 @@
-"""``bg`` CLI entry point — Typer application with all Phase 1 commands."""
+"""``bg`` CLI entry point — Typer application with all commands."""
 
 from __future__ import annotations
 
@@ -14,7 +14,18 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-# Global state for --agent flag (no-op in Phase 1)
+# ---------------------------------------------------------------------------
+# bg think subcommand group
+# ---------------------------------------------------------------------------
+
+think_app = typer.Typer(
+    name="think",
+    help="Thinking tools — structured analysis backed by FalkorDB.",
+    no_args_is_help=True,
+)
+app.add_typer(think_app, name="think")
+
+# Global state for --agent flag (no-op in Phase 1/2)
 _agent_enabled = False
 
 
@@ -189,6 +200,78 @@ def ingest(
     _print_result(IngestCommand().run_without_agent(
         url_or_path=url_or_path, title=title,
     ))
+
+
+# ---------------------------------------------------------------------------
+# bg think commands
+# ---------------------------------------------------------------------------
+
+
+@think_app.command()
+def challenge(
+    topic: Annotated[str, typer.Argument(help="Topic to challenge.")],
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Surface counter-evidence for a topic."""
+    from src.cli.commands.think.challenge import ChallengeCommand
+
+    _print_result(ChallengeCommand().run_without_agent(topic=topic, json=json))
+
+
+@think_app.command()
+def emerge(
+    period: Annotated[int, typer.Option(help="Look-back period in days.")] = 30,
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Detect emerging patterns in the knowledge graph."""
+    from src.cli.commands.think.emerge import EmergeCommand
+
+    _print_result(EmergeCommand().run_without_agent(period=period, json=json))
+
+
+@think_app.command()
+def connect(
+    a: Annotated[str, typer.Argument(help="First concept.")],
+    b: Annotated[str, typer.Argument(help="Second concept.")],
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Find paths between two concepts."""
+    from src.cli.commands.think.connect import ConnectCommand
+
+    _print_result(ConnectCommand().run_without_agent(a=a, b=b, json=json))
+
+
+@think_app.command()
+def graduate(
+    idea: Annotated[str, typer.Argument(help="Idea slug, uid, or partial title.")],
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Context for promoting an idea to permanent status."""
+    from src.cli.commands.think.graduate import GraduateCommand
+
+    _print_result(GraduateCommand().run_without_agent(idea=idea, json=json))
+
+
+@think_app.command()
+def forecast(
+    topic: Annotated[str, typer.Argument(help="Topic to forecast.")],
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Topic frequency timeline and trend detection."""
+    from src.cli.commands.think.forecast import ForecastCommand
+
+    _print_result(ForecastCommand().run_without_agent(topic=topic, json=json))
+
+
+@think_app.command()
+def audit(
+    claim: Annotated[str, typer.Argument(help="Claim text to audit.")],
+    json: Annotated[bool, typer.Option("--json", help="Output as JSON.")] = False,
+) -> None:
+    """Verify a claim against the knowledge graph."""
+    from src.cli.commands.think.audit import AuditCommand
+
+    _print_result(AuditCommand().run_without_agent(claim=claim, json=json))
 
 
 if __name__ == "__main__":
