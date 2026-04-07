@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import json
-import subprocess
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from src.pipeline.markdown_parser import ParsedDocument
 from src.pipeline.processor import (
@@ -216,12 +215,10 @@ class TestProcessDocument:
             content="About machine learning and python code development.",
             metadata={},
         )
-        with patch(
-            "src.pipeline.processor.subprocess.run",
-            side_effect=FileNotFoundError("claude not found"),
-        ):
+        mock_agent = MagicMock()
+        mock_agent.rewrite.side_effect = RuntimeError("agent not available")
+        with patch("src.pipeline.processor.load_agent", return_value=mock_agent):
             enriched = process_document(doc, enable_llm=True)
-        # Should still produce enriched output via fallback
         assert isinstance(enriched, ParsedDocument)
 
     def test_falls_back_on_timeout(self) -> None:
@@ -231,10 +228,9 @@ class TestProcessDocument:
             content="About python programming and code libraries.",
             metadata={},
         )
-        with patch(
-            "src.pipeline.processor.subprocess.run",
-            side_effect=subprocess.TimeoutExpired(cmd="claude", timeout=60),
-        ):
+        mock_agent = MagicMock()
+        mock_agent.rewrite.side_effect = TimeoutError("agent timeout")
+        with patch("src.pipeline.processor.load_agent", return_value=mock_agent):
             enriched = process_document(doc, enable_llm=True)
         assert isinstance(enriched, ParsedDocument)
 
@@ -245,13 +241,9 @@ class TestProcessDocument:
             content="About python and machine learning topics.",
             metadata={},
         )
-        mock_result = subprocess.CompletedProcess(
-            args=["claude"],
-            returncode=0,
-            stdout="not valid json at all",
-            stderr="",
-        )
-        with patch("src.pipeline.processor.subprocess.run", return_value=mock_result):
+        mock_agent = MagicMock()
+        mock_agent.rewrite.return_value = "not valid json at all"
+        with patch("src.pipeline.processor.load_agent", return_value=mock_agent):
             enriched = process_document(doc, enable_llm=True)
         assert isinstance(enriched, ParsedDocument)
 
@@ -274,13 +266,9 @@ class TestProcessDocument:
                 "para": "resources",
             }
         )
-        mock_result = subprocess.CompletedProcess(
-            args=["claude"],
-            returncode=0,
-            stdout=llm_output,
-            stderr="",
-        )
-        with patch("src.pipeline.processor.subprocess.run", return_value=mock_result):
+        mock_agent = MagicMock()
+        mock_agent.rewrite.return_value = llm_output
+        with patch("src.pipeline.processor.load_agent", return_value=mock_agent):
             enriched = process_document(doc, enable_llm=True)
         assert enriched.metadata["summary"] == "AI-generated summary."
         assert enriched.metadata["topics"] == ["technology/ai-ml"]
@@ -294,12 +282,8 @@ class TestProcessDocument:
             metadata={},
         )
         fenced = "```json\n" + json.dumps({"summary": "Fenced output."}) + "\n```"
-        mock_result = subprocess.CompletedProcess(
-            args=["claude"],
-            returncode=0,
-            stdout=fenced,
-            stderr="",
-        )
-        with patch("src.pipeline.processor.subprocess.run", return_value=mock_result):
+        mock_agent = MagicMock()
+        mock_agent.rewrite.return_value = fenced
+        with patch("src.pipeline.processor.load_agent", return_value=mock_agent):
             enriched = process_document(doc, enable_llm=True)
         assert enriched.metadata["summary"] == "Fenced output."

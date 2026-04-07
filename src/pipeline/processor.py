@@ -1,21 +1,21 @@
 """Document processor — AI-powered or fallback entity extraction and categorisation.
 
-When ``enable_llm=True``, invokes Claude Code headless to extract entities,
-assign topics, and generate a summary.  When LLM processing is disabled (or
-fails), a rule-based fallback extracts keywords, basic entities, and a
-topic guess from the document content.
+When ``enable_llm=True``, uses the ``LLMAgent`` interface (configured via
+``config/agent.toml``) to extract entities, assign topics, and generate a
+summary.  When LLM processing is disabled (or fails), a rule-based fallback
+extracts keywords, basic entities, and a topic guess from the document content.
 """
 
 from __future__ import annotations
 
 import json
 import re
-import subprocess
 import time
 from dataclasses import replace
 
 import structlog
 
+from src.cli.agent import load_agent
 from src.pipeline.markdown_parser import ParsedDocument
 
 logger = structlog.get_logger(__name__)
@@ -187,10 +187,10 @@ def _fallback_process(doc: ParsedDocument) -> ParsedDocument:
 
 
 # ---------------------------------------------------------------------------
-# LLM-powered processing via Claude Code headless
+# LLM-powered processing via LLMAgent interface
 # ---------------------------------------------------------------------------
 
-_CLAUDE_PROMPT = """Analyze this document and return ONLY a JSON object (no markdown fences):
+_EXTRACTION_PROMPT = """Analyze this document and return ONLY a JSON object (no markdown fences):
 {{
   "summary": "2-3 sentence summary",
   "topics": ["topic/subtopic"],
@@ -206,11 +206,9 @@ Document title: {title}
 Document content:
 {content}"""
 
-_CLAUDE_TIMEOUT_SECONDS = 60
-
 
 def _llm_process(doc: ParsedDocument) -> ParsedDocument:
-    """Enrich a document using Claude Code headless for AI extraction.
+    """Enrich a document using the LLMAgent interface for AI extraction.
 
     Args:
         doc: Parsed markdown document.
@@ -219,24 +217,19 @@ def _llm_process(doc: ParsedDocument) -> ParsedDocument:
         A new ``ParsedDocument`` with AI-enriched metadata.
 
     Raises:
-        RuntimeError: If the Claude Code subprocess fails.
+        RuntimeError: If the agent call fails.
     """
-    prompt = _CLAUDE_PROMPT.format(
+    agent = load_agent()
+    prompt = _EXTRACTION_PROMPT.format(
         title=doc.title,
-        content=doc.content[:8000],  # Limit content length for the prompt
+        content=doc.content[:8000],
     )
 
-    result = subprocess.run(  # noqa: S603
-        ["claude", "-p", prompt],  # noqa: S607
-        capture_output=True,
-        text=True,
-        timeout=_CLAUDE_TIMEOUT_SECONDS,
+    raw_output = agent.rewrite(
+        existing="",
+        context=prompt,
+        prompt="Extract structured metadata from this document. Return only JSON.",
     )
-
-    if result.returncode != 0:
-        raise RuntimeError(f"Claude Code exited with code {result.returncode}: {result.stderr}")
-
-    raw_output = result.stdout.strip()
 
     # Strip markdown code fences if present
     if raw_output.startswith("```"):
@@ -274,7 +267,7 @@ def process_document(doc: ParsedDocument, enable_llm: bool = True) -> ParsedDocu
 
     Args:
         doc: A parsed markdown document.
-        enable_llm: Whether to attempt Claude Code headless processing.
+        enable_llm: Whether to attempt LLM-powered processing.
 
     Returns:
         An enriched ``ParsedDocument`` with topics, entities, and summary.
@@ -295,12 +288,10 @@ def process_document(doc: ParsedDocument, enable_llm: bool = True) -> ParsedDocu
             )
             return enriched
         except (
-            subprocess.TimeoutExpired,
-            subprocess.SubprocessError,
             json.JSONDecodeError,
             RuntimeError,
-            FileNotFoundError,
             KeyError,
+            Exception,
         ) as exc:
             logger.warning(
                 "llm_processing_failed_using_fallback",

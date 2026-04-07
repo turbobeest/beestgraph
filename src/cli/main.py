@@ -202,6 +202,28 @@ def ingest(
     ))
 
 
+@app.command()
+def migrate(
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Report only, no changes.")] = False,
+    uid_only: Annotated[bool, typer.Option("--uid-only", help="Backfill uid fields only.")] = False,
+    frontmatter: Annotated[
+        bool, typer.Option("--frontmatter", help="Full frontmatter upgrade.")
+    ] = False,
+    all_: Annotated[bool, typer.Option("--all", help="uid + frontmatter together.")] = False,
+    write: Annotated[
+        bool, typer.Option("--write", help="Apply changes (default is read-only).")
+    ] = False,
+    path: Annotated[str | None, typer.Option("--path", help="Migrate a single file.")] = None,
+) -> None:
+    """Migrate vault documents to the current frontmatter spec."""
+    from src.cli.commands.migrate import MigrateCommand
+
+    _print_result(MigrateCommand().run_without_agent(
+        dry_run=dry_run, uid_only=uid_only, frontmatter=frontmatter,
+        all=all_, write=write, path=path,
+    ))
+
+
 # ---------------------------------------------------------------------------
 # bg think commands
 # ---------------------------------------------------------------------------

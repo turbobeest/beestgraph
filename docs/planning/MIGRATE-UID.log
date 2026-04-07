@@ -1,0 +1,127 @@
+2026-04-07 12:46:22 [info     ] settings_loaded                config_path=/home/turbobeest/beestgraph/config/beestgraph.yml log_level=INFO vault_path=/home/turbobeest/vault
+Migration [APPLIED]: 64 files scanned, 60 changed, 3 unchanged
+
+  02-queue/3D Knowledge Graph Viewer.md
+    + uid: generated 20260325105114
+  02-queue/Beestgraph Knowledge Standard (BKS).md
+    + uid: generated 20260325105122
+  02-queue/CalDAV Integration.md
+    + uid: generated 20260325105138
+  02-queue/Content Types Taxonomy.md
+    + uid: generated 20260325105144
+  02-queue/Diary of Bygones.md
+    + uid: generated 20260325105151
+  02-queue/Heartbeat System.md
+    + uid: generated 20260325105159
+  02-queue/LLM Content Boundaries.md
+    + uid: generated 20260325105207
+  02-queue/Maps of Content (MOCs).md
+    + uid: generated 20260325105213
+  02-queue/Markdown Auto-Formatter.md
+    + uid: generated 20260325105222
+  02-queue/Mobile Qualification Review Page.md
+    + uid: generated 20260325110427
+  02-queue/OpenClaw Identity.md
+    + uid: generated 20260325105244
+  02-queue/PARA Method in beestgraph.md
+    + uid: generated 20260325105253
+  02-queue/Pluggable Notification and Review Channels.md
+    + uid: generated 20260325110842
+  02-queue/Privacy Barriers.md
+    + uid: generated 20260325105300
+  02-queue/Qualification Pipeline.md
+    + uid: generated 20260325105307
+  02-queue/Security Scanner.md
+    + uid: generated 20260325105323
+  02-queue/Telegram as Capture Source.md
+    + uid: generated 20260325105932
+  02-queue/The Herd Protocol.md
+    + uid: generated 20260325105331
+  02-queue/Topic Tree Organization.md
+    + uid: generated 20260325105338
+  02-queue/Vault Folder Architecture.md
+    + uid: generated 20260325105345
+  02-queue/Zettelkasten Method in beestgraph.md
+    + uid: generated 20260325105358
+  02-queue/beestgraph Parking Lot.md
+    + uid: generated 20260325105925
+  02-queue/botmeetbot.com.md
+    + uid: generated 20260325105131
+  02-queue/falkordb-python-tutorial.md
+    + uid: generated 20260325013335
+  02-queue/obsidian-headless-cli.md
+    + uid: generated 20260325105230
+  02-queue/obsidian-workflows.md
+    + uid: generated 20260325105238
+  02-queue/qualification-test.md
+    + uid: generated 20260325004153
+  02-queue/raspberry-pi-homelab.md
+    + uid: generated 20260325105316
+  02-queue/security-test.md
+    + uid: generated 20260325102044
+  02-queue/slim-notification-test.md
+    + uid: generated 20260325112103
+  02-queue/watcher-test.md
+    + uid: generated 20260325105350
+  04-daily/2026-03-24.md
+    + uid: generated 20260324220150
+  05-projects/Test from CLI.md
+    + uid: generated 20260324220237
+  07-resources/articles/technology/ai-ml/docker-networking.md
+    + uid: generated 20260325005439
+  07-resources/meta/tools/live-watcher-test.md
+    + uid: generated 20260323022607
+  07-resources/meta/tools/production-test.md
+    + uid: generated 20260323035411
+  Camping List.md
+    + uid: generated 20260303150212
+  Clippings/Dagre Layout.md
+    + uid: generated 20260303131951
+  Clippings/dagrejsdagre Directed graph layout for JavaScript.md
+    + uid: generated 20260303131506
+  Clippings/ferdous-alamGenCAD.md
+    + uid: generated 20260316141648
+  Eat-Drink-Merriment/Alcohol Notes.md
+    + uid: generated 20260303215903
+  Eat-Drink-Merriment/Blueprint Protocol.md
+    + uid: generated 20260303142655
+  Eat-Drink-Merriment/Diet Menu.md
+    + uid: generated 20260303142716
+  Eat-Drink-Merriment/Food & Nutrition.md
+    + uid: generated 20260303142038
+  Eat-Drink-Merriment/Food Sourcing.md
+    + uid: generated 20260303142906
+  Eat-Drink-Merriment/Good Food List.md
+    + uid: generated 20260303142751
+  Eat-Drink-Merriment/Naughty Food List.md
+    + uid: generated 20260303142813
+  Eat-Drink-Merriment/Recipes - Desserts.md
+    + uid: generated 20260303142504
+  Eat-Drink-Merriment/Recipes - Meals.md
+    + uid: generated 20260303142408
+  Eat-Drink-Merriment/Recipes - Sauces & Dips.md
+    + uid: generated 20260303142611
+  Eat-Drink-Merriment/Restaurants - RI.md
+    + uid: generated 20260303142918
+  Entertainment/Bucket List.md
+    + uid: generated 20260325004606
+  Entertainment/Entertainment Index.md
+    + uid: generated 20260303150530
+  Entertainment/Reading List.md
+    + uid: generated 20260303150621
+  Entertainment/Watchlist - Movies.md
+    + uid: generated 20260303150552
+  Entertainment/Watchlist - TV Shows.md
+    + uid: generated 20260303150606
+  GH Links.md
+    + uid: generated 20260303170439
+  Notion Migration Tracker.md
+    + uid: generated 20260303170453
+  Obsidian Standards.md
+    + uid: generated 20260303131121
+ERROR /home/turbobeest/vault/Templates/Default Note.md: while constructing a mapping
+  in "<unicode string>", line 3, column 10
+found unhashable key
+  in "<unicode string>", line 3, column 11
+  heartbeat.md
+    + uid: generated 20260407164550

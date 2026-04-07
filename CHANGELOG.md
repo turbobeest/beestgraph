@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Graph schema definition with 7 node types and 9 relationship types
 - MCP server configuration for keep.md, Filesystem, and FalkorDB
 - System architecture diagram (Graphviz DOT + SVG)
-- Claude Code agent context (`CLAUDE.md`) with full project specifications
+- System context documentation (`CONTEXT.md`) with full project specifications
 - Documentation: architecture deep-dive, setup guide, configuration reference, schema reference, integration guides, troubleshooting
 - GitHub Actions CI workflow (ruff lint + pytest)
 - GitHub issue templates for bug reports and feature requests

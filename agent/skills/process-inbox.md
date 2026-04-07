@@ -68,7 +68,7 @@ Expected output: a 2-3 sentence summary.
 
 #### 2f. Build complete frontmatter
 
-Construct the full YAML frontmatter block using the template from `CLAUDE.md`. Merge any pre-existing frontmatter values with newly extracted ones. Set:
+Construct the full YAML frontmatter block using the template from `CONTEXT.md`. Merge any pre-existing frontmatter values with newly extracted ones. Set:
 
 - `date_processed`: current ISO 8601 timestamp
 - `status`: `published`
