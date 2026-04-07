@@ -193,12 +193,18 @@ def archive(
 def ingest(
     url_or_path: Annotated[str, typer.Argument(help="URL or file path to ingest.")],
     title: Annotated[str | None, typer.Option(help="Override title.")] = None,
+    active: Annotated[
+        bool, typer.Option("--active", help="Run phases 1-3 (entity updates, contradictions).")
+    ] = False,
+    use_agent: Annotated[
+        bool, typer.Option("--agent", help="Run phases 1-5 (full active ingest with LLM).")
+    ] = False,
 ) -> None:
     """Ingest a URL or file through the pipeline."""
     from src.cli.commands.ingest import IngestCommand
 
     _print_result(IngestCommand().run_without_agent(
-        url_or_path=url_or_path, title=title,
+        url_or_path=url_or_path, title=title, active=active, use_agent=use_agent,
     ))
 
 
