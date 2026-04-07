@@ -27,8 +27,46 @@ from src.pipeline.classifier import classify_document
 from src.pipeline.formatter import format_on_capture
 from src.pipeline.markdown_parser import ParsedDocument, parse_file
 from src.pipeline.qualification import QualificationQueue
+from src.pipeline.zettelkasten import generate_id
 
 logger = structlog.get_logger(__name__)
+
+
+def _ensure_uid(doc: ParsedDocument, filepath: Path) -> ParsedDocument:
+    """Ensure the document has a ``uid`` field, generating one if missing.
+
+    When a uid is generated it is written back into the file's frontmatter
+    so that subsequent reads pick it up.  The document is re-parsed
+    afterwards so all downstream code sees the uid in ``doc.metadata``.
+
+    Args:
+        doc: Parsed document that may lack a uid.
+        filepath: On-disk path for writing the uid back.
+
+    Returns:
+        The (possibly updated) ParsedDocument.
+    """
+    if doc.metadata.get("uid"):
+        return doc
+
+    import frontmatter as fm
+
+    uid = generate_id()
+    raw = filepath.read_text(encoding="utf-8")
+    post = fm.loads(raw)
+    post.metadata["uid"] = uid
+    filepath.write_text(fm.dumps(post), encoding="utf-8")
+    logger.info("uid_generated", path=str(filepath), uid=uid)
+
+    # Re-parse so the returned doc includes the new uid
+    vault_root = filepath.parents[1] if filepath.parent.name else filepath.parent
+    # Best-effort: caller will supply vault_root via settings, but we can
+    # derive it from the original doc.path relationship.
+    from dataclasses import replace as _replace
+
+    updated_meta = dict(doc.metadata)
+    updated_meta["uid"] = uid
+    return _replace(doc, metadata=updated_meta)
 
 
 # ---------------------------------------------------------------------------
@@ -81,6 +119,9 @@ def _handle_new_file_legacy(filepath: Path, settings: BeestgraphSettings) -> Non
     except (FileNotFoundError, ValueError) as exc:
         logger.error("parse_failed", path=str(filepath), error=str(exc))
         return
+
+    # Ensure document has a zettelkasten uid
+    doc = _ensure_uid(doc, filepath)
 
     # Apply capture formatting and write back
     formatted_body = format_on_capture(doc.content, title=doc.title)
@@ -152,6 +193,9 @@ def _handle_new_file(filepath: Path, settings: BeestgraphSettings) -> None:
     except (FileNotFoundError, ValueError) as exc:
         logger.error("parse_failed", path=str(filepath), error=str(exc))
         return
+
+    # 1a. Ensure document has a zettelkasten uid
+    doc = _ensure_uid(doc, filepath)
 
     # 1b. Apply capture formatting and write back
     formatted_body = format_on_capture(doc.content, title=doc.title)

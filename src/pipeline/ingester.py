@@ -38,7 +38,34 @@ def _to_content_stage(value: object) -> str:
 # Cypher templates (all use MERGE for idempotency)
 # ---------------------------------------------------------------------------
 
-_MERGE_DOCUMENT = """
+_MERGE_DOCUMENT_BY_UID = """
+MERGE (d:Document {uid: $uid})
+ON CREATE SET d.path            = $path,
+              d.created_at      = $created
+ON MATCH  SET d.path            = $path,
+              d.updated_at      = $processed
+SET d.title             = $title,
+    d.content           = $content,
+    d.summary           = $summary,
+    d.status            = $status,
+    d.para              = $para,
+    d.source_type       = $source_type,
+    d.source_url        = $source_url,
+    d.author            = $author,
+    d.type              = $type,
+    d.content_stage     = $content_stage,
+    d.importance        = $importance,
+    d.confidence        = $confidence,
+    d.engagement_status = $engagement_status,
+    d.created           = $created,
+    d.processed         = $processed,
+    d.modified          = $modified,
+    d.published         = $published,
+    d.captured          = $captured
+RETURN d.path AS path
+"""
+
+_MERGE_DOCUMENT_BY_PATH = """
 MERGE (d:Document {path: $path})
 SET d.title             = $title,
     d.content           = $content,
@@ -289,8 +316,17 @@ class GraphIngester:
             "published": str(dates.get("published", meta.get("published_at", ""))),
             "captured": str(dates.get("captured", meta.get("date_captured", now))),
         }
-        self._graph().query(_MERGE_DOCUMENT, params)
-        logger.debug("upserted_document", path=doc.path)
+        if params["uid"]:
+            self._graph().query(_MERGE_DOCUMENT_BY_UID, params)
+        else:
+            logger.warning(
+                "legacy_document_no_uid",
+                path=doc.path,
+                msg="Document has no uid — falling back to MERGE on path. "
+                "Add a uid field to this document's frontmatter.",
+            )
+            self._graph().query(_MERGE_DOCUMENT_BY_PATH, params)
+        logger.debug("upserted_document", path=doc.path, uid=params["uid"] or "(none)")
         return doc.path
 
     def upsert_tag(self, name: str) -> str:

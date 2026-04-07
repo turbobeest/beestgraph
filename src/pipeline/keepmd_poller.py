@@ -23,11 +23,13 @@ from src.config import BeestgraphSettings, KeepMDSettings, load_settings
 from src.pipeline.ingester import GraphIngester
 from src.pipeline.markdown_parser import parse_file
 from src.pipeline.processor import process_document
+from src.pipeline.zettelkasten import generate_id
 
 logger = structlog.get_logger(__name__)
 
 _FRONTMATTER_TEMPLATE = """---
 title: "{title}"
+uid: "{uid}"
 source_url: "{source_url}"
 source_type: keepmd
 date_captured: {date_captured}
@@ -134,9 +136,11 @@ def _write_markdown(item: dict, vault_inbox: Path) -> Path:
     title = item.get("title", "Untitled")
     source_url = item.get("url", item.get("source_url", ""))
     content = item.get("content", item.get("body", ""))
+    uid = generate_id()
 
     md_content = _FRONTMATTER_TEMPLATE.format(
         title=title.replace('"', '\\"'),
+        uid=uid,
         source_url=source_url,
         date_captured=now,
         date_processed=now,
