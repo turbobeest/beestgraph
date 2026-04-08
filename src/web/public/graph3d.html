@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>beestgraph — 3D Knowledge Graph</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #060a13;
+      color: #e2e8f0;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      overflow: hidden;
+    }
+
+    #graph-container,
+    #graph-container > div,
+    #graph-container canvas {
+      position: absolute !important;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important; height: 100% !important;
+      display: block !important;
+      border: none !important; outline: none !important;
+    }
+
+    /* Panels */
+    .panel {
+      background: rgba(10, 18, 36, 0.92);
+      border: 1px solid rgba(100, 116, 139, 0.25);
+      border-radius: 8px;
+      padding: 12px;
+      backdrop-filter: blur(16px);
+    }
+
+    #controls {
+      position: fixed; top: 52px; left: 16px; z-index: 100;
+      display: flex; flex-direction: column; gap: 8px;
+      max-width: 300px;
+    }
+
+    .panel h1 { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
+    .panel .subtitle { font-size: 10px; color: #64748b; letter-spacing: 0.5px; }
+    .panel h2 {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #94a3b8; margin-bottom: 8px;
+    }
+
+    /* View buttons */
+    .view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .view-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(100, 116, 139, 0.15);
+      border-radius: 6px; padding: 5px 8px;
+      color: #94a3b8; font-size: 10px; font-family: inherit;
+      cursor: pointer; transition: all 0.15s; text-align: left;
+    }
+    .view-btn:hover { background: rgba(51, 65, 85, 0.8); color: #e2e8f0; }
+    .view-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+    }
+
+    /* Search */
+    #search-input {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(100, 116, 139, 0.15);
+      border-radius: 6px; padding: 6px 10px;
+      color: #e2e8f0; font-family: inherit; font-size: 11px; outline: none;
+    }
+    #search-input:focus { border-color: rgba(59, 130, 246, 0.5); }
+    .search-item {
+      padding: 4px 0; cursor: pointer; color: #94a3b8; font-size: 11px;
+    }
+    .search-item:hover { color: #e2e8f0; }
+
+    /* Legend */
+    .legend-item {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 9px; color: #94a3b8; padding: 2px 0; margin-right: 10px;
+    }
+    .legend-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* Stats bar */
+    #stats { position: fixed; bottom: 16px; left: 16px; z-index: 100; }
+    .stat-row {
+      display: flex; gap: 16px; font-size: 10px; color: #64748b;
+    }
+    .stat-val { color: #94a3b8; font-weight: 600; }
+
+    /* Detail panel */
+    #detail-panel {
+      position: fixed; top: 52px; right: 16px; z-index: 100;
+      max-width: 360px; max-height: calc(100vh - 68px); overflow-y: auto;
+      display: none;
+    }
+    #detail-panel.visible { display: block; }
+    .detail-header { display: flex; justify-content: space-between; align-items: center; }
+    .detail-close {
+      background: none; border: none; color: #64748b;
+      cursor: pointer; font-size: 18px; padding: 4px;
+    }
+    .detail-close:hover { color: #e2e8f0; }
+    .detail-label {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .detail-props { font-size: 11px; line-height: 1.8; }
+    .detail-props .key { color: #64748b; }
+    .detail-props .val { color: #e2e8f0; }
+    .detail-rels { margin-top: 8px; font-size: 10px; }
+    .detail-rels .rel-item {
+      padding: 3px 0; border-bottom: 1px solid rgba(100,116,139,0.1);
+      display: flex; gap: 6px; align-items: center;
+    }
+    .rel-type { color: #60a5fa; font-weight: 500; }
+    .rel-arrow { color: #475569; }
+    .rel-peer { color: #94a3b8; cursor: pointer; }
+    .rel-peer:hover { color: #e2e8f0; }
+
+    /* Loading */
+    #loading {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 200; text-align: center;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: #6366f1; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <nav id="graph-nav" style="position:fixed;top:0;left:0;right:0;height:36px;display:flex;align-items:center;z-index:150;background:rgba(6,10,19,0.9);border-bottom:1px solid rgba(100,116,139,0.15);backdrop-filter:blur(12px)">
+    <div style="padding:0 16px;font-size:13px;font-weight:700;color:#f1f5f9;border-right:1px solid rgba(100,116,139,0.15);height:100%;display:flex;align-items:center">beestgraph</div>
+    <a href="/graph3d" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#60a5fa;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;border-bottom:2px solid #3b82f6">3D Graph</a>
+    <a href="/" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Dashboard</a>
+    <a href="/queue" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Queue</a>
+  </nav>
+
+  <div id="graph-container"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div style="font-size: 12px; color: #64748b;">Loading knowledge graph...</div>
+  </div>
+
+  <div id="controls">
+    <div class="panel">
+      <h1>beestgraph</h1>
+      <div class="subtitle">3D Knowledge Graph</div>
+    </div>
+
+    <div class="panel">
+      <h2>Edge View</h2>
+      <div class="view-grid" id="view-buttons"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Search</h2>
+      <input type="text" id="search-input" placeholder="Document, topic, tag, person...">
+      <div id="search-results"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Layout</h2>
+      <div style="display:flex;gap:4px">
+        <button class="view-btn active" id="btn-labels" onclick="toggleLabels()">Labels</button>
+      </div>
+    </div>
+
+    <div class="panel" id="legend-panel">
+      <h2>3moticons</h2>
+      <div id="legend"></div>
+    </div>
+  </div>
+
+  <div id="detail-panel" class="panel">
+    <div class="detail-header">
+      <h2>Node Detail</h2>
+      <button class="detail-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="stats" class="panel">
+    <div class="stat-row">
+      <span>Nodes: <span class="stat-val" id="stat-nodes">0</span></span>
+      <span>Edges: <span class="stat-val" id="stat-edges">0</span></span>
+      <span>View: <span class="stat-val" id="stat-view">-</span></span>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/3d-force-graph@1"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIG
+    // ═══════════════════════════════════════════════════════════════
+    const API = '';
+    let currentView = 'all';
+    let graph3d = null;
+    let graphData = { nodes: [], links: [] };
+    let labelsVisible = true;
+
+    // ═══════════════════════════════════════════════════════════════
+    // BEESTGRAPH COLORS — node labels and document types
+    // ═══════════════════════════════════════════════════════════════
+
+    const DOC_TYPE_COLORS = {
+      'article':   '#3b82f6',
+      'note':      '#8b5cf6',
+      'tutorial':  '#22c55e',
+      'moc':       '#f59e0b',
+      'synthesis': '#ec4899',
+    };
+
+    const LABEL_COLORS = {
+      'Document':     '#3b82f6',
+      'Tag':          '#64748b',
+      'Topic':        '#14b8a6',
+      'Person':       '#f97316',
+      'Concept':      '#8b5cf6',
+      'Organization': '#06b6d4',
+      'Tool':         '#22c55e',
+      'Place':        '#ef4444',
+      'Source':       '#94a3b8',
+    };
+
+    const EDGE_COLORS = {
+      'TAGGED_WITH':  '#64748b',
+      'BELONGS_TO':   '#14b8a6',
+      'MENTIONS':     '#f97316',
+      'LINKS_TO':     '#3b82f6',
+      'DERIVED_FROM': '#94a3b8',
+      'SUPPORTS':     '#22c55e',
+      'CONTRADICTS':  '#ef4444',
+      'EXTENDS':      '#8b5cf6',
+      'CHILD_OF':     '#a855f7',
+      'SUBTOPIC_OF':  '#06b6d4',
+    };
+
+    function nodeColor(n) {
+      if (n.label === 'Document') {
+        const docType = n.properties && n.properties.type;
+        return DOC_TYPE_COLORS[docType] || LABEL_COLORS['Document'];
+      }
+      return LABEL_COLORS[n.label] || '#475569';
+    }
+
+    function nodeSize(n) {
+      if (n.label === 'Document') {
+        const importance = n.properties && Number(n.properties.importance);
+        if (importance && importance >= 1 && importance <= 5) {
+          return 3 + ((importance - 1) / 4) * 7; // maps 1–5 → 3–10
+        }
+        return 5;
+      }
+      if (n.label === 'Topic') return 7;
+      if (n.label === 'Tag') return 3;
+      return 4;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 3MOTICONS — Programmatic 3D mesh icons
+    // ═══════════════════════════════════════════════════════════════
+
+    function make3moticon(label, color, size) {
+      const c = new THREE.Color(color);
+      const mat = () => new THREE.MeshLambertMaterial({
+        color: c, transparent: true, opacity: 0.88,
+        emissive: c, emissiveIntensity: 0.2,
+      });
+
+      switch (label) {
+        case 'Document':     return makeDocument(size, mat());
+        case 'Tag':          return makeTag(size, mat(), c);
+        case 'Topic':        return makeGlobe(size, mat(), c);
+        case 'Person':       return makePerson(size, mat());
+        case 'Concept':      return makeLightbulb(size, mat());
+        case 'Organization': return makeBuilding(size, mat());
+        case 'Tool':         return makeGear(size, mat());
+        case 'Place':        return makePin(size, mat(), c);
+        case 'Source':       return makeLink(size, mat(), c);
+        default:             return makeSphere(size, mat());
+      }
+    }
+
+    // ─── Shape builders ────────────────────────────────────────────
+
+    function makeDocument(s, mat) {
+      const shape = new THREE.Shape();
+      shape.moveTo(-s * 0.4, -s * 0.55);
+      shape.lineTo(-s * 0.4, s * 0.55);
+      shape.lineTo(s * 0.2, s * 0.55);
+      shape.lineTo(s * 0.4, s * 0.35);
+      shape.lineTo(s * 0.4, -s * 0.55);
+      shape.closePath();
+      const geo = new THREE.ExtrudeGeometry(shape, { depth: s * 0.08, bevelEnabled: false });
+      geo.center();
+      const mesh = new THREE.Mesh(geo, mat);
+      // Folded corner indicator
+      const corner = new THREE.Mesh(
+        new THREE.BoxGeometry(s * 0.2, s * 0.2, s * 0.09),
+        mat.clone()
+      );
+      corner.material.emissiveIntensity = 0.4;
+      corner.position.set(s * 0.3, s * 0.45, 0);
+      const group = new THREE.Group();
+      group.add(mesh);
+      group.add(corner);
+      return group;
+    }
+
+    function makeTag(s, mat, c) {
+      // Pentagon tag shape
+      const shape = new THREE.Shape();
+      shape.moveTo(-s * 0.4, s * 0.5);
+      shape.lineTo(-s * 0.4, -s * 0.2);
+      shape.lineTo(0, -s * 0.55);
+      shape.lineTo(s * 0.4, -s * 0.2);
+      shape.lineTo(s * 0.4, s * 0.5);
+      shape.closePath();
+      // Hole for the pin
+      const hole = new THREE.Path();
+      hole.absarc(0, s * 0.3, s * 0.1, 0, Math.PI * 2, false);
+      shape.holes.push(hole);
+      const geo = new THREE.ExtrudeGeometry(shape, { depth: s * 0.12, bevelEnabled: false });
+      geo.center();
+      return new THREE.Mesh(geo, mat);
+    }
+
+    function makeGlobe(s, mat, c) {
+      const group = new THREE.Group();
+      // Main sphere
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(s * 0.55, 16, 12), mat);
+      group.add(sphere);
+      // Latitude rings
+      for (let i = 1; i <= 2; i++) {
+        const lat = new THREE.Mesh(
+          new THREE.TorusGeometry(s * 0.55 * Math.cos((i / 3) * Math.PI * 0.8), s * 0.03, 4, 24),
+          new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.3 })
+        );
+        lat.position.y = s * 0.55 * Math.sin((i / 3) * Math.PI * 0.8) * (i % 2 === 0 ? -1 : 1);
+        group.add(lat);
+      }
+      // Longitude ring (equator)
+      const eq = new THREE.Mesh(
+        new THREE.TorusGeometry(s * 0.55, s * 0.03, 4, 24),
+        new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4 })
+      );
+      group.add(eq);
+      // Meridian ring (vertical)
+      const mer = new THREE.Mesh(
+        new THREE.TorusGeometry(s * 0.55, s * 0.03, 4, 24),
+        new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.3 })
+      );
+      mer.rotation.y = Math.PI / 2;
+      group.add(mer);
+      return group;
+    }
+
+    function makePerson(s, mat) {
+      const group = new THREE.Group();
+      // Head sphere
+      const head = new THREE.Mesh(new THREE.SphereGeometry(s * 0.35, 12, 10), mat);
+      head.position.y = s * 0.35;
+      group.add(head);
+      // Body (half-sphere / torso)
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(s * 0.45, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+        mat.clone()
+      );
+      body.material.opacity = 0.7;
+      body.position.y = -s * 0.1;
+      body.rotation.x = Math.PI;
+      group.add(body);
+      return group;
+    }
+
+    function makeLightbulb(s, mat) {
+      const group = new THREE.Group();
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(s * 0.55, 16, 12), mat);
+      bulb.position.y = s * 0.3;
+      group.add(bulb);
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(s * 0.3, s * 0.35, s * 0.4, 8), mat);
+      base.position.y = -s * 0.3;
+      group.add(base);
+      for (let i = 0; i < 4; i++) {
+        const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, s * 0.45, 4), mat.clone());
+        ray.material.emissiveIntensity = 0.5;
+        const angle = (i / 4) * Math.PI * 2;
+        ray.position.set(Math.cos(angle) * s * 0.7, s * 0.4, Math.sin(angle) * s * 0.7);
+        ray.rotation.z = Math.PI / 4;
+        ray.rotation.y = angle;
+        group.add(ray);
+      }
+      return group;
+    }
+
+    function makeBuilding(s, mat) {
+      const group = new THREE.Group();
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(s * 0.6, s * 1.2, s * 0.5), mat);
+      tower.position.y = s * 0.1;
+      group.add(tower);
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(s * 0.9, s * 0.6, s * 0.4), mat.clone());
+      wing.material.opacity = 0.7;
+      wing.position.y = -s * 0.3;
+      group.add(wing);
+      for (let r = 0; r < 3; r++) {
+        for (let col = 0; col < 2; col++) {
+          const w = new THREE.Mesh(
+            new THREE.PlaneGeometry(s * 0.1, s * 0.1),
+            new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.7 })
+          );
+          w.position.set(-s * 0.1 + col * s * 0.2, s * 0.5 - r * s * 0.25, s * 0.26);
+          group.add(w);
+        }
+      }
+      return group;
+    }
+
+    function makeGear(s, mat) {
+      const shape = new THREE.Shape();
+      const teeth = 8;
+      for (let i = 0; i < teeth; i++) {
+        const a1 = (i / teeth) * Math.PI * 2;
+        const a2 = ((i + 0.3) / teeth) * Math.PI * 2;
+        const a3 = ((i + 0.5) / teeth) * Math.PI * 2;
+        const a4 = ((i + 0.8) / teeth) * Math.PI * 2;
+        const ri = s * 0.35, ro = s * 0.55;
+        if (i === 0) shape.moveTo(Math.cos(a1) * ri, Math.sin(a1) * ri);
+        shape.lineTo(Math.cos(a2) * ro, Math.sin(a2) * ro);
+        shape.lineTo(Math.cos(a3) * ro, Math.sin(a3) * ro);
+        shape.lineTo(Math.cos(a4) * ri, Math.sin(a4) * ri);
+      }
+      shape.closePath();
+      const hole = new THREE.Path();
+      for (let i = 0; i <= 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        if (i === 0) hole.moveTo(Math.cos(a) * s * 0.12, Math.sin(a) * s * 0.12);
+        else hole.lineTo(Math.cos(a) * s * 0.12, Math.sin(a) * s * 0.12);
+      }
+      shape.holes.push(hole);
+      const geo = new THREE.ExtrudeGeometry(shape, { depth: s * 0.15, bevelEnabled: false });
+      geo.center();
+      return new THREE.Mesh(geo, mat);
+    }
+
+    function makePin(s, mat, c) {
+      const group = new THREE.Group();
+      // Cone body (pointing down)
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(s * 0.35, s * 0.7, 12),
+        mat
+      );
+      cone.position.y = -s * 0.2;
+      cone.rotation.x = Math.PI;
+      group.add(cone);
+      // Sphere top
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(s * 0.4, 14, 10),
+        new THREE.MeshLambertMaterial({ color: c, emissive: c, emissiveIntensity: 0.3, transparent: true, opacity: 0.9 })
+      );
+      head.position.y = s * 0.25;
+      group.add(head);
+      return group;
+    }
+
+    function makeLink(s, mat, c) {
+      const group = new THREE.Group();
+      // Two interlocking torus rings (chain link)
+      const ring1 = new THREE.Mesh(
+        new THREE.TorusGeometry(s * 0.32, s * 0.1, 8, 20),
+        mat
+      );
+      ring1.position.x = -s * 0.18;
+      ring1.rotation.y = Math.PI / 4;
+      group.add(ring1);
+
+      const ring2 = new THREE.Mesh(
+        new THREE.TorusGeometry(s * 0.32, s * 0.1, 8, 20),
+        mat.clone()
+      );
+      ring2.position.x = s * 0.18;
+      ring2.rotation.y = -Math.PI / 4;
+      group.add(ring2);
+      return group;
+    }
+
+    function makeSphere(s, mat) {
+      return new THREE.Mesh(new THREE.SphereGeometry(s * 0.5, 16, 12), mat);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEXT SPRITES
+    // ═══════════════════════════════════════════════════════════════
+
+    function makeTextSprite(text, color) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const fontSize = 24;
+      ctx.font = `${fontSize}px monospace`;
+      const textWidth = ctx.measureText(text).width;
+      canvas.width = textWidth + 16;
+      canvas.height = fontSize + 8;
+      ctx.font = `${fontSize}px monospace`;
+      ctx.fillStyle = color || '#e2e8f0';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(canvas.width / 6, canvas.height / 6, 1);
+      return sprite;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // LEGEND SVG ICONS
+    // ═══════════════════════════════════════════════════════════════
+
+    function legendSVG(label, color) {
+      const c = color;
+      const ICONS = {
+        // Document: paper sheet with folded corner
+        'Document': `<path d="M3,1 L9,1 L11,3 L11,13 L3,13 Z" fill="${c}" opacity="0.8"/><polyline points="9,1 9,3 11,3" fill="none" stroke="#060a13" stroke-width="0.5"/><line x1="5" y1="5" x2="9" y2="5" stroke="#060a13" stroke-width="0.6"/><line x1="5" y1="7" x2="9" y2="7" stroke="#060a13" stroke-width="0.6"/><line x1="5" y1="9" x2="8" y2="9" stroke="#060a13" stroke-width="0.6"/>`,
+        // Tag: pentagon with hole
+        'Tag': `<path d="M7,12 L3,12 L3,5 L7,2 L11,5 L11,12 Z" fill="${c}" opacity="0.75"/><circle cx="7" cy="4.5" r="1.2" fill="#060a13" opacity="0.7"/>`,
+        // Topic: globe with rings
+        'Topic': `<circle cx="7" cy="7" r="5" fill="${c}" opacity="0.7"/><ellipse cx="7" cy="7" rx="5" ry="2.5" fill="none" stroke="#060a13" stroke-width="0.5" opacity="0.4"/><line x1="7" y1="2" x2="7" y2="12" stroke="#060a13" stroke-width="0.5" opacity="0.4"/>`,
+        // Person: head + shoulders silhouette
+        'Person': `<circle cx="7" cy="5" r="3" fill="${c}" opacity="0.85"/><path d="M1,13 Q1,9 7,9 Q13,9 13,13" fill="${c}" opacity="0.65"/>`,
+        // Concept: lightbulb
+        'Concept': `<circle cx="7" cy="5" r="3.5" fill="${c}" opacity="0.85"/><rect x="5.5" y="8.5" width="3" height="2" rx="0.5" fill="${c}" opacity="0.7"/><line x1="7" y1="1" x2="7" y2="0" stroke="${c}" stroke-width="0.7"/><line x1="3" y1="2.5" x2="2" y2="1.5" stroke="${c}" stroke-width="0.7"/><line x1="11" y1="2.5" x2="12" y2="1.5" stroke="${c}" stroke-width="0.7"/>`,
+        // Organization: building
+        'Organization': `<rect x="4" y="1" width="5" height="10" rx="0.5" fill="${c}" opacity="0.8"/><rect x="2" y="5" width="9" height="6" rx="0.5" fill="${c}" opacity="0.6"/><rect x="5.5" y="3" width="1" height="1" fill="#fbbf24" opacity="0.8"/><rect x="7.5" y="3" width="1" height="1" fill="#fbbf24" opacity="0.8"/><rect x="5.5" y="5.5" width="1" height="1" fill="#fbbf24" opacity="0.6"/><rect x="7.5" y="5.5" width="1" height="1" fill="#fbbf24" opacity="0.6"/>`,
+        // Tool: gear
+        'Tool': `<path d="M7,2 L8.5,4.5 L11,4 L9.5,6.5 L12,8 L9.5,8.5 L10,11 L7,9.5 L4,11 L4.5,8.5 L2,8 L4.5,6.5 L3,4 L5.5,4.5 Z" fill="${c}" opacity="0.8"/><circle cx="7" cy="7" r="1.5" fill="#060a13"/>`,
+        // Place: map pin
+        'Place': `<circle cx="7" cy="5.5" r="3.5" fill="${c}" opacity="0.85"/><path d="M4,7 Q4,13 7,13 Q10,13 10,7 Z" fill="${c}" opacity="0.7"/>`,
+        // Source: chain link
+        'Source': `<rect x="1" y="5" width="5" height="4" rx="2" fill="none" stroke="${c}" stroke-width="1.5" opacity="0.85"/><rect x="8" y="5" width="5" height="4" rx="2" fill="none" stroke="${c}" stroke-width="1.5" opacity="0.85"/><line x1="5.5" y1="7" x2="8.5" y2="7" stroke="${c}" stroke-width="1" opacity="0.5"/>`,
+      };
+      const path = ICONS[label] || `<circle cx="7" cy="7" r="4" fill="${c}" opacity="0.7"/>`;
+      return `<svg class="legend-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">${path}</svg>`;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════
+
+    const VIEWS = [
+      { id: 'all',         label: 'All' },
+      { id: 'topics',      label: 'Topics' },
+      { id: 'tags',        label: 'Tags' },
+      { id: 'entities',    label: 'Entities' },
+      { id: 'links',       label: 'Links' },
+      { id: 'sources',     label: 'Sources' },
+      { id: 'connections', label: 'Connections' },
+    ];
+
+    async function init() {
+      // Build view buttons
+      const grid = document.getElementById('view-buttons');
+      VIEWS.forEach(v => {
+        const btn = document.createElement('button');
+        btn.className = 'view-btn' + (v.id === currentView ? ' active' : '');
+        btn.textContent = v.label;
+        btn.dataset.view = v.id;
+        btn.onclick = () => switchView(v.id);
+        grid.appendChild(btn);
+      });
+
+      // Init 3D graph
+      const container = document.getElementById('graph-container');
+      graph3d = ForceGraph3D()(container)
+        .width(window.innerWidth)
+        .height(window.innerHeight)
+        .backgroundColor('#060a13')
+        .nodeLabel(n => `${n.display_name || n.id} [${n.label}]`)
+        .nodeColor(n => nodeColor(n))
+        .nodeVal(n => nodeSize(n))
+        .nodeOpacity(0.9)
+        .linkColor(e => EDGE_COLORS[e.type] || '#1e293b')
+        .linkOpacity(0.5)
+        .linkWidth(0.5)
+        .linkDirectionalArrowLength(3)
+        .linkDirectionalArrowRelPos(1)
+        .onNodeClick(n => showNodeDetail(n))
+        .onNodeHover(n => { container.style.cursor = n ? 'pointer' : 'default'; })
+        .nodeThreeObject(n => {
+          const size = nodeSize(n) * 0.7;
+          const color = nodeColor(n);
+
+          const group = new THREE.Group();
+          const icon = make3moticon(n.label, color, size);
+          icon.userData.rotates = true;
+          group.add(icon);
+
+          if (labelsVisible && n.display_name) {
+            const labelText = n.display_name.length > 22
+              ? n.display_name.substring(0, 20) + '..'
+              : n.display_name;
+            const sprite = makeTextSprite(labelText, color);
+            sprite.position.set(0, size + 3, 0);
+            group.add(sprite);
+          }
+
+          return group;
+        })
+        .d3AlphaDecay(0.02)
+        .d3VelocityDecay(0.3);
+
+      // Lighting
+      const scene = graph3d.scene();
+      scene.add(new THREE.AmbientLight(0x404060, 2));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight.position.set(100, 200, 100);
+      scene.add(dirLight);
+      const dirLight2 = new THREE.DirectionalLight(0x6366f1, 0.8);
+      dirLight2.position.set(-100, -50, -100);
+      scene.add(dirLight2);
+
+      // Rotation animation loop
+      (function animate() {
+        requestAnimationFrame(animate);
+        const time = Date.now() * 0.001;
+        graphData.nodes.forEach(n => {
+          if (n.__threeObj) {
+            const icon = n.__threeObj.children[0];
+            if (icon && icon.userData && icon.userData.rotates) {
+              icon.rotation.y = time * 0.3;
+            }
+          }
+        });
+      })();
+
+      await switchView(currentView);
+      document.getElementById('loading').style.display = 'none';
+
+      document.getElementById('search-input').addEventListener('input', debounce(handleSearch, 300));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VIEW SWITCHING
+    // ═══════════════════════════════════════════════════════════════
+
+    async function switchView(viewId) {
+      currentView = viewId;
+      document.querySelectorAll('#view-buttons .view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === viewId);
+      });
+
+      document.getElementById('loading').style.display = 'block';
+
+      let data;
+      try {
+        data = await fetch(`${API}/api/graph3d?view=${viewId}`).then(r => r.json());
+      } catch (err) {
+        console.error('switchView fetch failed:', err);
+        document.getElementById('loading').innerHTML = `<div style="color:#ef4444">Failed to load: ${err.message}</div>`;
+        return;
+      }
+
+      graphData = {
+        nodes: (data.nodes || []).map(n => ({
+          id: n.id,
+          display_name: n.display_name,
+          label: n.label,
+          properties: n.properties || {},
+        })),
+        links: (data.edges || []).map(e => ({
+          source: e.source,
+          target: e.target,
+          type: e.type,
+        })),
+      };
+
+      graph3d.graphData(graphData);
+
+      document.getElementById('stat-nodes').textContent = graphData.nodes.length;
+      document.getElementById('stat-edges').textContent = graphData.links.length;
+      document.getElementById('stat-view').textContent = VIEWS.find(v => v.id === viewId)?.label || viewId;
+
+      updateLegend(graphData.nodes);
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // LEGEND
+    // ═══════════════════════════════════════════════════════════════
+
+    function updateLegend(nodes) {
+      const counts = {};
+      nodes.forEach(n => {
+        counts[n.label] = (counts[n.label] || 0) + 1;
+      });
+
+      const legend = document.getElementById('legend');
+      legend.innerHTML = '';
+      Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([label, count]) => {
+        const color = LABEL_COLORS[label] || '#64748b';
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `${legendSVG(label, color)}${label} (${count})`;
+        legend.appendChild(item);
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NODE DETAIL
+    // ═══════════════════════════════════════════════════════════════
+
+    function showNodeDetail(node) {
+      const panel = document.getElementById('detail-panel');
+      const content = document.getElementById('detail-content');
+      const props = node.properties || {};
+      const color = nodeColor(node);
+
+      // Label badge
+      let html = `<span class="detail-label" style="background:${color}22;color:${color}">${node.label}</span>`;
+
+      // Title
+      const title = node.display_name || props.title || props.name || node.id;
+      html += `<div style="font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.4">${title}</div>`;
+
+      // Key properties
+      html += '<div class="detail-props">';
+
+      const PRIORITY = {
+        Document: ['status', 'importance', 'type', 'para_category', 'source_type', 'confidence', 'summary', 'created_at', 'updated_at'],
+        Tag: ['name', 'normalized_name'],
+        Topic: ['name', 'level'],
+        Person: ['name', 'role', 'affiliation'],
+        Concept: ['name', 'description'],
+        Organization: ['name', 'type', 'url'],
+        Tool: ['name', 'description', 'url'],
+        Place: ['name', 'country', 'region'],
+        Source: ['name', 'url', 'type'],
+      };
+
+      const priority = PRIORITY[node.label] || [];
+      const shown = new Set(['id', 'path']);
+      const skip = new Set(['id', '__v', '_id']);
+
+      priority.forEach(k => {
+        const v = props[k];
+        if (v !== null && v !== undefined && v !== '' && !skip.has(k)) {
+          let display = String(v);
+          if (k === 'importance') display = '★'.repeat(Number(v)) + '☆'.repeat(5 - Number(v));
+          else if (k === 'summary' && display.length > 200) display = display.substring(0, 197) + '...';
+          html += `<div><span class="key">${k.replace(/_/g, ' ')}:</span> <span class="val">${display}</span></div>`;
+          shown.add(k);
+        }
+      });
+
+      Object.entries(props).forEach(([k, v]) => {
+        if (shown.has(k) || skip.has(k)) return;
+        if (v === null || v === '' || v === 0 || v === false) return;
+        let display = String(v);
+        if (display.length > 120) display = display.substring(0, 117) + '...';
+        html += `<div><span class="key">${k.replace(/_/g, ' ')}:</span> <span class="val">${display}</span></div>`;
+      });
+
+      html += '</div>';
+
+      // Relationships from current graph
+      const nodeId = node.id;
+      const rels = [];
+      graphData.links.forEach(l => {
+        const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+        const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+        if (srcId === nodeId) {
+          const peer = graphData.nodes.find(n => n.id === tgtId);
+          if (peer) rels.push({ type: l.type, direction: 'outgoing', peer });
+        } else if (tgtId === nodeId) {
+          const peer = graphData.nodes.find(n => n.id === srcId);
+          if (peer) rels.push({ type: l.type, direction: 'incoming', peer });
+        }
+      });
+
+      if (rels.length > 0) {
+        html += '<div class="detail-rels"><h2 style="margin-top:8px">Relationships</h2>';
+        const grouped = {};
+        rels.forEach(r => {
+          grouped[r.type] = grouped[r.type] || [];
+          grouped[r.type].push(r);
+        });
+        Object.entries(grouped).forEach(([type, typeRels]) => {
+          const edgeColor = EDGE_COLORS[type] || '#60a5fa';
+          html += `<div style="margin-top:4px;color:${edgeColor};font-weight:500;font-size:10px">${type} (${typeRels.length})</div>`;
+          typeRels.slice(0, 10).forEach(r => {
+            const arrow = r.direction === 'outgoing' ? '&rarr;' : '&larr;';
+            const peerName = r.peer.display_name || r.peer.id;
+            html += `<div class="rel-item">
+              <span class="rel-arrow">${arrow}</span>
+              <span class="rel-peer" onclick="focusNode('${r.peer.id}')">${peerName} <span style="color:#475569">(${r.peer.label})</span></span>
+            </div>`;
+          });
+          if (typeRels.length > 10) html += `<div style="color:#475569;font-size:9px">… and ${typeRels.length - 10} more</div>`;
+        });
+        html += '</div>';
+      }
+
+      content.innerHTML = html;
+      panel.classList.add('visible');
+
+      // Focus camera on node
+      if (node.x !== undefined) {
+        graph3d.cameraPosition(
+          { x: node.x + 80, y: node.y + 40, z: node.z + 80 },
+          { x: node.x, y: node.y, z: node.z },
+          800
+        );
+      }
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-panel').classList.remove('visible');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SEARCH
+    // ═══════════════════════════════════════════════════════════════
+
+    async function handleSearch(e) {
+      const q = e.target.value.trim();
+      const results = document.getElementById('search-results');
+      if (q.length < 2) { results.innerHTML = ''; return; }
+
+      try {
+        const data = await fetch(`${API}/api/graph3d/search?q=${encodeURIComponent(q)}`).then(r => r.json());
+        results.innerHTML = (data.results || []).map(d => {
+          const color = LABEL_COLORS[d.label] || '#64748b';
+          const name = d.display_name || d.id;
+          return `<div class="search-item" onclick="focusNode('${d.id}')">
+            <span style="color:${color}">[${d.label}]</span> ${name}
+          </div>`;
+        }).join('') || '<div style="color:#475569;font-size:10px;padding:4px 0">No results</div>';
+      } catch (err) {
+        results.innerHTML = `<div style="color:#ef4444;font-size:10px">Search error</div>`;
+      }
+    }
+
+    function focusNode(nodeId) {
+      const node = graphData.nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      showNodeDetail(node);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CONTROLS
+    // ═══════════════════════════════════════════════════════════════
+
+    function toggleLabels() {
+      labelsVisible = !labelsVisible;
+      document.getElementById('btn-labels').classList.toggle('active', labelsVisible);
+      // Force re-render of all node objects
+      graph3d.nodeThreeObject(graph3d.nodeThreeObject());
+    }
+
+    function debounce(fn, ms) {
+      let timer;
+      return function(...args) { clearTimeout(timer); timer = setTimeout(() => fn.apply(this, args), ms); };
+    }
+
+    window.addEventListener('resize', () => {
+      if (graph3d) graph3d.width(window.innerWidth).height(window.innerHeight);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeDetail();
+    });
+
+    init().catch(err => {
+      console.error('Init failed:', err);
+      document.getElementById('loading').innerHTML =
+        `<div style="color:#ef4444;font-size:12px">Failed to load: ${err.message}</div>`;
+    });
+  </script>
+</body>
+</html>
