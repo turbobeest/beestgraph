@@ -34,7 +34,7 @@ const VIEWS: Record<string, { label: string; edgeTypes: string[] | null }> = {
 const NODE_QUERIES: Array<{ label: string; cypher: string; props: string[] }> = [
   {
     label: "Document",
-    cypher: "MATCH (n:Document) RETURN id(n), n.title, n.path, n.status, n.type, n.importance, n.summary, n.uid, n.confidence, n.content_stage",
+    cypher: "MATCH (n:Document) WHERE NOT n.path STARTS WITH '00-meta/beestgraph/' RETURN id(n), n.title, n.path, n.status, n.type, n.importance, n.summary, n.uid, n.confidence, n.content_stage",
     props: ["title", "path", "status", "type", "importance", "summary", "uid", "confidence", "content_stage"],
   },
   { label: "Tag", cypher: "MATCH (n:Tag) RETURN id(n), n.name, n.normalized_name", props: ["name", "normalized_name"] },
