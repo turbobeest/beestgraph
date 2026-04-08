@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>beestgraph wiki</title>
+  <script src="https://unpkg.com/marked@14/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #0f172a; color: #e2e8f0;
+      font-family: -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; }
+
+    /* Nav */
+    nav { position: fixed; top: 0; left: 0; right: 0; height: 36px; display: flex;
+      align-items: center; z-index: 150; background: rgba(6,10,19,0.95);
+      border-bottom: 1px solid rgba(100,116,139,0.15); backdrop-filter: blur(12px); }
+    nav .brand { padding: 0 16px; font-size: 13px; font-weight: 700; color: #f1f5f9;
+      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex; align-items: center; }
+    nav a { padding: 0 14px; height: 100%; display: flex; align-items: center;
+      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+    nav a.active { color: #60a5fa; border-bottom: 2px solid #3b82f6; }
+    nav a:hover { color: #94a3b8; }
+
+    /* Layout */
+    .layout { display: flex; margin-top: 36px; height: calc(100vh - 36px); }
+
+    /* Sidebar */
+    .sidebar { width: 280px; min-width: 280px; border-right: 1px solid rgba(100,116,139,0.12);
+      overflow-y: auto; padding: 12px; background: rgba(15,23,42,0.95); }
+    .sidebar h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #64748b; margin: 12px 0 6px; }
+    .sidebar input { width: 100%; background: rgba(30,41,59,0.7); border: 1px solid rgba(100,116,139,0.15);
+      border-radius: 6px; padding: 6px 10px; color: #e2e8f0; font-size: 12px; outline: none; margin-bottom: 8px; }
+    .sidebar input:focus { border-color: rgba(59,130,246,0.5); }
+
+    .page-item { display: block; padding: 4px 8px; border-radius: 4px; cursor: pointer;
+      font-size: 12px; color: #94a3b8; text-decoration: none; line-height: 1.4; }
+    .page-item:hover { background: rgba(59,130,246,0.1); color: #e2e8f0; }
+    .page-item.active { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .page-item .folder { font-size: 9px; color: #475569; }
+
+    /* Content */
+    .content { flex: 1; overflow-y: auto; padding: 24px 40px 80px; max-width: 900px; }
+
+    /* Frontmatter badge bar */
+    .fm-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .fm-badge { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px;
+      background: rgba(100,116,139,0.12); color: #94a3b8; }
+    .fm-badge .label { color: #64748b; margin-right: 4px; }
+
+    /* Rendered markdown */
+    .wiki-body { line-height: 1.7; font-size: 14px; }
+    .wiki-body h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin: 24px 0 12px; }
+    .wiki-body h2 { font-size: 17px; font-weight: 600; color: #f1f5f9; margin: 20px 0 8px;
+      padding-bottom: 4px; border-bottom: 1px solid rgba(100,116,139,0.15); }
+    .wiki-body h3 { font-size: 14px; font-weight: 600; color: #e2e8f0; margin: 16px 0 6px; }
+    .wiki-body p { margin: 8px 0; }
+    .wiki-body ul, .wiki-body ol { margin: 8px 0; padding-left: 24px; }
+    .wiki-body li { margin: 3px 0; }
+    .wiki-body code { background: rgba(30,41,59,0.8); padding: 1px 5px; border-radius: 3px;
+      font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .wiki-body pre { background: rgba(15,23,42,0.9); border: 1px solid rgba(100,116,139,0.15);
+      border-radius: 6px; padding: 12px; overflow-x: auto; margin: 12px 0; }
+    .wiki-body pre code { background: none; padding: 0; }
+    .wiki-body blockquote { border-left: 3px solid #3b82f6; padding-left: 12px;
+      color: #94a3b8; margin: 12px 0; }
+    .wiki-body table { border-collapse: collapse; margin: 12px 0; width: 100%; }
+    .wiki-body th, .wiki-body td { border: 1px solid rgba(100,116,139,0.2); padding: 6px 10px;
+      font-size: 12px; text-align: left; }
+    .wiki-body th { background: rgba(30,41,59,0.5); color: #94a3b8; font-weight: 600; }
+    .wiki-body a { color: #60a5fa; text-decoration: none; }
+    .wiki-body a:hover { text-decoration: underline; }
+    .wiki-body img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+
+    /* Wikilinks */
+    .wikilink { color: #60a5fa; cursor: pointer; text-decoration: none;
+      border-bottom: 1px dotted rgba(96,165,250,0.4); }
+    .wikilink:hover { color: #93c5fd; border-bottom-color: #93c5fd; }
+    .wikilink.broken { color: #f87171; border-bottom-color: rgba(248,113,113,0.4); }
+
+    /* Backlinks panel */
+    .backlinks { width: 240px; min-width: 240px; border-left: 1px solid rgba(100,116,139,0.12);
+      overflow-y: auto; padding: 12px; background: rgba(15,23,42,0.95); }
+    .backlinks h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #64748b; margin-bottom: 8px; }
+    .backlink-item { display: block; padding: 4px 0; font-size: 11px; color: #60a5fa;
+      cursor: pointer; text-decoration: none; }
+    .backlink-item:hover { color: #93c5fd; }
+
+    .wikilink-list { margin-top: 12px; }
+    .wikilink-list h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #64748b; margin-bottom: 8px; }
+
+    /* Edit mode */
+    .edit-bar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+    .btn { background: rgba(30,41,59,0.7); border: 1px solid rgba(100,116,139,0.2);
+      border-radius: 6px; padding: 5px 12px; color: #94a3b8; font-size: 11px;
+      cursor: pointer; font-family: inherit; }
+    .btn:hover { background: rgba(51,65,85,0.8); color: #e2e8f0; }
+    .btn.primary { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.4); color: #60a5fa; }
+    .btn.primary:hover { background: rgba(59,130,246,0.3); }
+
+    .editor { width: 100%; min-height: 400px; background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(100,116,139,0.2); border-radius: 6px; padding: 12px;
+      color: #e2e8f0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px;
+      line-height: 1.6; resize: vertical; outline: none; }
+    .editor:focus { border-color: rgba(59,130,246,0.5); }
+
+    /* Suggest dropdown */
+    .suggest-dropdown { position: absolute; background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(100,116,139,0.25); border-radius: 6px; padding: 4px;
+      z-index: 200; max-height: 200px; overflow-y: auto; min-width: 200px; display: none; }
+    .suggest-item { padding: 4px 8px; font-size: 11px; color: #94a3b8; cursor: pointer;
+      border-radius: 4px; }
+    .suggest-item:hover, .suggest-item.selected { background: rgba(59,130,246,0.15); color: #e2e8f0; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; color: #475569; }
+    .empty h2 { color: #64748b; margin-bottom: 8px; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">beestgraph</div>
+    <a href="/graph3d.html">3D Graph</a>
+    <a href="/graph">2D Graph</a>
+    <a href="/wiki.html" class="active">Wiki</a>
+    <a href="/">Dashboard</a>
+    <a href="/queue">Queue</a>
+  </nav>
+
+  <div class="layout">
+    <div class="sidebar">
+      <input type="text" id="page-search" placeholder="Search pages...">
+      <div id="page-list"></div>
+    </div>
+
+    <div class="content" id="content">
+      <div class="empty">
+        <h2>beestgraph wiki</h2>
+        <p>Select a page from the sidebar to begin browsing.</p>
+      </div>
+    </div>
+
+    <div class="backlinks" id="backlinks-panel">
+      <h3>Backlinks</h3>
+      <div id="backlinks-list"><span style="font-size:11px;color:#475569">Select a page</span></div>
+      <div class="wikilink-list">
+        <h3>Outgoing Links</h3>
+        <div id="wikilinks-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="suggest-dropdown" id="suggest-dropdown"></div>
+
+  <script>
+    let allPages = [];
+    let currentPath = '';
+    let currentRaw = '';
+    let editing = false;
+
+    // ─── Init ─────────────────────────────────────────────────
+    async function init() {
+      const data = await fetch('/api/wiki').then(r => r.json());
+      allPages = data.pages || [];
+      renderPageList(allPages);
+
+      document.getElementById('page-search').addEventListener('input', e => {
+        const q = e.target.value.toLowerCase();
+        const filtered = allPages.filter(p =>
+          p.title.toLowerCase().includes(q) || p.path.toLowerCase().includes(q)
+        );
+        renderPageList(filtered);
+      });
+
+      // Check URL hash for initial page
+      if (location.hash) {
+        const pagePath = decodeURIComponent(location.hash.slice(1));
+        loadPage(pagePath);
+      }
+    }
+
+    function renderPageList(pages) {
+      const list = document.getElementById('page-list');
+      // Group by folder
+      const groups = {};
+      pages.forEach(p => {
+        const folder = p.folder || '(root)';
+        if (!groups[folder]) groups[folder] = [];
+        groups[folder].push(p);
+      });
+
+      let html = '';
+      Object.entries(groups).sort().forEach(([folder, items]) => {
+        html += `<h3>${folder}</h3>`;
+        items.forEach(p => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${p.title}</div>`;
+        });
+      });
+      list.innerHTML = html;
+    }
+
+    // ─── Load page ────────────────────────────────────────────
+    async function loadPage(pagePath) {
+      currentPath = pagePath;
+      location.hash = encodeURIComponent(pagePath);
+      editing = false;
+
+      const data = await fetch(`/api/wiki?path=${encodeURIComponent(pagePath)}`).then(r => r.json());
+      if (data.error) {
+        document.getElementById('content').innerHTML = `<div class="empty"><h2>Not Found</h2><p>${data.error}</p></div>`;
+        return;
+      }
+
+      currentRaw = (data.frontmatter ? '---\n' : '') + data.body;
+      // Reconstruct raw for editing
+      const rawResp = await fetch(`/api/wiki?path=${encodeURIComponent(pagePath)}`);
+      const rawData = await rawResp.json();
+
+      renderPage(data);
+      renderBacklinks(data.backlinks || [], data.wikilinks || []);
+      renderPageList(allPages); // Update active state
+    }
+
+    function renderPage(data) {
+      const content = document.getElementById('content');
+      const fm = data.frontmatter || {};
+      const body = data.body || '';
+
+      // Frontmatter badges
+      let fmHtml = '<div class="fm-bar">';
+      const showFields = ['type', 'status', 'tags', 'topics'];
+      showFields.forEach(k => {
+        let v = fm[k];
+        if (v && v !== '[]') {
+          if (typeof v === 'string' && v.startsWith('[')) v = v.slice(1, -1);
+          fmHtml += `<span class="fm-badge"><span class="label">${k}:</span> ${v}</span>`;
+        }
+      });
+      fmHtml += '</div>';
+
+      // Edit bar
+      let editHtml = `<div class="edit-bar">
+        <button class="btn primary" onclick="toggleEdit()">Edit</button>
+        <button class="btn" onclick="viewIn3D()">View in 3D Graph</button>
+        <span style="font-size:10px;color:#475569;margin-left:auto">${data.path}</span>
+      </div>`;
+
+      // Render markdown with wikilink support
+      const rendered = renderMarkdown(body);
+
+      content.innerHTML = editHtml + fmHtml + `<div class="wiki-body">${rendered}</div>`;
+    }
+
+    function renderMarkdown(text) {
+      // Convert [[wikilinks]] to clickable links before markdown parsing
+      let processed = text.replace(
+        /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
+        (match, target, display) => {
+          const label = display || target;
+          const page = findPageByTitle(target);
+          if (page) {
+            return `<span class="wikilink" onclick="loadPage('${page.path.replace(/'/g, "\\'")}')">${label}</span>`;
+          }
+          return `<span class="wikilink broken" title="Page not found: ${target}">${label}</span>`;
+        }
+      );
+      return marked.parse(processed);
+    }
+
+    function findPageByTitle(title) {
+      const lower = title.toLowerCase();
+      return allPages.find(p =>
+        p.title.toLowerCase() === lower ||
+        p.path.toLowerCase().replace(/\.md$/, '').endsWith(lower.replace(/ /g, '-')) ||
+        p.path.toLowerCase().includes(lower.replace(/ /g, '-'))
+      );
+    }
+
+    // ─── Backlinks ────────────────────────────────────────────
+    function renderBacklinks(backlinks, wikilinks) {
+      const blList = document.getElementById('backlinks-list');
+      const wlList = document.getElementById('wikilinks-list');
+
+      if (backlinks.length === 0) {
+        blList.innerHTML = '<span style="font-size:11px;color:#475569">No backlinks</span>';
+      } else {
+        blList.innerHTML = backlinks.map(bl =>
+          `<div class="backlink-item" onclick="loadPage('${bl.path.replace(/'/g, "\\'")}')">${bl.title}</div>`
+        ).join('');
+      }
+
+      if (wikilinks.length === 0) {
+        wlList.innerHTML = '<span style="font-size:11px;color:#475569">No outgoing links</span>';
+      } else {
+        wlList.innerHTML = wikilinks.map(wl => {
+          const page = findPageByTitle(wl);
+          if (page) {
+            return `<div class="backlink-item" onclick="loadPage('${page.path.replace(/'/g, "\\'")}')">${wl}</div>`;
+          }
+          return `<div class="backlink-item" style="color:#f87171">${wl} (missing)</div>`;
+        }).join('');
+      }
+    }
+
+    // ─── Edit mode ────────────────────────────────────────────
+    async function toggleEdit() {
+      if (editing) return;
+      editing = true;
+
+      // Fetch raw content
+      const resp = await fetch(`/api/wiki?path=${encodeURIComponent(currentPath)}`);
+      const data = await resp.json();
+      // Reconstruct full file
+      const rawContent = data.frontmatter
+        ? '---\n' + reconstructFrontmatter(data.frontmatter) + '---\n\n' + data.body
+        : data.body;
+
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="edit-bar">
+          <button class="btn primary" onclick="saveEdit()">Save</button>
+          <button class="btn" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Cancel</button>
+          <span style="font-size:10px;color:#475569;margin-left:auto">${currentPath}</span>
+        </div>
+        <div style="font-size:10px;color:#64748b;margin-bottom:8px">
+          Type <strong>[[</strong> to insert a wikilink. Press Escape to dismiss suggestions.
+        </div>
+        <textarea class="editor" id="wiki-editor">${escapeHtml(rawContent)}</textarea>
+      `;
+
+      const editor = document.getElementById('wiki-editor');
+      editor.focus();
+      editor.addEventListener('input', handleEditorInput);
+      editor.addEventListener('keydown', handleEditorKeydown);
+    }
+
+    function reconstructFrontmatter(fm) {
+      return Object.entries(fm).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('\n') + '\n';
+    }
+
+    async function saveEdit() {
+      const editor = document.getElementById('wiki-editor');
+      const newContent = editor.value;
+
+      const resp = await fetch('/api/wiki', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: currentPath, content: newContent }),
+      });
+
+      const result = await resp.json();
+      if (result.success) {
+        editing = false;
+        loadPage(currentPath);
+      } else {
+        alert('Save failed: ' + (result.error || 'Unknown error'));
+      }
+    }
+
+    // ─── Wikilink autocomplete ────────────────────────────────
+    let suggestIndex = -1;
+    let suggestItems = [];
+    let suggestStart = -1;
+
+    function handleEditorInput(e) {
+      const editor = e.target;
+      const pos = editor.selectionStart;
+      const text = editor.value;
+
+      // Check if we're inside [[ ]]
+      const before = text.substring(0, pos);
+      const openBracket = before.lastIndexOf('[[');
+      const closeBracket = before.lastIndexOf(']]');
+
+      if (openBracket > closeBracket && openBracket >= 0) {
+        const query = before.substring(openBracket + 2);
+        if (query.length >= 1 && !query.includes('\n')) {
+          suggestStart = openBracket;
+          showSuggestions(query, editor);
+          return;
+        }
+      }
+      hideSuggestions();
+    }
+
+    function handleEditorKeydown(e) {
+      const dropdown = document.getElementById('suggest-dropdown');
+      if (dropdown.style.display === 'none') return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        suggestIndex = Math.min(suggestIndex + 1, suggestItems.length - 1);
+        highlightSuggestion();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        suggestIndex = Math.max(suggestIndex - 1, 0);
+        highlightSuggestion();
+      } else if (e.key === 'Enter' && suggestIndex >= 0) {
+        e.preventDefault();
+        insertSuggestion(suggestItems[suggestIndex]);
+      } else if (e.key === 'Escape') {
+        hideSuggestions();
+      }
+    }
+
+    async function showSuggestions(query, editor) {
+      const resp = await fetch(`/api/wiki/suggest?q=${encodeURIComponent(query)}`);
+      const data = await resp.json();
+      suggestItems = data.suggestions || [];
+      suggestIndex = -1;
+
+      const dropdown = document.getElementById('suggest-dropdown');
+      if (suggestItems.length === 0) { hideSuggestions(); return; }
+
+      // Position near cursor
+      const rect = editor.getBoundingClientRect();
+      dropdown.style.left = (rect.left + 20) + 'px';
+      dropdown.style.top = (rect.top + 30) + 'px';
+      dropdown.style.display = 'block';
+
+      dropdown.innerHTML = suggestItems.map((s, i) =>
+        `<div class="suggest-item" onclick="insertSuggestion(suggestItems[${i}])">${s.title}<span style="color:#475569;margin-left:8px;font-size:9px">${s.path}</span></div>`
+      ).join('');
+    }
+
+    function highlightSuggestion() {
+      const items = document.querySelectorAll('.suggest-item');
+      items.forEach((el, i) => el.classList.toggle('selected', i === suggestIndex));
+    }
+
+    function insertSuggestion(suggestion) {
+      const editor = document.getElementById('wiki-editor');
+      const pos = editor.selectionStart;
+      const text = editor.value;
+      const before = text.substring(0, suggestStart);
+      const after = text.substring(pos);
+      const inserted = `[[${suggestion.title}]]`;
+      editor.value = before + inserted + after;
+      editor.selectionStart = editor.selectionEnd = before.length + inserted.length;
+      editor.focus();
+      hideSuggestions();
+    }
+
+    function hideSuggestions() {
+      document.getElementById('suggest-dropdown').style.display = 'none';
+      suggestIndex = -1;
+    }
+
+    // ─── 3D graph link ────────────────────────────────────────
+    function viewIn3D() {
+      window.location.href = '/graph3d.html';
+    }
+
+    // ─── Utils ────────────────────────────────────────────────
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    init();
+  </script>
+</body>
+</html>
