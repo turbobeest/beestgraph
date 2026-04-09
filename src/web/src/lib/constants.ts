@@ -1,8 +1,10 @@
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "home" },
+  { href: "/graph3d.html", label: "3D Graph", icon: "graph3d" },
+  { href: "/graph", label: "2D Graph", icon: "graph" },
+  { href: "/wiki.html", label: "Wiki", icon: "wiki" },
   { href: "/queue", label: "Queue", icon: "queue" },
   { href: "/timeline", label: "Timeline", icon: "timeline" },
-  { href: "/graph", label: "Graph", icon: "graph" },
   { href: "/entry", label: "New Entry", icon: "plus" },
 ] as const;
 

@@ -170,3 +170,45 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+// DELETE /api/wiki — move a vault file to .trash/ (safe delete)
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  try {
+    const { path: filePath } = await request.json();
+
+    if (!filePath || typeof filePath !== "string") {
+      return NextResponse.json({ error: "path required" }, { status: 400 });
+    }
+
+    const fullPath = path.join(VAULT_PATH, filePath);
+    if (!fullPath.startsWith(VAULT_PATH)) {
+      return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+    }
+
+    if (!fs.existsSync(fullPath)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // Move to .trash/ in vault root (matches Obsidian's trash behavior)
+    const trashDir = path.join(VAULT_PATH, ".trash");
+    fs.mkdirSync(trashDir, { recursive: true });
+
+    const trashPath = path.join(trashDir, path.basename(filePath));
+    // Avoid overwriting existing trash files
+    let dest = trashPath;
+    let i = 1;
+    while (fs.existsSync(dest)) {
+      const ext = path.extname(trashPath);
+      const base = path.basename(trashPath, ext);
+      dest = path.join(trashDir, `${base}-${i}${ext}`);
+      i++;
+    }
+
+    fs.renameSync(fullPath, dest);
+
+    return NextResponse.json({ success: true, deleted: filePath, trashedTo: path.relative(VAULT_PATH, dest) });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Delete failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

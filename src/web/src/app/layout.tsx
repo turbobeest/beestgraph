@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen antialiased">
         <Sidebar />
-        <main className="min-h-screen pl-0 pt-14 md:pl-64 md:pt-0">
+        <main className="min-h-screen pt-[36px]">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
         </main>
       </body>

@@ -7,120 +7,212 @@
   <script src="https://unpkg.com/marked@14/marked.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #0f172a; color: #e2e8f0;
-      font-family: -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; }
+    html, body { width: 100%; height: 100%; background: #101418; color: #c8ccd1;
+      font-family: 'Linux Libertine', 'Georgia', 'Times', 'Source Serif Pro', serif; }
 
-    /* Nav */
+    /* ─── Nav (same as graph3d) ─── */
     nav { position: fixed; top: 0; left: 0; right: 0; height: 36px; display: flex;
       align-items: center; z-index: 150; background: rgba(6,10,19,0.95);
       border-bottom: 1px solid rgba(100,116,139,0.15); backdrop-filter: blur(12px); }
     nav .brand { padding: 0 16px; font-size: 13px; font-weight: 700; color: #f1f5f9;
-      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex; align-items: center; }
+      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex;
+      align-items: center; font-family: -apple-system, 'Segoe UI', sans-serif; }
     nav a { padding: 0 14px; height: 100%; display: flex; align-items: center;
-      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px;
+      text-transform: uppercase; font-family: -apple-system, 'Segoe UI', sans-serif; }
     nav a.active { color: #60a5fa; border-bottom: 2px solid #3b82f6; }
     nav a:hover { color: #94a3b8; }
 
-    /* Layout */
+    /* ─── Layout ─── */
     .layout { display: flex; margin-top: 36px; height: calc(100vh - 36px); }
 
-    /* Sidebar */
-    .sidebar { width: 280px; min-width: 280px; border-right: 1px solid rgba(100,116,139,0.12);
-      overflow-y: auto; padding: 12px; background: rgba(15,23,42,0.95); }
-    .sidebar h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
-      color: #64748b; margin: 12px 0 6px; }
-    .sidebar input { width: 100%; background: rgba(30,41,59,0.7); border: 1px solid rgba(100,116,139,0.15);
-      border-radius: 6px; padding: 6px 10px; color: #e2e8f0; font-size: 12px; outline: none; margin-bottom: 8px; }
-    .sidebar input:focus { border-color: rgba(59,130,246,0.5); }
+    /* ─── Sidebar (Wikipedia-style nav panel) ─── */
+    .sidebar { width: 260px; min-width: 260px; border-right: 1px solid #2a2f36;
+      overflow-y: auto; padding: 0; background: #1a1e24; }
+    .sidebar-header { padding: 12px 14px 8px; border-bottom: 1px solid #2a2f36; }
+    .sidebar-header h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: #6b7785; font-family: -apple-system, 'Segoe UI', sans-serif; font-weight: 600; }
+    .sidebar input { width: 100%; background: #14181d; border: 1px solid #2a2f36;
+      border-radius: 2px; padding: 6px 10px; color: #c8ccd1; font-size: 12px;
+      outline: none; margin-top: 8px; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .sidebar input:focus { border-color: #3366cc; box-shadow: 0 0 0 1px rgba(51,102,204,0.3); }
+    #page-list { padding: 6px 0; }
 
-    .page-item { display: block; padding: 4px 8px; border-radius: 4px; cursor: pointer;
-      font-size: 12px; color: #94a3b8; text-decoration: none; line-height: 1.4; }
-    .page-item:hover { background: rgba(59,130,246,0.1); color: #e2e8f0; }
-    .page-item.active { background: rgba(59,130,246,0.15); color: #60a5fa; }
-    .page-item .folder { font-size: 9px; color: #475569; }
+    /* Tree structure */
+    .tree-node { user-select: none; }
+    .tree-folder { display: flex; align-items: center; cursor: pointer;
+      padding: 3px 8px; font-size: 12px; color: #8b949e; border-radius: 2px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; font-weight: 500; }
+    .tree-folder:hover { background: #1f2830; color: #c8ccd1; }
+    .tree-folder .arrow { display: inline-block; width: 14px; font-size: 10px;
+      color: #54606d; transition: transform 0.15s; flex-shrink: 0; text-align: center; }
+    .tree-folder .arrow.open { transform: rotate(90deg); }
+    .tree-folder .folder-icon { margin-right: 5px; font-size: 13px; flex-shrink: 0; }
+    .tree-folder .folder-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tree-folder .count { font-size: 10px; color: #54606d; margin-left: 4px; flex-shrink: 0; }
+    .tree-children { overflow: hidden; }
+    .tree-children.collapsed { display: none; }
 
-    /* Content */
-    .content { flex: 1; overflow-y: auto; padding: 24px 40px 80px; max-width: 900px; }
+    .page-item { display: block; padding: 2px 8px 2px 12px; cursor: pointer;
+      font-size: 12px; color: #6b9edd; text-decoration: none; line-height: 1.5;
+      font-family: -apple-system, 'Segoe UI', sans-serif; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; border-radius: 2px; }
+    .page-item:hover { background: #1f2830; text-decoration: underline; }
+    .page-item.active { background: #1a2636; color: #8ab4f8; font-weight: 500; }
 
-    /* Frontmatter badge bar */
-    .fm-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-    .fm-badge { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px;
-      background: rgba(100,116,139,0.12); color: #94a3b8; }
-    .fm-badge .label { color: #64748b; margin-right: 4px; }
+    /* ─── Content (Wikipedia article area) ─── */
+    .content { flex: 1; overflow-y: auto; padding: 20px 32px 80px; max-width: 960px; }
 
-    /* Rendered markdown */
-    .wiki-body { line-height: 1.7; font-size: 14px; }
-    .wiki-body h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin: 24px 0 12px; }
-    .wiki-body h2 { font-size: 17px; font-weight: 600; color: #f1f5f9; margin: 20px 0 8px;
-      padding-bottom: 4px; border-bottom: 1px solid rgba(100,116,139,0.15); }
-    .wiki-body h3 { font-size: 14px; font-weight: 600; color: #e2e8f0; margin: 16px 0 6px; }
-    .wiki-body p { margin: 8px 0; }
-    .wiki-body ul, .wiki-body ol { margin: 8px 0; padding-left: 24px; }
-    .wiki-body li { margin: 3px 0; }
-    .wiki-body code { background: rgba(30,41,59,0.8); padding: 1px 5px; border-radius: 3px;
-      font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; }
-    .wiki-body pre { background: rgba(15,23,42,0.9); border: 1px solid rgba(100,116,139,0.15);
-      border-radius: 6px; padding: 12px; overflow-x: auto; margin: 12px 0; }
-    .wiki-body pre code { background: none; padding: 0; }
-    .wiki-body blockquote { border-left: 3px solid #3b82f6; padding-left: 12px;
-      color: #94a3b8; margin: 12px 0; }
-    .wiki-body table { border-collapse: collapse; margin: 12px 0; width: 100%; }
-    .wiki-body th, .wiki-body td { border: 1px solid rgba(100,116,139,0.2); padding: 6px 10px;
-      font-size: 12px; text-align: left; }
-    .wiki-body th { background: rgba(30,41,59,0.5); color: #94a3b8; font-weight: 600; }
-    .wiki-body a { color: #60a5fa; text-decoration: none; }
+    /* Article title */
+    .article-title { font-size: 28px; font-weight: 400; color: #e3e3e3; line-height: 1.2;
+      margin-bottom: 4px; border-bottom: 1px solid #2a2f36; padding-bottom: 4px;
+      font-family: 'Linux Libertine', 'Georgia', serif; }
+
+    /* Infobox (from frontmatter) — Wikipedia-style */
+    .infobox { float: right; width: 260px; margin: 0 0 16px 20px; background: #1a1e24;
+      border: 1px solid #2a2f36; font-size: 12px; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .infobox-header { background: #1f2830; padding: 8px 10px; text-align: center;
+      font-weight: 600; color: #c8ccd1; font-size: 13px; border-bottom: 1px solid #2a2f36; }
+    .infobox-row { display: flex; border-bottom: 1px solid #22272d; }
+    .infobox-row:last-child { border-bottom: none; }
+    .infobox-label { width: 90px; padding: 4px 8px; color: #8b949e; font-weight: 500;
+      background: #161a1f; flex-shrink: 0; }
+    .infobox-value { padding: 4px 8px; color: #c8ccd1; flex: 1; word-break: break-word; }
+    .infobox-tag { display: inline-block; background: #1f2830; border: 1px solid #2a2f36;
+      border-radius: 2px; padding: 1px 6px; margin: 1px 2px; font-size: 11px; color: #8b949e; }
+
+    /* Table of contents */
+    .toc { background: #1a1e24; border: 1px solid #2a2f36; padding: 10px 14px;
+      margin: 12px 0 16px; display: inline-block; min-width: 200px; max-width: 400px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .toc-title { font-size: 12px; font-weight: 700; color: #c8ccd1; text-align: center;
+      margin-bottom: 6px; }
+    .toc-toggle { font-size: 11px; color: #6b9edd; cursor: pointer; font-weight: 400;
+      margin-left: 6px; }
+    .toc-toggle:hover { text-decoration: underline; }
+    .toc ol { padding-left: 24px; margin: 0; }
+    .toc li { font-size: 12px; line-height: 1.7; color: #6b9edd; cursor: pointer;
+      list-style-type: decimal; }
+    .toc li:hover { text-decoration: underline; }
+    .toc ol ol { padding-left: 18px; }
+    .toc ol ol li { list-style-type: decimal; font-size: 11px; }
+
+    /* ─── Article body (Wikipedia-style) ─── */
+    .wiki-body { line-height: 1.65; font-size: 14.5px; color: #c8ccd1; clear: none; }
+    .wiki-body h1 { font-size: 24px; font-weight: 400; color: #e3e3e3; margin: 24px 0 8px;
+      border-bottom: 1px solid #2a2f36; padding-bottom: 2px; }
+    .wiki-body h2 { font-size: 20px; font-weight: 400; color: #e3e3e3; margin: 22px 0 8px;
+      border-bottom: 1px solid #2a2f36; padding-bottom: 2px; }
+    .wiki-body h3 { font-size: 16px; font-weight: 700; color: #e3e3e3; margin: 16px 0 6px; }
+    .wiki-body h4 { font-size: 14px; font-weight: 700; color: #c8ccd1; margin: 12px 0 4px; }
+    .wiki-body p { margin: 6px 0 10px; }
+    .wiki-body ul, .wiki-body ol { margin: 6px 0 10px; padding-left: 28px; }
+    .wiki-body li { margin: 2px 0; }
+    .wiki-body code { background: #1a1e24; border: 1px solid #2a2f36; padding: 1px 4px;
+      border-radius: 2px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+    .wiki-body pre { background: #161a1f; border: 1px solid #2a2f36; border-radius: 2px;
+      padding: 12px; overflow-x: auto; margin: 10px 0; }
+    .wiki-body pre code { background: none; border: none; padding: 0; }
+    .wiki-body blockquote { border-left: 3px solid #3366cc; padding: 8px 16px;
+      background: #161a1f; color: #a0a8b4; margin: 10px 0; font-style: italic; }
+    .wiki-body table { border-collapse: collapse; margin: 10px 0; }
+    .wiki-body th, .wiki-body td { border: 1px solid #2a2f36; padding: 6px 10px;
+      font-size: 13px; text-align: left; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .wiki-body th { background: #1a1e24; color: #a0a8b4; font-weight: 600; }
+    .wiki-body a { color: #6b9edd; text-decoration: none; }
     .wiki-body a:hover { text-decoration: underline; }
-    .wiki-body img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+    .wiki-body img { max-width: 100%; border-radius: 2px; margin: 8px 0; }
+    .wiki-body hr { border: none; border-top: 1px solid #2a2f36; margin: 16px 0; }
+    .wiki-body strong { font-weight: 700; color: #d4d8dd; }
+    .wiki-body em { font-style: italic; }
+
+    /* Section edit brackets */
+    .section-edit { font-size: 11px; color: #6b9edd; cursor: pointer; margin-left: 8px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; font-weight: 400; }
+    .section-edit:hover { text-decoration: underline; }
 
     /* Wikilinks */
-    .wikilink { color: #60a5fa; cursor: pointer; text-decoration: none;
-      border-bottom: 1px dotted rgba(96,165,250,0.4); }
-    .wikilink:hover { color: #93c5fd; border-bottom-color: #93c5fd; }
-    .wikilink.broken { color: #f87171; border-bottom-color: rgba(248,113,113,0.4); }
+    .wikilink { color: #6b9edd; cursor: pointer; text-decoration: none; }
+    .wikilink:hover { text-decoration: underline; }
+    .wikilink.broken { color: #d73a49; }
+    .wikilink.broken:hover { text-decoration: underline; }
 
-    /* Backlinks panel */
-    .backlinks { width: 240px; min-width: 240px; border-left: 1px solid rgba(100,116,139,0.12);
-      overflow-y: auto; padding: 12px; background: rgba(15,23,42,0.95); }
+    /* ─── Backlinks panel ─── */
+    .backlinks { width: 230px; min-width: 230px; border-left: 1px solid #2a2f36;
+      overflow-y: auto; padding: 0; background: #1a1e24; }
+    .backlinks-section { padding: 12px 14px; border-bottom: 1px solid #22272d; }
+    .backlinks-section:last-child { border-bottom: none; }
     .backlinks h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
-      color: #64748b; margin-bottom: 8px; }
-    .backlink-item { display: block; padding: 4px 0; font-size: 11px; color: #60a5fa;
-      cursor: pointer; text-decoration: none; }
-    .backlink-item:hover { color: #93c5fd; }
+      color: #54606d; margin-bottom: 6px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; font-weight: 600; }
+    .backlink-item { display: block; padding: 2px 0; font-size: 12px; color: #6b9edd;
+      cursor: pointer; text-decoration: none; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .backlink-item:hover { text-decoration: underline; }
 
-    .wikilink-list { margin-top: 12px; }
-    .wikilink-list h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
-      color: #64748b; margin-bottom: 8px; }
+    /* ─── Edit bar ─── */
+    .edit-bar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .tab-bar { display: flex; border-bottom: 1px solid #2a2f36; margin-bottom: 12px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .tab { padding: 6px 16px; font-size: 12px; cursor: pointer; color: #6b9edd;
+      border: 1px solid transparent; border-bottom: none; margin-bottom: -1px;
+      background: transparent; border-radius: 2px 2px 0 0; }
+    .tab:hover { background: #1a1e24; }
+    .tab.active { background: #101418; border-color: #2a2f36; color: #c8ccd1; font-weight: 500; }
 
-    /* Edit mode */
-    .edit-bar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
-    .btn { background: rgba(30,41,59,0.7); border: 1px solid rgba(100,116,139,0.2);
-      border-radius: 6px; padding: 5px 12px; color: #94a3b8; font-size: 11px;
-      cursor: pointer; font-family: inherit; }
-    .btn:hover { background: rgba(51,65,85,0.8); color: #e2e8f0; }
-    .btn.primary { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.4); color: #60a5fa; }
-    .btn.primary:hover { background: rgba(59,130,246,0.3); }
+    .btn { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 2px;
+      padding: 5px 14px; color: #8b949e; font-size: 12px; cursor: pointer;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .btn:hover { background: #1f2830; color: #c8ccd1; border-color: #3a4149; }
+    .btn.primary { background: #1a3352; border-color: #2a5090; color: #6b9edd; }
+    .btn.primary:hover { background: #1f3d66; }
+    .btn.danger { background: #3b1c1c; border-color: #5c2828; color: #d73a49; }
+    .btn.danger:hover { background: #4a2222; color: #f85149; }
 
-    .editor { width: 100%; min-height: 400px; background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(100,116,139,0.2); border-radius: 6px; padding: 12px;
-      color: #e2e8f0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px;
-      line-height: 1.6; resize: vertical; outline: none; }
-    .editor:focus { border-color: rgba(59,130,246,0.5); }
+    .editor { width: 100%; min-height: 500px; background: #14181d;
+      border: 1px solid #2a2f36; border-radius: 0 0 2px 2px; padding: 14px;
+      color: #c8ccd1; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px; line-height: 1.6; resize: vertical; outline: none; }
+    .editor:focus { border-color: #3366cc; }
 
     /* Suggest dropdown */
-    .suggest-dropdown { position: absolute; background: rgba(15,23,42,0.98);
-      border: 1px solid rgba(100,116,139,0.25); border-radius: 6px; padding: 4px;
-      z-index: 200; max-height: 200px; overflow-y: auto; min-width: 200px; display: none; }
-    .suggest-item { padding: 4px 8px; font-size: 11px; color: #94a3b8; cursor: pointer;
-      border-radius: 4px; }
-    .suggest-item:hover, .suggest-item.selected { background: rgba(59,130,246,0.15); color: #e2e8f0; }
+    .suggest-dropdown { position: absolute; background: #1a1e24;
+      border: 1px solid #2a2f36; border-radius: 2px; padding: 4px;
+      z-index: 200; max-height: 200px; overflow-y: auto; min-width: 220px;
+      display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .suggest-item { padding: 5px 10px; font-size: 12px; color: #8b949e; cursor: pointer;
+      border-radius: 2px; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .suggest-item:hover, .suggest-item.selected { background: #1f2830; color: #c8ccd1; }
+
+    /* Delete confirmation modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 300; display: flex; align-items: center; justify-content: center; }
+    .modal { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 4px;
+      padding: 24px; max-width: 420px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .modal h3 { font-size: 16px; color: #e3e3e3; margin-bottom: 8px; }
+    .modal p { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.5; }
+    .modal code { background: #14181d; padding: 2px 6px; border-radius: 2px;
+      font-size: 12px; color: #c8ccd1; }
+    .modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* Categories (bottom of article) */
+    .categories { margin-top: 24px; padding-top: 12px; border-top: 1px solid #2a2f36;
+      font-size: 12px; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .categories .label { color: #54606d; font-weight: 600; }
+    .categories .cat-link { color: #6b9edd; cursor: pointer; margin: 0 2px; }
+    .categories .cat-link:hover { text-decoration: underline; }
 
     /* Empty state */
-    .empty { text-align: center; padding: 60px 20px; color: #475569; }
-    .empty h2 { color: #64748b; margin-bottom: 8px; }
+    .empty { text-align: center; padding: 80px 20px; color: #54606d;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .empty h2 { color: #6b7785; margin-bottom: 8px; font-size: 24px; font-weight: 400; }
+    .empty p { font-size: 14px; }
 
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #14181d; }
+    ::-webkit-scrollbar-thumb { background: #2a2f36; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a4149; }
   </style>
 </head>
 <body>
@@ -131,11 +223,15 @@
     <a href="/wiki.html" class="active">Wiki</a>
     <a href="/">Dashboard</a>
     <a href="/queue">Queue</a>
+    <a href="/wiki.html#help" onclick="event.preventDefault();showHelp()" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
   </nav>
 
   <div class="layout">
     <div class="sidebar">
-      <input type="text" id="page-search" placeholder="Search pages...">
+      <div class="sidebar-header">
+        <h2>Contents</h2>
+        <input type="text" id="page-search" placeholder="Search pages...">
+      </div>
       <div id="page-list"></div>
     </div>
 
@@ -147,9 +243,11 @@
     </div>
 
     <div class="backlinks" id="backlinks-panel">
-      <h3>Backlinks</h3>
-      <div id="backlinks-list"><span style="font-size:11px;color:#475569">Select a page</span></div>
-      <div class="wikilink-list">
+      <div class="backlinks-section">
+        <h3>Backlinks</h3>
+        <div id="backlinks-list"><span style="font-size:11px;color:#54606d">Select a page</span></div>
+      </div>
+      <div class="backlinks-section">
         <h3>Outgoing Links</h3>
         <div id="wikilinks-list"></div>
       </div>
@@ -157,11 +255,11 @@
   </div>
 
   <div class="suggest-dropdown" id="suggest-dropdown"></div>
+  <div id="modal-container"></div>
 
   <script>
     let allPages = [];
     let currentPath = '';
-    let currentRaw = '';
     let editing = false;
 
     // ─── Init ─────────────────────────────────────────────────
@@ -178,32 +276,98 @@
         renderPageList(filtered);
       });
 
-      // Check URL hash for initial page
       if (location.hash) {
         const pagePath = decodeURIComponent(location.hash.slice(1));
-        loadPage(pagePath);
+        if (pagePath === 'help') {
+          showHelp();
+        } else {
+          loadPage(pagePath);
+        }
       }
     }
 
+    // Track which folders are open (persisted to localStorage)
+    let openFolders = JSON.parse(localStorage.getItem('wiki-open-folders') || '{}');
+
+    function saveOpenFolders() {
+      localStorage.setItem('wiki-open-folders', JSON.stringify(openFolders));
+    }
+
+    function toggleFolder(key) {
+      openFolders[key] = !openFolders[key];
+      saveOpenFolders();
+      renderPageList(_lastRenderedPages || allPages);
+    }
+
+    let _lastRenderedPages = null;
+
     function renderPageList(pages) {
+      _lastRenderedPages = pages;
       const list = document.getElementById('page-list');
-      // Group by folder
-      const groups = {};
+
+      // Build a nested tree structure from paths
+      const root = { _files: [], _subs: {} };
       pages.forEach(p => {
-        const folder = p.folder || '(root)';
-        if (!groups[folder]) groups[folder] = [];
-        groups[folder].push(p);
+        const parts = (p.folder || '').split('/').filter(Boolean);
+        let node = root;
+        parts.forEach(part => {
+          if (!node._subs[part]) node._subs[part] = { _files: [], _subs: {} };
+          node = node._subs[part];
+        });
+        node._files.push(p);
       });
 
-      let html = '';
-      Object.entries(groups).sort().forEach(([folder, items]) => {
-        html += `<h3>${folder}</h3>`;
-        items.forEach(p => {
-          const active = p.path === currentPath ? ' active' : '';
-          html += `<div class="page-item${active}" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${p.title}</div>`;
+      // Auto-open folder containing the active page
+      if (currentPath) {
+        const activeParts = currentPath.split('/').slice(0, -1);
+        let key = '';
+        activeParts.forEach(part => {
+          key = key ? key + '/' + part : part;
+          if (openFolders[key] === undefined) openFolders[key] = true;
         });
-      });
-      list.innerHTML = html;
+      }
+
+      function countFiles(node) {
+        let n = node._files.length;
+        Object.values(node._subs).forEach(sub => n += countFiles(sub));
+        return n;
+      }
+
+      function renderNode(node, path, depth) {
+        let html = '';
+        // Sort subfolders first, then files
+        const sortedSubs = Object.entries(node._subs).sort(([a], [b]) => a.localeCompare(b));
+        const indent = depth * 14;
+
+        sortedSubs.forEach(([name, sub]) => {
+          const key = path ? path + '/' + name : name;
+          const isOpen = openFolders[key] === true; // default collapsed
+          const fileCount = countFiles(sub);
+          const arrowClass = isOpen ? 'arrow open' : 'arrow';
+          const childClass = isOpen ? 'tree-children' : 'tree-children collapsed';
+
+          html += `<div class="tree-node">`;
+          html += `<div class="tree-folder" style="padding-left:${8 + indent}px" onclick="toggleFolder('${key}')">`;
+          html += `<span class="${arrowClass}">&#9654;</span>`;
+          html += `<span class="folder-name">${escapeHtml(name)}</span>`;
+          html += `<span class="count">${fileCount}</span>`;
+          html += `</div>`;
+          html += `<div class="${childClass}">`;
+          html += renderNode(sub, key, depth + 1);
+          html += `</div></div>`;
+        });
+
+        // Files at this level
+        node._files.sort((a, b) => a.title.localeCompare(b.title));
+        node._files.forEach(p => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" style="padding-left:${12 + indent}px" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${escapeHtml(p.title)}</div>`;
+        });
+
+        return html;
+      }
+
+      list.innerHTML = renderNode(root, '', 0);
     }
 
     // ─── Load page ────────────────────────────────────────────
@@ -218,49 +382,117 @@
         return;
       }
 
-      currentRaw = (data.frontmatter ? '---\n' : '') + data.body;
-      // Reconstruct raw for editing
-      const rawResp = await fetch(`/api/wiki?path=${encodeURIComponent(pagePath)}`);
-      const rawData = await rawResp.json();
-
       renderPage(data);
       renderBacklinks(data.backlinks || [], data.wikilinks || []);
-      renderPageList(allPages); // Update active state
+      renderPageList(allPages);
     }
 
     function renderPage(data) {
       const content = document.getElementById('content');
       const fm = data.frontmatter || {};
       const body = data.body || '';
+      const title = fm.title || path_basename(data.path);
 
-      // Frontmatter badges
-      let fmHtml = '<div class="fm-bar">';
-      const showFields = ['type', 'status', 'tags', 'topics'];
-      showFields.forEach(k => {
-        let v = fm[k];
-        if (v && v !== '[]') {
-          if (typeof v === 'string' && v.startsWith('[')) v = v.slice(1, -1);
-          fmHtml += `<span class="fm-badge"><span class="label">${k}:</span> ${v}</span>`;
-        }
-      });
-      fmHtml += '</div>';
-
-      // Edit bar
-      let editHtml = `<div class="edit-bar">
-        <button class="btn primary" onclick="toggleEdit()">Edit</button>
-        <button class="btn" onclick="viewIn3D()">View in 3D Graph</button>
-        <span style="font-size:10px;color:#475569;margin-left:auto">${data.path}</span>
+      // ─── Tab bar (Wikipedia-style Read/Edit) ───
+      let tabHtml = `<div class="tab-bar">
+        <div class="tab active" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Read</div>
+        <div class="tab" onclick="toggleEdit()">Edit source</div>
+        <div class="tab" onclick="viewIn3D()">View in graph</div>
       </div>`;
 
-      // Render markdown with wikilink support
-      const rendered = renderMarkdown(body);
+      // ─── Article title ───
+      let titleHtml = `<h1 class="article-title">${escapeHtml(title)}</h1>`;
 
-      content.innerHTML = editHtml + fmHtml + `<div class="wiki-body">${rendered}</div>`;
+      // ─── Infobox (from frontmatter) ───
+      const fmEntries = Object.entries(fm).filter(([k]) => k !== 'title');
+      let infoboxHtml = '';
+      if (fmEntries.length > 0) {
+        infoboxHtml = `<div class="infobox">
+          <div class="infobox-header">${escapeHtml(title)}</div>`;
+        fmEntries.forEach(([k, v]) => {
+          let display = '';
+          if (typeof v === 'string' && v.startsWith('[')) {
+            // Parse simple array-like values as tags
+            const items = v.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
+            display = items.map(t => `<span class="infobox-tag">${escapeHtml(t)}</span>`).join(' ');
+          } else {
+            display = escapeHtml(String(v));
+          }
+          infoboxHtml += `<div class="infobox-row">
+            <div class="infobox-label">${escapeHtml(k)}</div>
+            <div class="infobox-value">${display}</div>
+          </div>`;
+        });
+        infoboxHtml += `</div>`;
+      }
+
+      // ─── Table of contents ───
+      const headings = [];
+      const tocRegex = /^(#{1,3})\s+(.+)$/gm;
+      let hMatch;
+      while ((hMatch = tocRegex.exec(body)) !== null) {
+        headings.push({ level: hMatch[1].length, text: hMatch[2].replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (m, t, d) => d || t) });
+      }
+
+      let tocHtml = '';
+      if (headings.length > 2) {
+        tocHtml = `<div class="toc"><div class="toc-title">Contents <span class="toc-toggle" onclick="this.parentElement.parentElement.querySelector('ol').style.display = this.parentElement.parentElement.querySelector('ol').style.display === 'none' ? '' : 'none'; this.textContent = this.textContent === '[hide]' ? '[show]' : '[hide]'">[hide]</span></div><ol>`;
+        let lastLevel = 0;
+        headings.forEach((h, i) => {
+          const id = 'section-' + i;
+          if (h.level > lastLevel) tocHtml += '<ol>'.repeat(h.level - lastLevel);
+          else if (h.level < lastLevel) tocHtml += '</ol>'.repeat(lastLevel - h.level);
+          tocHtml += `<li onclick="document.getElementById('${id}')?.scrollIntoView({behavior:'smooth'})">${escapeHtml(h.text)}</li>`;
+          lastLevel = h.level;
+        });
+        if (lastLevel > 0) tocHtml += '</ol>'.repeat(lastLevel);
+        tocHtml += `</ol></div>`;
+      }
+
+      // ─── Render markdown ───
+      const rendered = renderMarkdown(body, headings);
+
+      // ─── Categories (from tags/topics) ───
+      let catHtml = '';
+      const tags = fm.tags;
+      const topics = fm.topics;
+      if (tags || topics) {
+        catHtml = `<div class="categories"><span class="label">Categories:</span> `;
+        const allCats = [];
+        if (typeof tags === 'string') {
+          tags.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean).forEach(t => allCats.push(t));
+        }
+        if (typeof topics === 'string') {
+          topics.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean).forEach(t => allCats.push(t));
+        }
+        catHtml += allCats.map(c =>
+          `<span class="cat-link" onclick="document.getElementById('page-search').value='${escapeHtml(c)}'; document.getElementById('page-search').dispatchEvent(new Event('input'))">${escapeHtml(c)}</span>`
+        ).join(' · ');
+        catHtml += `</div>`;
+      }
+
+      // ─── Path info ───
+      let pathHtml = `<div style="font-size:11px;color:#54606d;margin-top:16px;font-family:-apple-system,'Segoe UI',sans-serif">
+        <em>Vault path: ${escapeHtml(data.path)}</em></div>`;
+
+      content.innerHTML = tabHtml + titleHtml + infoboxHtml + tocHtml +
+        `<div class="wiki-body">${rendered}</div>` + catHtml + pathHtml;
     }
 
-    function renderMarkdown(text) {
-      // Convert [[wikilinks]] to clickable links before markdown parsing
+    function renderMarkdown(text, headings) {
+      // Add IDs to headings for ToC linking
+      let headingIdx = 0;
       let processed = text.replace(
+        /^(#{1,3})\s+(.+)$/gm,
+        (match, hashes, content) => {
+          const id = 'section-' + headingIdx;
+          headingIdx++;
+          return `${hashes} <span id="${id}"></span>${content}`;
+        }
+      );
+
+      // Convert [[wikilinks]] to clickable spans
+      processed = processed.replace(
         /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
         (match, target, display) => {
           const label = display || target;
@@ -271,7 +503,10 @@
           return `<span class="wikilink broken" title="Page not found: ${target}">${label}</span>`;
         }
       );
-      return marked.parse(processed);
+      let html = marked.parse(processed);
+      // External links open in new tab, never navigate away from wiki
+      html = html.replace(/<a href="(https?:\/\/[^"]+)"/g, '<a href="$1" target="_blank" rel="noopener noreferrer"');
+      return html;
     }
 
     function findPageByTitle(title) {
@@ -289,7 +524,7 @@
       const wlList = document.getElementById('wikilinks-list');
 
       if (backlinks.length === 0) {
-        blList.innerHTML = '<span style="font-size:11px;color:#475569">No backlinks</span>';
+        blList.innerHTML = '<span style="font-size:11px;color:#54606d">No backlinks found</span>';
       } else {
         blList.innerHTML = backlinks.map(bl =>
           `<div class="backlink-item" onclick="loadPage('${bl.path.replace(/'/g, "\\'")}')">${bl.title}</div>`
@@ -297,14 +532,14 @@
       }
 
       if (wikilinks.length === 0) {
-        wlList.innerHTML = '<span style="font-size:11px;color:#475569">No outgoing links</span>';
+        wlList.innerHTML = '<span style="font-size:11px;color:#54606d">No outgoing links</span>';
       } else {
         wlList.innerHTML = wikilinks.map(wl => {
           const page = findPageByTitle(wl);
           if (page) {
             return `<div class="backlink-item" onclick="loadPage('${page.path.replace(/'/g, "\\'")}')">${wl}</div>`;
           }
-          return `<div class="backlink-item" style="color:#f87171">${wl} (missing)</div>`;
+          return `<div class="backlink-item" style="color:#d73a49">${wl} (missing)</div>`;
         }).join('');
       }
     }
@@ -314,23 +549,28 @@
       if (editing) return;
       editing = true;
 
-      // Fetch raw content
       const resp = await fetch(`/api/wiki?path=${encodeURIComponent(currentPath)}`);
       const data = await resp.json();
-      // Reconstruct full file
       const rawContent = data.frontmatter
         ? '---\n' + reconstructFrontmatter(data.frontmatter) + '---\n\n' + data.body
         : data.body;
 
       const content = document.getElementById('content');
       content.innerHTML = `
-        <div class="edit-bar">
-          <button class="btn primary" onclick="saveEdit()">Save</button>
-          <button class="btn" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Cancel</button>
-          <span style="font-size:10px;color:#475569;margin-left:auto">${currentPath}</span>
+        <div class="tab-bar">
+          <div class="tab" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Read</div>
+          <div class="tab active">Edit source</div>
+          <div class="tab" onclick="viewIn3D()">View in graph</div>
         </div>
-        <div style="font-size:10px;color:#64748b;margin-bottom:8px">
-          Type <strong>[[</strong> to insert a wikilink. Press Escape to dismiss suggestions.
+        <h1 class="article-title" style="font-size:22px">Editing: ${escapeHtml(data.frontmatter?.title || path_basename(currentPath))}</h1>
+        <div style="font-size:11px;color:#54606d;margin-bottom:10px;font-family:-apple-system,'Segoe UI',sans-serif">
+          Type <strong style="color:#8b949e">[[</strong> to insert a wikilink. Press Escape to dismiss suggestions.
+        </div>
+        <div class="edit-bar">
+          <button class="btn primary" onclick="saveEdit()">Save page</button>
+          <button class="btn" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Cancel</button>
+          <span style="flex:1"></span>
+          <button class="btn danger" onclick="confirmDelete()">Delete page</button>
         </div>
         <textarea class="editor" id="wiki-editor">${escapeHtml(rawContent)}</textarea>
       `;
@@ -358,9 +598,60 @@
       const result = await resp.json();
       if (result.success) {
         editing = false;
+        // Refresh page list in case title changed
+        const data = await fetch('/api/wiki').then(r => r.json());
+        allPages = data.pages || [];
         loadPage(currentPath);
       } else {
         alert('Save failed: ' + (result.error || 'Unknown error'));
+      }
+    }
+
+    // ─── Delete ───────────────────────────────────────────────
+    function confirmDelete() {
+      const container = document.getElementById('modal-container');
+      container.innerHTML = `
+        <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <h3>Delete this page?</h3>
+            <p>This will move <code>${escapeHtml(currentPath)}</code> to the vault's <strong>.trash/</strong> folder. You can recover it from there if needed.</p>
+            <div class="modal-actions">
+              <button class="btn" onclick="closeModal()">Cancel</button>
+              <button class="btn danger" onclick="deletePage()">Move to trash</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').innerHTML = '';
+    }
+
+    async function deletePage() {
+      closeModal();
+      const resp = await fetch('/api/wiki', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: currentPath }),
+      });
+
+      const result = await resp.json();
+      if (result.success) {
+        // Remove from page list and go to empty state
+        allPages = allPages.filter(p => p.path !== currentPath);
+        currentPath = '';
+        location.hash = '';
+        renderPageList(allPages);
+        document.getElementById('content').innerHTML = `
+          <div class="empty">
+            <h2>Page deleted</h2>
+            <p>Moved to .trash/ — select another page from the sidebar.</p>
+          </div>`;
+        document.getElementById('backlinks-list').innerHTML = '<span style="font-size:11px;color:#54606d">Select a page</span>';
+        document.getElementById('wikilinks-list').innerHTML = '';
+      } else {
+        alert('Delete failed: ' + (result.error || 'Unknown error'));
       }
     }
 
@@ -374,7 +665,6 @@
       const pos = editor.selectionStart;
       const text = editor.value;
 
-      // Check if we're inside [[ ]]
       const before = text.substring(0, pos);
       const openBracket = before.lastIndexOf('[[');
       const closeBracket = before.lastIndexOf(']]');
@@ -419,14 +709,13 @@
       const dropdown = document.getElementById('suggest-dropdown');
       if (suggestItems.length === 0) { hideSuggestions(); return; }
 
-      // Position near cursor
       const rect = editor.getBoundingClientRect();
       dropdown.style.left = (rect.left + 20) + 'px';
       dropdown.style.top = (rect.top + 30) + 'px';
       dropdown.style.display = 'block';
 
       dropdown.innerHTML = suggestItems.map((s, i) =>
-        `<div class="suggest-item" onclick="insertSuggestion(suggestItems[${i}])">${s.title}<span style="color:#475569;margin-left:8px;font-size:9px">${s.path}</span></div>`
+        `<div class="suggest-item" onclick="insertSuggestion(suggestItems[${i}])">${s.title}<span style="color:#54606d;margin-left:8px;font-size:10px">${s.path}</span></div>`
       ).join('');
     }
 
@@ -453,14 +742,165 @@
       suggestIndex = -1;
     }
 
-    // ─── 3D graph link ────────────────────────────────────────
+    // ─── Help page ──────────────────────────────────────────
+    function showHelp() {
+      currentPath = '';
+      editing = false;
+      location.hash = 'help';
+      renderPageList(allPages);
+
+      // Clear backlinks panel
+      document.getElementById('backlinks-list').innerHTML = '';
+      document.getElementById('wikilinks-list').innerHTML = '';
+
+      // The guide pages that live in 00-meta/beestgraph/
+      const guides = [
+        { key: 'bks', title: 'Beestgraph Knowledge Standard (BKS)', path: '00-meta/beestgraph/Beestgraph Knowledge Standard (BKS).md', desc: 'The unifying spec — how PARA, Zettelkasten, and Topic Trees work together as one system.' },
+        { key: 'vault', title: 'Vault Folder Architecture', path: '00-meta/beestgraph/Vault Folder Architecture.md', desc: 'The numbered folder structure (00–09) and what belongs in each folder.' },
+        { key: 'para', title: 'PARA Method in beestgraph', path: '00-meta/beestgraph/PARA Method in beestgraph.md', desc: 'Projects, Areas, Resources, Archives — how actionability drives organization.' },
+        { key: 'zk', title: 'Zettelkasten Method in beestgraph', path: '00-meta/beestgraph/Zettelkasten Method in beestgraph.md', desc: 'Atomic notes, maturity graduation (fleeting → evergreen), and heavy wiki-linking.' },
+        { key: 'topics', title: 'Topic Tree Organization', path: '00-meta/beestgraph/Topic Tree Organization.md', desc: 'Hierarchical topic classification (technology/ai-ml, culture/film, etc.) and how it maps to folders.' },
+        { key: 'mocs', title: 'Maps of Content (MOCs)', path: '00-meta/beestgraph/Maps of Content (MOCs).md', desc: 'Human-curated index notes that serve as entry points into topic clusters.' },
+        { key: 'types', title: 'Content Types Taxonomy', path: '00-meta/beestgraph/Content Types Taxonomy.md', desc: 'The 25+ document types (article, note, recipe, person, tool, etc.) and their type-specific fields.' },
+        { key: 'pipeline', title: 'Qualification Pipeline', path: '00-meta/beestgraph/Qualification Pipeline.md', desc: 'How content flows from inbox → queue → review → classification → permanent home.' },
+      ];
+
+      // Build clickable guide links — resolve against loaded pages
+      function guideLink(g) {
+        const page = allPages.find(p => p.path === g.path);
+        if (page) {
+          return `<span class="wikilink" onclick="loadPage('${page.path.replace(/'/g, "\\'")}')">${g.title}</span>`;
+        }
+        return `<span class="wikilink broken" title="Page not found">${g.title}</span>`;
+      }
+
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <h1 class="article-title">How beestgraph organizes knowledge</h1>
+
+        <div class="infobox">
+          <div class="infobox-header">Quick Reference</div>
+          <div class="infobox-row"><div class="infobox-label">Method</div><div class="infobox-value">PARA + Zettelkasten + Topic Trees</div></div>
+          <div class="infobox-row"><div class="infobox-label">Folders</div><div class="infobox-value">00-meta through 09-attachments</div></div>
+          <div class="infobox-row"><div class="infobox-label">Stages</div><div class="infobox-value">fleeting → literature → evergreen → reference</div></div>
+          <div class="infobox-row"><div class="infobox-label">Types</div><div class="infobox-value">25+ (note, article, recipe, person, tool...)</div></div>
+          <div class="infobox-row"><div class="infobox-label">Spec</div><div class="infobox-value">${guideLink(guides[0])}</div></div>
+        </div>
+
+        <div class="toc">
+          <div class="toc-title">Contents</div>
+          <ol>
+            <li onclick="document.getElementById('s-philosophy')?.scrollIntoView({behavior:'smooth'})">Philosophy</li>
+            <li onclick="document.getElementById('s-three-axes')?.scrollIntoView({behavior:'smooth'})">The three organizational axes</li>
+            <li onclick="document.getElementById('s-folders')?.scrollIntoView({behavior:'smooth'})">Vault folder structure</li>
+            <li onclick="document.getElementById('s-frontmatter')?.scrollIntoView({behavior:'smooth'})">Frontmatter &amp; metadata</li>
+            <li onclick="document.getElementById('s-stages')?.scrollIntoView({behavior:'smooth'})">Content stages</li>
+            <li onclick="document.getElementById('s-pipeline')?.scrollIntoView({behavior:'smooth'})">How content flows in</li>
+            <li onclick="document.getElementById('s-wikilinks')?.scrollIntoView({behavior:'smooth'})">Wikilinks &amp; connections</li>
+            <li onclick="document.getElementById('s-guides')?.scrollIntoView({behavior:'smooth'})">Deep-dive guides</li>
+          </ol>
+        </div>
+
+        <div class="wiki-body">
+
+        <h2><span id="s-philosophy"></span>Philosophy</h2>
+        <p>beestgraph treats your vault as a <strong>living knowledge graph</strong>, not a folder tree. Every markdown file is a node. Every <code>[[wikilink]]</code> is an edge. The folders are a convenience layer for browsing — the graph is the real structure.</p>
+        <p>Three proven methodologies work together:</p>
+        <ul>
+          <li><strong>PARA</strong> (Tiago Forte) — organizes by <em>actionability</em>: is this an active project, an ongoing area, a reference resource, or archived?</li>
+          <li><strong>Zettelkasten</strong> (Luhmann) — organizes by <em>maturity</em>: raw capture → processed note → evergreen insight, connected by links</li>
+          <li><strong>Topic Trees</strong> — organizes by <em>subject</em>: technology/ai-ml, culture/film, health/nutrition, etc.</li>
+        </ul>
+        <p>No single axis is "right" — you'll find a recipe by browsing topics (<em>eat-drink-merriment</em>), by checking your resources folder (PARA), or by following a wikilink chain (Zettelkasten). All three paths lead to the same note.</p>
+
+        <h2><span id="s-three-axes"></span>The three organizational axes</h2>
+        <table>
+          <tr><th>Axis</th><th>Question it answers</th><th>Frontmatter field</th><th>Guide</th></tr>
+          <tr><td><strong>PARA</strong></td><td>"What do I need to <em>do</em> with this?"</td><td><code>para:</code> projects / areas / resources / archives</td><td>${guideLink(guides[2])}</td></tr>
+          <tr><td><strong>Zettelkasten</strong></td><td>"How <em>developed</em> is this idea?"</td><td><code>content_stage:</code> fleeting / literature / evergreen / reference</td><td>${guideLink(guides[3])}</td></tr>
+          <tr><td><strong>Topic Tree</strong></td><td>"What is this <em>about</em>?"</td><td><code>topics:</code> technology/ai-ml, culture/film, etc.</td><td>${guideLink(guides[4])}</td></tr>
+        </table>
+
+        <h2><span id="s-folders"></span>Vault folder structure</h2>
+        <p>Numbered prefixes ensure stable sort order. Full details: ${guideLink(guides[1])}</p>
+        <table>
+          <tr><th>Folder</th><th>Purpose</th><th>PARA mapping</th></tr>
+          <tr><td><code>00-meta/</code></td><td>Navigation, MOCs, beestgraph docs (you're reading these now)</td><td>—</td></tr>
+          <tr><td><code>01-inbox/</code></td><td>Quick captures land here automatically (keep.md, Obsidian Clipper)</td><td>—</td></tr>
+          <tr><td><code>02-queue/</code></td><td>Awaiting human review via Telegram</td><td>—</td></tr>
+          <tr><td><code>03-fleeting/</code></td><td>Raw thoughts, rough notes, not yet processed</td><td>—</td></tr>
+          <tr><td><code>04-daily/</code></td><td>Daily journal entries</td><td>—</td></tr>
+          <tr><td><code>05-projects/</code></td><td>Active, time-bound initiatives with specific goals</td><td><strong>Projects</strong></td></tr>
+          <tr><td><code>06-areas/</code></td><td>Ongoing responsibilities (health, career, finances)</td><td><strong>Areas</strong></td></tr>
+          <tr><td><code>07-resources/</code></td><td>Reference material organized by topic subdirectories</td><td><strong>Resources</strong></td></tr>
+          <tr><td><code>08-archive/</code></td><td>Completed projects, inactive material</td><td><strong>Archives</strong></td></tr>
+          <tr><td><code>09-attachments/</code></td><td>Images, PDFs, media files</td><td>—</td></tr>
+          <tr><td><code>entities/</code></td><td>Auto-generated pages for people, tools, concepts, orgs, places</td><td>—</td></tr>
+          <tr><td><code>raw/</code></td><td>Immutable source captures — never edited after ingest</td><td>—</td></tr>
+        </table>
+
+        <h2><span id="s-frontmatter"></span>Frontmatter &amp; metadata</h2>
+        <p>Every page has a YAML frontmatter block between <code>---</code> markers. The core fields every document gets:</p>
+        <table>
+          <tr><th>Field</th><th>What it does</th><th>Example</th></tr>
+          <tr><td><code>uid</code></td><td>Immutable ID (timestamp-based), primary key in the graph</td><td><code>"20260406143000"</code></td></tr>
+          <tr><td><code>title</code></td><td>Display name (can differ from filename)</td><td><code>"Homemade Pasta Dough"</code></td></tr>
+          <tr><td><code>type</code></td><td>What kind of document — drives which extra fields appear</td><td><code>recipe</code>, <code>article</code>, <code>person</code></td></tr>
+          <tr><td><code>tags</code></td><td>Flat labels, 2–5 per doc, lowercase hyphenated</td><td><code>[pasta, italian, cooking]</code></td></tr>
+          <tr><td><code>status</code></td><td>Lifecycle stage</td><td><code>inbox</code> → <code>draft</code> → <code>published</code> → <code>archived</code></td></tr>
+          <tr><td><code>para</code></td><td>PARA category</td><td><code>resources</code></td></tr>
+          <tr><td><code>topics</code></td><td>Hierarchical subject classification</td><td><code>[eat-drink-merriment/recipes]</code></td></tr>
+          <tr><td><code>content_stage</code></td><td>Zettelkasten maturity</td><td><code>fleeting</code>, <code>literature</code>, <code>evergreen</code>, <code>reference</code></td></tr>
+          <tr><td><code>dates</code></td><td>Created, captured, modified, processed timestamps</td><td><code>created: 2026-04-06</code></td></tr>
+        </table>
+        <p>Type-specific fields (like <code>source.author</code> for articles or <code>engagement.rating</code> for reviews) appear only when relevant. See ${guideLink(guides[6])} for the full taxonomy.</p>
+
+        <h2><span id="s-stages"></span>Content stages</h2>
+        <p>Ideas mature over time. The <code>content_stage</code> field tracks where each note sits:</p>
+        <table>
+          <tr><th>Stage</th><th>Meaning</th><th>Example</th></tr>
+          <tr><td><strong>fleeting</strong></td><td>Raw capture, unprocessed thought</td><td>Quick note jotted on your phone</td></tr>
+          <tr><td><strong>literature</strong></td><td>Rewritten in your own words from a source</td><td>Article summary, book notes</td></tr>
+          <tr><td><strong>evergreen</strong></td><td>Self-contained insight written for longevity</td><td>A principle or framework you've validated</td></tr>
+          <tr><td><strong>reference</strong></td><td>Lookup material, documentation</td><td>API docs, configuration guides, specs</td></tr>
+        </table>
+
+        <h2><span id="s-pipeline"></span>How content flows in</h2>
+        <p>Full details: ${guideLink(guides[7])}</p>
+        <ol>
+          <li><strong>Capture</strong> — content lands in <code>01-inbox/</code> via keep.md, Obsidian Clipper, or manual creation</li>
+          <li><strong>Queue</strong> — the ingester moves it to <code>02-queue/</code> and sends a Telegram notification for review</li>
+          <li><strong>Review</strong> — you approve, edit, or reject via Telegram. AI suggests type, tags, and topics</li>
+          <li><strong>Classification</strong> — approved content gets full frontmatter, entity extraction, and graph edges</li>
+          <li><strong>Filing</strong> — the document moves to its permanent home (07-resources/, 05-projects/, etc.)</li>
+        </ol>
+
+        <h2><span id="s-wikilinks"></span>Wikilinks &amp; connections</h2>
+        <p>The power of the system is in the links. Use <code>[[Page Title]]</code> to link between any pages. In this wiki, <span class="wikilink" style="cursor:default">blue links</span> resolve to existing pages and <span class="wikilink broken" style="cursor:default">red links</span> indicate missing pages.</p>
+        <p>The <code>connections</code> frontmatter field captures relationship types: <code>supports</code>, <code>contradicts</code>, <code>extends</code>, <code>related</code>. These become typed edges in the knowledge graph.</p>
+        <p><strong>Important rule:</strong> every entry in <code>connections</code> frontmatter must also appear as an inline <code>[[wikilink]]</code> in the body, so Obsidian's backlinks work correctly.</p>
+
+        <h2><span id="s-guides"></span>Deep-dive guides</h2>
+        <p>Each of these pages lives in your vault under <code>00-meta/beestgraph/</code> — click to read the full article:</p>
+        <ol>
+          ${guides.map(g => `<li>${guideLink(g)} — ${g.desc}</li>`).join('\n          ')}
+        </ol>
+
+        </div>
+      `;
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────
     function viewIn3D() {
       window.location.href = '/graph3d.html';
     }
 
-    // ─── Utils ────────────────────────────────────────────────
+    function path_basename(p) {
+      return p.split('/').pop().replace(/\.md$/, '');
+    }
+
     function escapeHtml(text) {
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     init();
