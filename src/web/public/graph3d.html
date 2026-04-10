@@ -363,7 +363,9 @@
         const k = expScale(gravityStrength) * 0.15;
         for (let i = 0; i < simNodes.length; i++) {
           const node = simNodes[i];
-          const mode = effectiveGravityMode(node);
+          let mode = effectiveGravityMode(node);
+          // In orphan mode, pull all neutral nodes to center by default
+          if (showOrphansOnly && mode === 'neutral') mode = 'attract';
           if (mode === 'neutral') continue;
           const dir = mode === 'attract' ? -1 : 1;
           const f = k * alpha * dir;
