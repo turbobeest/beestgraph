@@ -4,11 +4,9 @@ import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/graph3d.html", label: "3D Graph" },
-  { href: "/graph", label: "2D Graph" },
   { href: "/wiki.html", label: "Wiki" },
-  { href: "/", label: "Dashboard" },
+  { href: "/dashboard.html", label: "Dashboard" },
   { href: "/queue", label: "Queue" },
-  { href: "/timeline", label: "Timeline" },
   { href: "/entry", label: "New Entry" },
 ];
 

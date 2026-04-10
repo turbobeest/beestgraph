@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>beestgraph dashboard</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #101418; color: #c8ccd1;
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+
+    /* ─── Nav ─── */
+    nav { position: fixed; top: 0; left: 0; right: 0; height: 36px; display: flex;
+      align-items: center; z-index: 150; background: rgba(6,10,19,0.95);
+      border-bottom: 1px solid rgba(100,116,139,0.15); backdrop-filter: blur(12px); }
+    nav .brand { padding: 0 16px; font-size: 13px; font-weight: 700; color: #f1f5f9;
+      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex; align-items: center; }
+    nav a { padding: 0 14px; height: 100%; display: flex; align-items: center;
+      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+    nav a.active { color: #60a5fa; border-bottom: 2px solid #3b82f6; }
+    nav a:hover { color: #94a3b8; }
+
+    /* ─── Layout ─── */
+    .page { margin-top: 36px; padding: 20px 32px 80px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+
+    /* ─── Stats bar ─── */
+    .stats-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 140px; background: #1a1e24; border: 1px solid #2a2f36;
+      border-radius: 4px; padding: 14px 16px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #e3e3e3; line-height: 1; }
+    .stat-label { font-size: 11px; color: #54606d; text-transform: uppercase; letter-spacing: 1px;
+      margin-top: 4px; }
+
+    /* ─── Search ─── */
+    .search-bar { margin-bottom: 20px; }
+    .search-bar input { width: 100%; background: #14181d; border: 1px solid #2a2f36;
+      border-radius: 4px; padding: 10px 14px 10px 36px; color: #c8ccd1; font-size: 14px;
+      outline: none; font-family: inherit; }
+    .search-bar input:focus { border-color: #3366cc; }
+    .search-bar { position: relative; }
+    .search-bar svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: #54606d; pointer-events: none; }
+
+    /* ─── Controls ─── */
+    .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .controls label { font-size: 11px; color: #54606d; text-transform: uppercase; letter-spacing: 1px; }
+    .controls select { background: #14181d; border: 1px solid #2a2f36; border-radius: 2px;
+      padding: 4px 8px; color: #c8ccd1; font-size: 12px; font-family: inherit; outline: none; }
+    .controls select:focus { border-color: #3366cc; }
+    .result-count { font-size: 12px; color: #54606d; margin-left: auto; }
+
+    /* ─── Timeline ─── */
+    .date-group { margin-bottom: 24px; }
+    .date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #54606d; font-weight: 600; margin-bottom: 10px; padding-left: 20px; }
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before { content: ''; position: absolute; left: 5px; top: 0; bottom: 0;
+      width: 1px; background: #2a2f36; }
+
+    .entry { position: relative; margin-bottom: 8px; background: #1a1e24; border: 1px solid #2a2f36;
+      border-radius: 4px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; }
+    .entry:hover { border-color: #3a4149; }
+    .entry::before { content: ''; position: absolute; left: -20px; top: 16px; width: 9px; height: 9px;
+      border-radius: 50%; border: 2px solid #3366cc; background: #101418; z-index: 1; }
+
+    .entry-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .entry-title { font-size: 14px; font-weight: 600; color: #e3e3e3; line-height: 1.3; }
+    .entry-title a { color: #6b9edd; text-decoration: none; }
+    .entry-title a:hover { text-decoration: underline; }
+    .entry-badges { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+    .badge-status-published { background: #132d1b; color: #3fb950; border: 1px solid #1a3d24; }
+    .badge-status-inbox { background: #2d2613; color: #d29922; border: 1px solid #3d3318; }
+    .badge-status-draft { background: #1a2333; color: #6b9edd; border: 1px solid #1f3050; }
+    .badge-status-archived { background: #1a1e24; color: #54606d; border: 1px solid #2a2f36; }
+    .badge-status-qualifying { background: #2d1a33; color: #bc8cdb; border: 1px solid #3d2445; }
+    .badge-source { background: #1a1e24; color: #8b949e; border: 1px solid #2a2f36; }
+
+    .entry-summary { font-size: 13px; color: #8b949e; margin-top: 6px; line-height: 1.5; }
+    .entry-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .entry-tag { font-size: 10px; padding: 1px 6px; border-radius: 2px;
+      background: #1f2830; color: #6b9edd; border: 1px solid #2a2f36; }
+    .entry-topic { font-size: 10px; padding: 1px 6px; border-radius: 2px;
+      background: #132d1b; color: #3fb950; border: 1px solid #1a3d24; }
+    .entry-meta { font-size: 11px; color: #54606d; margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .entry-meta a { color: #6b9edd; text-decoration: none; }
+    .entry-meta a:hover { text-decoration: underline; }
+
+    /* ─── Expanded detail ─── */
+    .entry-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #22272d; }
+    .entry.expanded .entry-detail { display: block; }
+    .detail-row { display: flex; gap: 8px; margin-bottom: 4px; font-size: 12px; }
+    .detail-label { color: #54606d; width: 80px; flex-shrink: 0; }
+    .detail-value { color: #8b949e; word-break: break-all; }
+    .detail-value a { color: #6b9edd; }
+
+    /* ─── Empty / loading ─── */
+    .empty { text-align: center; padding: 60px 20px; color: #54606d; }
+    .empty h2 { color: #6b7785; margin-bottom: 8px; font-size: 20px; font-weight: 400; }
+    .loading { text-align: center; padding: 40px; color: #54606d; font-size: 13px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #14181d; }
+    ::-webkit-scrollbar-thumb { background: #2a2f36; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">beestgraph</div>
+    <a href="/graph3d.html">3D Graph</a>
+    <a href="/wiki.html">Wiki</a>
+    <a href="/dashboard.html" class="active">Dashboard</a>
+    <a href="/queue">Queue</a>
+    <div style="margin-left:auto;display:flex;align-items:center;height:100%">
+      <a href="https://obsidian.md" target="_blank" style="font-size:9px;letter-spacing:0.3px">Obsidian</a>
+      <a href="https://keep.md" target="_blank" style="font-size:9px;letter-spacing:0.3px">keep.md</a>
+      <a href="https://github.com/turbobeest/beestgraph" target="_blank" style="font-size:9px;letter-spacing:0.3px">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <!-- Stats -->
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="stat-docs">-</div><div class="stat-label">Documents</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-topics">-</div><div class="stat-label">Topics</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-tags">-</div><div class="stat-label">Tags</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-sources">-</div><div class="stat-label">Sources</div></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="search" placeholder="Search documents...">
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <label>Show</label>
+      <select id="limit">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+      </select>
+      <label style="margin-left:8px">Status</label>
+      <select id="filter-status">
+        <option value="">All</option>
+        <option value="published">Published</option>
+        <option value="inbox">Inbox</option>
+        <option value="draft">Draft</option>
+        <option value="qualifying">Qualifying</option>
+        <option value="archived">Archived</option>
+      </select>
+      <span class="result-count" id="result-count"></span>
+    </div>
+
+    <!-- Timeline -->
+    <div id="timeline-container">
+      <div class="loading">Loading documents...</div>
+    </div>
+  </div>
+
+  <script>
+    let allDocs = [];
+    let searchTimeout = null;
+
+    async function init() {
+      // Fetch stats and timeline in parallel
+      const [statsResp, timelineResp] = await Promise.all([
+        fetch('/api/stats').catch(() => null),
+        fetch(`/api/timeline?limit=${document.getElementById('limit').value}`).catch(() => null),
+      ]);
+
+      if (statsResp?.ok) {
+        const stats = await statsResp.json();
+        document.getElementById('stat-docs').textContent = stats.documents ?? 0;
+        document.getElementById('stat-topics').textContent = stats.topics ?? 0;
+        document.getElementById('stat-tags').textContent = stats.tags ?? 0;
+        document.getElementById('stat-sources').textContent = stats.sources ?? 0;
+      }
+
+      if (timelineResp?.ok) {
+        const data = await timelineResp.json();
+        allDocs = data.documents || [];
+        renderTimeline(allDocs);
+      } else {
+        document.getElementById('timeline-container').innerHTML =
+          '<div class="empty"><h2>Could not load documents</h2><p>Check that FalkorDB is running.</p></div>';
+      }
+
+      // Search with debounce
+      document.getElementById('search').addEventListener('input', e => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => filterAndRender(), 250);
+      });
+
+      document.getElementById('filter-status').addEventListener('change', () => filterAndRender());
+      document.getElementById('limit').addEventListener('change', async () => {
+        const resp = await fetch(`/api/timeline?limit=${document.getElementById('limit').value}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          allDocs = data.documents || [];
+          filterAndRender();
+        }
+      });
+    }
+
+    function filterAndRender() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+
+      let filtered = allDocs;
+      if (q) {
+        filtered = filtered.filter(d =>
+          (d.title || '').toLowerCase().includes(q) ||
+          (d.summary || '').toLowerCase().includes(q) ||
+          (d.path || '').toLowerCase().includes(q) ||
+          (d.tags || []).some(t => t.toLowerCase().includes(q)) ||
+          (d.topics || []).some(t => t.toLowerCase().includes(q))
+        );
+      }
+      if (status) {
+        filtered = filtered.filter(d => d.status === status);
+      }
+      renderTimeline(filtered);
+    }
+
+    function renderTimeline(docs) {
+      const container = document.getElementById('timeline-container');
+      document.getElementById('result-count').textContent = `${docs.length} document${docs.length !== 1 ? 's' : ''}`;
+
+      if (docs.length === 0) {
+        container.innerHTML = '<div class="empty"><h2>No documents found</h2><p>Try a different search or filter.</p></div>';
+        return;
+      }
+
+      // Group by date
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today.getTime() - 86400000);
+      const weekAgo = new Date(today.getTime() - 7 * 86400000);
+      const monthAgo = new Date(today.getTime() - 30 * 86400000);
+
+      const groups = { 'Today': [], 'Yesterday': [], 'This Week': [], 'This Month': [], 'Older': [] };
+      docs.forEach(d => {
+        const created = new Date(d.createdAt);
+        if (isNaN(created.getTime())) groups['Older'].push(d);
+        else if (created >= today) groups['Today'].push(d);
+        else if (created >= yesterday) groups['Yesterday'].push(d);
+        else if (created >= weekAgo) groups['This Week'].push(d);
+        else if (created >= monthAgo) groups['This Month'].push(d);
+        else groups['Older'].push(d);
+      });
+
+      let html = '';
+      Object.entries(groups).forEach(([label, items]) => {
+        if (items.length === 0) return;
+        html += `<div class="date-group">`;
+        html += `<div class="date-label">${label} (${items.length})</div>`;
+        html += `<div class="timeline">`;
+        items.forEach(d => {
+          html += renderEntry(d);
+        });
+        html += `</div></div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderEntry(d) {
+      const statusClass = `badge-status-${d.status || 'inbox'}`;
+      const sourceLabel = { keepmd: 'keep.md', obsidian_clipper: 'Obsidian', manual: 'Manual', api: 'API', agent: 'Agent' };
+
+      const date = d.createdAt ? new Date(d.createdAt).toLocaleString(undefined, {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      }) : '';
+
+      const summary = d.summary
+        ? (d.summary.length > 200 ? d.summary.slice(0, 200) + '...' : d.summary)
+        : '';
+
+      const wikiPath = d.path ? encodeURIComponent(d.path) : '';
+
+      let tagsHtml = '';
+      if (d.topics?.length > 0) {
+        tagsHtml += d.topics.map(t => `<span class="entry-topic">${esc(t)}</span>`).join('');
+      }
+      if (d.tags?.length > 0) {
+        tagsHtml += d.tags.map(t => `<span class="entry-tag">#${esc(t)}</span>`).join('');
+      }
+
+      return `
+        <div class="entry" onclick="this.classList.toggle('expanded')">
+          <div class="entry-header">
+            <div class="entry-title">${wikiPath ? `<a href="/wiki.html#${wikiPath}" onclick="event.stopPropagation()">${esc(d.title || 'Untitled')}</a>` : esc(d.title || 'Untitled')}</div>
+            <div class="entry-badges">
+              ${d.status ? `<span class="badge ${statusClass}">${esc(d.status)}</span>` : ''}
+              ${d.sourceType ? `<span class="badge badge-source">${esc(sourceLabel[d.sourceType] || d.sourceType)}</span>` : ''}
+            </div>
+          </div>
+          ${summary ? `<div class="entry-summary">${esc(summary)}</div>` : ''}
+          ${tagsHtml ? `<div class="entry-tags">${tagsHtml}</div>` : ''}
+          <div class="entry-meta">
+            ${date ? `<span>${date}</span>` : ''}
+            ${d.paraCategory ? `<span>${esc(d.paraCategory)}</span>` : ''}
+            ${wikiPath ? `<a href="/wiki.html#${wikiPath}" onclick="event.stopPropagation()">Open in Wiki</a>` : ''}
+          </div>
+          <div class="entry-detail">
+            <div class="detail-row"><span class="detail-label">Path</span><span class="detail-value">${esc(d.path)}</span></div>
+            ${d.sourceUrl ? `<div class="detail-row"><span class="detail-label">Source</span><span class="detail-value"><a href="${esc(d.sourceUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(d.sourceUrl)}</a></span></div>` : ''}
+            ${d.paraCategory ? `<div class="detail-row"><span class="detail-label">PARA</span><span class="detail-value">${esc(d.paraCategory)}</span></div>` : ''}
+            ${d.updatedAt ? `<div class="detail-row"><span class="detail-label">Updated</span><span class="detail-value">${esc(d.updatedAt)}</span></div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function esc(text) {
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    init();
+  </script>
+</body>
+</html>

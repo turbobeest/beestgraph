@@ -61,7 +61,7 @@
     .page-item.active { background: #1a2636; color: #8ab4f8; font-weight: 500; }
 
     /* ─── Content (Wikipedia article area) ─── */
-    .content { flex: 1; overflow-y: auto; padding: 20px 32px 80px; max-width: 960px; }
+    .content { flex: 1; overflow-y: auto; padding: 20px 32px 80px; }
 
     /* Article title */
     .article-title { font-size: 28px; font-weight: 400; color: #e3e3e3; line-height: 1.2;
@@ -69,15 +69,20 @@
       font-family: 'Linux Libertine', 'Georgia', serif; }
 
     /* Infobox (from frontmatter) — Wikipedia-style */
-    .infobox { float: right; width: 260px; margin: 0 0 16px 20px; background: #1a1e24;
+    .infobox { float: right; width: 320px; margin: 0 0 16px 24px; background: #1a1e24;
       border: 1px solid #2a2f36; font-size: 12px; font-family: -apple-system, 'Segoe UI', sans-serif; }
-    .infobox-header { background: #1f2830; padding: 8px 10px; text-align: center;
+    .infobox-header { background: #1f2830; padding: 8px 12px; display: flex;
+      align-items: center; justify-content: space-between;
       font-weight: 600; color: #c8ccd1; font-size: 13px; border-bottom: 1px solid #2a2f36; }
+    .infobox-header .edit-schema { font-size: 11px; color: #6b9edd; cursor: pointer;
+      font-weight: 400; background: none; border: none; font-family: inherit; padding: 0; }
+    .infobox-header .edit-schema:hover { text-decoration: underline; }
     .infobox-row { display: flex; border-bottom: 1px solid #22272d; }
     .infobox-row:last-child { border-bottom: none; }
-    .infobox-label { width: 90px; padding: 4px 8px; color: #8b949e; font-weight: 500;
-      background: #161a1f; flex-shrink: 0; }
-    .infobox-value { padding: 4px 8px; color: #c8ccd1; flex: 1; word-break: break-word; }
+    .infobox-label { width: 110px; min-width: 110px; padding: 5px 10px; color: #8b949e; font-weight: 500;
+      background: #161a1f; flex-shrink: 0; font-size: 11px; }
+    .infobox-value { padding: 5px 10px; color: #c8ccd1; flex: 1; word-break: break-word;
+      min-width: 0; font-size: 12px; }
     .infobox-tag { display: inline-block; background: #1f2830; border: 1px solid #2a2f36;
       border-radius: 2px; padding: 1px 6px; margin: 1px 2px; font-size: 11px; color: #8b949e; }
 
@@ -196,6 +201,33 @@
       font-size: 12px; color: #c8ccd1; }
     .modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
+    /* Organize form */
+    .organize-form { font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 720px; }
+    .organize-form h2 { font-size: 16px; color: #c8ccd1; margin: 20px 0 10px; font-weight: 600;
+      padding-bottom: 4px; border-bottom: 1px solid #2a2f36; }
+    .organize-form h2:first-child { margin-top: 0; }
+    .form-row { display: flex; align-items: flex-start; margin-bottom: 10px; gap: 12px; }
+    .form-label { width: 120px; min-width: 120px; font-size: 12px; color: #8b949e;
+      font-weight: 500; padding-top: 7px; }
+    .form-field { flex: 1; }
+    .form-field select, .form-field input[type="text"] { width: 100%; background: #14181d;
+      border: 1px solid #2a2f36; border-radius: 2px; padding: 6px 10px; color: #c8ccd1;
+      font-size: 13px; font-family: inherit; outline: none; }
+    .form-field select:focus, .form-field input[type="text"]:focus { border-color: #3366cc; }
+    .form-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7785' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px; }
+    .form-hint { font-size: 11px; color: #54606d; margin-top: 3px; }
+    .form-current { font-size: 12px; color: #6b9edd; background: #161a1f; border: 1px solid #2a2f36;
+      border-radius: 2px; padding: 6px 10px; display: inline-block; }
+    .tag-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .tag-chip { display: inline-flex; align-items: center; gap: 4px; background: #1f2830;
+      border: 1px solid #2a2f36; border-radius: 2px; padding: 2px 8px; font-size: 11px; color: #8b949e; }
+    .tag-chip .remove { cursor: pointer; color: #54606d; font-size: 13px; line-height: 1; }
+    .tag-chip .remove:hover { color: #d73a49; }
+    .organize-actions { margin-top: 20px; padding-top: 16px; border-top: 1px solid #2a2f36;
+      display: flex; gap: 8px; align-items: center; }
+    .organize-status { font-size: 12px; color: #8b949e; margin-left: 12px; }
+
     /* Categories (bottom of article) */
     .categories { margin-top: 24px; padding-top: 12px; border-top: 1px solid #2a2f36;
       font-size: 12px; font-family: -apple-system, 'Segoe UI', sans-serif; }
@@ -219,9 +251,8 @@
   <nav>
     <div class="brand">beestgraph</div>
     <a href="/graph3d.html">3D Graph</a>
-    <a href="/graph">2D Graph</a>
     <a href="/wiki.html" class="active">Wiki</a>
-    <a href="/">Dashboard</a>
+    <a href="/dashboard.html">Dashboard</a>
     <a href="/queue">Queue</a>
     <a href="/wiki.html#help" onclick="event.preventDefault();showHelp()" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
   </nav>
@@ -393,10 +424,11 @@
       const body = data.body || '';
       const title = fm.title || path_basename(data.path);
 
-      // ─── Tab bar (Wikipedia-style Read/Edit) ───
+      // ─── Tab bar (Wikipedia-style Read/Edit/Organize) ───
       let tabHtml = `<div class="tab-bar">
         <div class="tab active" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Read</div>
         <div class="tab" onclick="toggleEdit()">Edit source</div>
+        <div class="tab" onclick="showOrganize()">Organize</div>
         <div class="tab" onclick="viewIn3D()">View in graph</div>
       </div>`;
 
@@ -408,7 +440,10 @@
       let infoboxHtml = '';
       if (fmEntries.length > 0) {
         infoboxHtml = `<div class="infobox">
-          <div class="infobox-header">${escapeHtml(title)}</div>`;
+          <div class="infobox-header">
+            <span>Knowledge Graph Schema</span>
+            <button class="edit-schema" onclick="toggleEdit()">edit</button>
+          </div>`;
         fmEntries.forEach(([k, v]) => {
           let display = '';
           if (typeof v === 'string' && v.startsWith('[')) {
@@ -544,6 +579,246 @@
       }
     }
 
+    // ─── Organize mode ─────────────────────────────────────────
+    let _organizeData = null;
+    let _vaultFolders = null;
+
+    async function showOrganize() {
+      editing = false;
+
+      // Fetch page data and folder list in parallel
+      const [pageResp, foldersResp] = await Promise.all([
+        fetch(`/api/wiki?path=${encodeURIComponent(currentPath)}`),
+        _vaultFolders ? Promise.resolve(null) : fetch('/api/wiki/folders'),
+      ]);
+      _organizeData = await pageResp.json();
+      if (foldersResp) {
+        const fd = await foldersResp.json();
+        _vaultFolders = fd.folders || [];
+      }
+
+      const fm = _organizeData.frontmatter || {};
+      const title = fm.title || path_basename(currentPath);
+      const currentFolder = currentPath.split('/').slice(0, -1).join('/');
+
+      const content = document.getElementById('content');
+
+      // Dropdown options
+      const types = ['note','article','recipe','concept','reference','project','decision','meeting','daily','journal','moc','person','organization','tool','place','book','film','podcast','thread','repo','email','event','health','collection','synthesis','quote','financial','dream'];
+      const statuses = ['inbox','draft','published','archived','qualifying','processing'];
+      const paraOpts = ['','projects','areas','resources','archives'];
+      const stages = ['fleeting','literature','evergreen','reference'];
+
+      function selectOpts(options, current) {
+        return options.map(o => `<option value="${o}"${o === (current||'') ? ' selected' : ''}>${o || '(none)'}</option>`).join('');
+      }
+
+      function folderOpts(current) {
+        let opts = `<option value="">(root)</option>`;
+        (_vaultFolders || []).forEach(f => {
+          opts += `<option value="${escapeHtml(f)}"${f === current ? ' selected' : ''}>${escapeHtml(f)}</option>`;
+        });
+        return opts;
+      }
+
+      // Parse tags and topics from frontmatter (may be string "[a, b]" or missing)
+      function parseFmList(val) {
+        if (!val) return [];
+        if (typeof val === 'string') {
+          if (val.startsWith('[')) return val.slice(1,-1).split(',').map(s => s.trim()).filter(Boolean);
+          return [val];
+        }
+        return [];
+      }
+      const tags = parseFmList(fm.tags);
+      const topics = parseFmList(fm.topics);
+
+      content.innerHTML = `
+        <div class="tab-bar">
+          <div class="tab" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Read</div>
+          <div class="tab" onclick="toggleEdit()">Edit source</div>
+          <div class="tab active">Organize</div>
+          <div class="tab" onclick="viewIn3D()">View in graph</div>
+        </div>
+        <h1 class="article-title" style="font-size:22px">${escapeHtml(title)}</h1>
+        <div class="organize-form">
+
+          <h2>Location</h2>
+          <div class="form-row">
+            <div class="form-label">Current path</div>
+            <div class="form-field"><div class="form-current">${escapeHtml(currentPath)}</div></div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Move to folder</div>
+            <div class="form-field">
+              <select id="org-folder">${folderOpts(currentFolder)}</select>
+              <div class="form-hint">Select a destination folder. The filename stays the same.</div>
+            </div>
+          </div>
+
+          <h2>Classification</h2>
+          <div class="form-row">
+            <div class="form-label">Type</div>
+            <div class="form-field"><select id="org-type">${selectOpts(types, fm.type || fm.content_type || fm.recommended_type || '')}</select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Status</div>
+            <div class="form-field"><select id="org-status">${selectOpts(statuses, fm.status || '')}</select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">PARA</div>
+            <div class="form-field">
+              <select id="org-para">${selectOpts(paraOpts, fm.para || '')}</select>
+              <div class="form-hint">Projects / Areas / Resources / Archives</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Content stage</div>
+            <div class="form-field">
+              <select id="org-stage">${selectOpts(stages, fm.content_stage || fm.maturity || '')}</select>
+              <div class="form-hint">Zettelkasten maturity: fleeting → literature → evergreen → reference</div>
+            </div>
+          </div>
+
+          <h2>Tags</h2>
+          <div class="form-row">
+            <div class="form-label">Tags</div>
+            <div class="form-field">
+              <div class="tag-chips" id="org-tags">${tags.map(t => `<span class="tag-chip">${escapeHtml(t)}<span class="remove" onclick="removeOrgTag(this, '${escapeHtml(t)}')">&times;</span></span>`).join('')}</div>
+              <input type="text" id="org-tag-input" placeholder="Add tag and press Enter">
+            </div>
+          </div>
+
+          <h2>Topics</h2>
+          <div class="form-row">
+            <div class="form-label">Topics</div>
+            <div class="form-field">
+              <div class="tag-chips" id="org-topics">${topics.map(t => `<span class="tag-chip">${escapeHtml(t)}<span class="remove" onclick="removeOrgTopic(this, '${escapeHtml(t)}')">&times;</span></span>`).join('')}</div>
+              <input type="text" id="org-topic-input" placeholder="e.g. technology/ai-ml — press Enter">
+            </div>
+          </div>
+
+          <h2>Identity</h2>
+          <div class="form-row">
+            <div class="form-label">Title</div>
+            <div class="form-field"><input type="text" id="org-title" value="${escapeHtml(title)}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">UID</div>
+            <div class="form-field"><div class="form-current">${escapeHtml(fm.uid || fm.id || '(none)')}</div></div>
+          </div>
+
+          <div class="organize-actions">
+            <button class="btn primary" onclick="saveOrganize()">Save changes</button>
+            <button class="btn" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Cancel</button>
+            <span class="btn danger" style="margin-left:auto" onclick="confirmDelete()">Delete page</span>
+            <span class="organize-status" id="org-status-msg"></span>
+          </div>
+        </div>
+      `;
+
+      // Tag/topic input handlers
+      document.getElementById('org-tag-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addOrgTag(); }
+      });
+      document.getElementById('org-topic-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addOrgTopic(); }
+      });
+    }
+
+    function getOrgChips(containerId) {
+      return [...document.querySelectorAll(`#${containerId} .tag-chip`)].map(el =>
+        el.textContent.replace('×', '').trim()
+      );
+    }
+
+    function addOrgTag() {
+      const input = document.getElementById('org-tag-input');
+      const tag = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!tag) return;
+      const existing = getOrgChips('org-tags');
+      if (existing.includes(tag)) { input.value = ''; return; }
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `${escapeHtml(tag)}<span class="remove" onclick="this.parentElement.remove()">&times;</span>`;
+      document.getElementById('org-tags').appendChild(chip);
+      input.value = '';
+    }
+
+    function removeOrgTag(el) { el.parentElement.remove(); }
+
+    function addOrgTopic() {
+      const input = document.getElementById('org-topic-input');
+      const topic = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!topic) return;
+      const existing = getOrgChips('org-topics');
+      if (existing.includes(topic)) { input.value = ''; return; }
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `${escapeHtml(topic)}<span class="remove" onclick="this.parentElement.remove()">&times;</span>`;
+      document.getElementById('org-topics').appendChild(chip);
+      input.value = '';
+    }
+
+    function removeOrgTopic(el) { el.parentElement.remove(); }
+
+    async function saveOrganize() {
+      const statusEl = document.getElementById('org-status-msg');
+      statusEl.textContent = 'Saving...';
+      statusEl.style.color = '#8b949e';
+
+      const updates = {
+        title: document.getElementById('org-title').value.trim(),
+        type: document.getElementById('org-type').value,
+        status: document.getElementById('org-status').value,
+        para: document.getElementById('org-para').value,
+        content_stage: document.getElementById('org-stage').value,
+        tags: getOrgChips('org-tags'),
+        topics: getOrgChips('org-topics'),
+      };
+
+      // Clean up old/legacy fields by setting canonical ones
+      const fm = _organizeData.frontmatter || {};
+      if (fm.content_type) updates.content_type = null;      // remove legacy
+      if (fm.maturity) updates.maturity = null;               // remove legacy
+      if (fm.recommended_type) updates.recommended_type = null;
+      if (fm.recommended_tags) updates.recommended_tags = null;
+      if (fm.recommended_topic) updates.recommended_topic = null;
+      if (fm.recommended_quality) updates.recommended_quality = null;
+      if (fm.recommended_summary) updates.recommended_summary = null;
+      if (fm.quality) updates.quality = null;
+      if (fm.id && !fm.uid) { updates.uid = fm.id; updates.id = null; }
+
+      const currentFolder = currentPath.split('/').slice(0, -1).join('/');
+      const selectedFolder = document.getElementById('org-folder').value;
+      const moveTo = selectedFolder !== currentFolder ? selectedFolder : undefined;
+
+      try {
+        const resp = await fetch('/api/wiki', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: currentPath, updates, moveTo }),
+        });
+        const result = await resp.json();
+        if (result.success) {
+          statusEl.textContent = 'Saved!';
+          statusEl.style.color = '#3fb950';
+          // Refresh page list and navigate to new path
+          const newPath = result.path;
+          const data = await fetch('/api/wiki').then(r => r.json());
+          allPages = data.pages || [];
+          currentPath = newPath;
+          setTimeout(() => loadPage(newPath), 600);
+        } else {
+          statusEl.textContent = 'Error: ' + (result.error || 'Unknown');
+          statusEl.style.color = '#d73a49';
+        }
+      } catch (err) {
+        statusEl.textContent = 'Network error';
+        statusEl.style.color = '#d73a49';
+      }
+    }
+
     // ─── Edit mode ────────────────────────────────────────────
     async function toggleEdit() {
       if (editing) return;
@@ -560,6 +835,7 @@
         <div class="tab-bar">
           <div class="tab" onclick="loadPage('${currentPath.replace(/'/g, "\\'")}')">Read</div>
           <div class="tab active">Edit source</div>
+          <div class="tab" onclick="showOrganize()">Organize</div>
           <div class="tab" onclick="viewIn3D()">View in graph</div>
         </div>
         <h1 class="article-title" style="font-size:22px">Editing: ${escapeHtml(data.frontmatter?.title || path_basename(currentPath))}</h1>
@@ -900,7 +1176,7 @@
     }
 
     function escapeHtml(text) {
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     init();

@@ -36,6 +36,12 @@ Raspberry Pi 5 at 192.168.1.12 (Tailscale: 100.74.63.55).
    write a `docs/planning/BLOCKERS.md` file describing exactly what
    failed, what you tried, and what needs human input. Then stop.
 
+8. **Test UI changes with dev-browser before deploying.** Any time
+   you modify a frontend file (HTML, CSS, JS, TSX), use `dev-browser`
+   to visually verify the change renders correctly before running
+   `npm run build` and restarting the service. Do not finalize a UI
+   deployment without visual confirmation.
+
 ## Key Paths
 
 - Repo root:        ~/beestgraph/

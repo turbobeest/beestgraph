@@ -171,6 +171,104 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+// PATCH /api/wiki — update frontmatter fields and/or move file
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  try {
+    const { path: filePath, updates, moveTo } = await request.json();
+
+    if (!filePath || typeof filePath !== "string") {
+      return NextResponse.json({ error: "path required" }, { status: 400 });
+    }
+
+    const fullPath = path.join(VAULT_PATH, filePath);
+    if (!fullPath.startsWith(VAULT_PATH)) {
+      return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+    }
+    if (!fs.existsSync(fullPath)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    let raw = fs.readFileSync(fullPath, "utf-8");
+
+    // Update frontmatter fields if provided
+    if (updates && typeof updates === "object") {
+      const fmMatch = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+      if (fmMatch) {
+        let fmText = fmMatch[1]!;
+        const body = fmMatch[2] ?? "";
+
+        for (const [key, value] of Object.entries(updates)) {
+          if (value === null || value === undefined || value === "") {
+            // Remove the field
+            fmText = fmText.replace(new RegExp(`^${key}:.*$\\n?`, "m"), "");
+            continue;
+          }
+
+          const lineRegex = new RegExp(`^${key}:\\s*.*$`, "m");
+          let serialized: string;
+
+          if (Array.isArray(value)) {
+            // Write as YAML list
+            serialized = `${key}:\n${(value as string[]).map((v: string) => `  - ${v}`).join("\n")}`;
+          } else if (typeof value === "string") {
+            // Quote if contains special chars
+            const needsQuote = /[:#\[\]{}&*!|>'"%@`]/.test(value as string) || (value as string).includes("\n");
+            serialized = needsQuote ? `${key}: "${(value as string).replace(/"/g, '\\"')}"` : `${key}: ${value}`;
+          } else {
+            serialized = `${key}: ${String(value)}`;
+          }
+
+          if (lineRegex.test(fmText)) {
+            // Handle array fields that span multiple lines
+            const arrayRegex = new RegExp(`^${key}:\\s*\\n(  - .+\\n?)*`, "m");
+            if (Array.isArray(value) && arrayRegex.test(fmText)) {
+              fmText = fmText.replace(arrayRegex, serialized);
+            } else {
+              fmText = fmText.replace(lineRegex, serialized);
+            }
+          } else {
+            // Append new field
+            fmText = fmText.trimEnd() + "\n" + serialized;
+          }
+        }
+
+        raw = `---\n${fmText}\n---\n${body}`;
+      }
+    }
+
+    // Determine final path
+    let finalPath = filePath;
+    let finalFullPath = fullPath;
+
+    if (moveTo && typeof moveTo === "string") {
+      const destDir = path.join(VAULT_PATH, moveTo);
+      if (!destDir.startsWith(VAULT_PATH)) {
+        return NextResponse.json({ error: "Invalid destination" }, { status: 400 });
+      }
+      fs.mkdirSync(destDir, { recursive: true });
+      finalFullPath = path.join(destDir, path.basename(filePath));
+
+      if (fs.existsSync(finalFullPath) && finalFullPath !== fullPath) {
+        return NextResponse.json({ error: "File already exists at destination" }, { status: 409 });
+      }
+      finalPath = path.relative(VAULT_PATH, finalFullPath);
+    }
+
+    // Write content (to original location first if moving)
+    fs.writeFileSync(fullPath, raw, "utf-8");
+
+    // Move if needed
+    if (moveTo && finalFullPath !== fullPath) {
+      fs.renameSync(fullPath, finalFullPath);
+    }
+
+    return NextResponse.json({ success: true, path: finalPath });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Update failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
 // DELETE /api/wiki — move a vault file to .trash/ (safe delete)
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
