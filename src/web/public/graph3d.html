@@ -138,6 +138,56 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+    /* Gravity well & node types */
+    .slider-row {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .slider-row input[type=range] {
+      flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
+      background: rgba(100,116,139,0.3); border-radius: 2px; outline: none;
+    }
+    .slider-row input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      background: #3b82f6; border-radius: 50%; cursor: pointer;
+      border: 2px solid #1e293b;
+    }
+    .node-type-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 0; transition: opacity 0.15s;
+    }
+    .vis-eye {
+      background: none; border: none; color: #475569; cursor: pointer;
+      padding: 2px; display: flex; align-items: center; flex-shrink: 0;
+    }
+    .vis-eye:hover { color: #e2e8f0; }
+    .vis-eye.active { color: #94a3b8; }
+    .mode-btns {
+      display: flex; gap: 2px; margin-left: auto; flex-shrink: 0;
+    }
+    .mode-btn {
+      width: 18px; height: 18px; border-radius: 3px;
+      border: 1px solid rgba(100,116,139,0.2); background: rgba(30,41,59,0.5);
+      color: #475569; font-size: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; line-height: 1;
+    }
+    .mode-btn:hover { border-color: rgba(100,116,139,0.5); color: #94a3b8; }
+    .mode-btn.attract { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.5); color: #22c55e; }
+    .mode-btn.repel { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); color: #ef4444; }
+    .mode-btn.neutral-active { background: rgba(100,116,139,0.15); border-color: rgba(100,116,139,0.4); color: #94a3b8; }
+    .sub-row {
+      display: flex; align-items: center; gap: 4px;
+      padding: 2px 0 2px 22px; transition: opacity 0.15s;
+    }
+    .sub-row .vis-eye { padding: 1px; }
+    .sub-row .mode-btn { width: 16px; height: 16px; }
+    .tree-toggle {
+      background: none; border: none; color: #475569; cursor: pointer;
+      font-size: 8px; width: 14px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; padding: 0;
+    }
+    .tree-toggle:hover { color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -192,15 +242,32 @@
     </div>
 
     <div class="panel">
-      <h2>Layout</h2>
-      <div style="display:flex;gap:4px">
-        <button class="view-btn active" id="btn-labels" onclick="toggleLabels()">Labels</button>
+      <h2>Gravity Well</h2>
+      <div class="slider-row" style="margin-bottom:4px">
+        <span style="font-size:8px;color:#475569">OFF</span>
+        <input type="range" min="0" max="100" value="0" id="gravity-slider" oninput="updateGravityStrength(this.value)">
+        <span style="font-size:8px;color:#475569">MAX</span>
+        <span id="gravity-val" style="font-size:11px;color:#64748b;font-weight:600;min-width:20px;text-align:right">0</span>
+      </div>
+      <div style="font-size:8px;color:#475569;line-height:1.4">
+        Set types below to <span style="color:#22c55e">attract</span> (pull to center) or
+        <span style="color:#ef4444">repel</span> (push outward)
       </div>
     </div>
 
-    <div class="panel" id="legend-panel">
-      <h2>3moticons</h2>
-      <div id="legend"></div>
+    <div class="panel" id="node-types-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h2 style="margin:0">Node Types</h2>
+        <div style="display:flex;gap:3px;align-items:center">
+          <button class="view-btn" onclick="showAllTypes()" style="padding:2px 6px;font-size:8px">All</button>
+          <button class="view-btn" onclick="hideAllTypes()" style="padding:2px 6px;font-size:8px">None</button>
+          <button class="view-btn" id="btn-orphans" onclick="toggleOrphans()" style="padding:2px 6px;font-size:8px;color:#f59e0b;border-color:rgba(245,158,11,0.3)">Orphans</button>
+        </div>
+      </div>
+      <div id="node-types-list"></div>
+      <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(100,116,139,0.12)">
+        <button class="view-btn active" id="btn-labels" onclick="toggleLabels()" style="padding:3px 8px;font-size:8px;width:100%">Toggle Node Labels</button>
+      </div>
     </div>
   </div>
 
@@ -216,6 +283,7 @@
     <div class="stat-row">
       <span>Nodes: <span class="stat-val" id="stat-nodes">0</span></span>
       <span>Edges: <span class="stat-val" id="stat-edges">0</span></span>
+      <span>Orphans: <span class="stat-val" id="stat-orphans" style="color:#f59e0b">0</span></span>
       <span>View: <span class="stat-val" id="stat-view">-</span></span>
     </div>
   </div>
@@ -232,6 +300,81 @@
     let graph3d = null;
     let graphData = { nodes: [], links: [] };
     let labelsVisible = true;
+
+    // ═══════════════════════════════════════════════════════════════
+    // GRAVITY WELL + VISIBILITY STATE
+    // ═══════════════════════════════════════════════════════════════
+    let gravityStrength = 0;
+    let gravityModes = {};       // "Document" -> 'neutral'|'attract'|'repel'
+    let subGravityModes = {};    // "Document:recipe" -> mode (overrides parent)
+    let visibleLabels = new Set();
+    let hiddenSubs = new Set();  // "Document:recipe" = hidden subcategory
+    let showOrphansOnly = false;
+    let fullGraphData = { nodes: [], links: [] };
+    let gravityCenterObj = null;
+    let expandedLabels = {};     // label -> true/false for tree collapse
+
+    const eyeOpenSVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const eyeClosedSVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+    // Extract subcategory from a node (Documents by type, Topics by root path)
+    function getNodeSub(node) {
+      if (node.label === 'Document') return node.properties?.type || null;
+      if (node.label === 'Topic') {
+        const name = node.properties?.name || node.display_name || '';
+        const parts = name.split('/');
+        return parts.length > 1 ? parts[0] : null;
+      }
+      return null;
+    }
+
+    // Effective gravity mode: subcategory override > parent label
+    function effectiveGravityMode(node) {
+      const sub = getNodeSub(node);
+      if (sub) {
+        const key = node.label + ':' + sub;
+        if (key in subGravityModes) return subGravityModes[key];
+      }
+      return gravityModes[node.label] || 'neutral';
+    }
+
+    // Is a node visible? (check sub-hide, then label-hide)
+    function isNodeVisible(node) {
+      if (!visibleLabels.has(node.label)) return false;
+      const sub = getNodeSub(node);
+      if (sub && hiddenSubs.has(node.label + ':' + sub)) return false;
+      return true;
+    }
+
+    // Exponential slider mapping: slider 0–100 → force 0–1.0
+    // Low end is fine-grained (gentle nudge), high end ramps aggressively
+    function expScale(sliderVal) {
+      if (sliderVal === 0) return 0;
+      // Maps 0–100 exponentially: (e^(v/25) - 1) / (e^4 - 1) ≈ 0..1
+      return (Math.exp(sliderVal / 25) - 1) / (Math.exp(4) - 1);
+    }
+
+    // Custom d3 force: pulls attracted types to center, pushes repelled types outward
+    // Respects subcategory overrides (e.g., repel Tags but attract Document:recipe)
+    const gravityWellForce = (() => {
+      let simNodes = [];
+      function force(alpha) {
+        if (gravityStrength === 0) return;
+        const k = expScale(gravityStrength) * 0.15;
+        for (let i = 0; i < simNodes.length; i++) {
+          const node = simNodes[i];
+          const mode = effectiveGravityMode(node);
+          if (mode === 'neutral') continue;
+          const dir = mode === 'attract' ? -1 : 1;
+          const f = k * alpha * dir;
+          node.vx += node.x * f;
+          node.vy += node.y * f;
+          node.vz += node.z * f;
+        }
+      }
+      force.initialize = (nodes) => { simNodes = nodes; };
+      return force;
+    })();
 
     // ═══════════════════════════════════════════════════════════════
     // BEESTGRAPH COLORS — node labels and document types
@@ -620,28 +763,12 @@
         .linkDirectionalArrowRelPos(1)
         .onNodeClick(n => showNodeDetail(n))
         .onNodeHover(n => { container.style.cursor = n ? 'pointer' : 'default'; })
-        .nodeThreeObject(n => {
-          const size = nodeSize(n) * 0.7;
-          const color = nodeColor(n);
-
-          const group = new THREE.Group();
-          const icon = make3moticon(n.label, color, size);
-          icon.userData.rotates = true;
-          group.add(icon);
-
-          if (labelsVisible && n.display_name) {
-            const labelText = n.display_name.length > 22
-              ? n.display_name.substring(0, 20) + '..'
-              : n.display_name;
-            const sprite = makeTextSprite(labelText, color);
-            sprite.position.set(0, size + 3, 0);
-            group.add(sprite);
-          }
-
-          return group;
-        })
+        .nodeThreeObject(n => buildNodeObject(n))
         .d3AlphaDecay(0.02)
         .d3VelocityDecay(0.3);
+
+      // Register gravity well force
+      graph3d.d3Force('gravityWell', gravityWellForce);
 
       // Lighting
       const scene = graph3d.scene();
@@ -653,7 +780,45 @@
       dirLight2.position.set(-100, -50, -100);
       scene.add(dirLight2);
 
-      // Rotation animation loop
+      // ── Gravity center visual ──────────────────────────────────
+      gravityCenterObj = new THREE.Group();
+
+      // Pulsing core
+      const gcCore = new THREE.Mesh(
+        new THREE.SphereGeometry(5, 24, 18),
+        new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.25 })
+      );
+      gcCore.userData.role = 'core';
+      gravityCenterObj.add(gcCore);
+
+      // Outer glow shell
+      const gcGlow = new THREE.Mesh(
+        new THREE.SphereGeometry(18, 24, 18),
+        new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.04, side: THREE.BackSide })
+      );
+      gcGlow.userData.role = 'glow';
+      gravityCenterObj.add(gcGlow);
+
+      // Orbital rings
+      const ringMat = () => new THREE.MeshBasicMaterial({
+        color: 0x60a5fa, transparent: true, opacity: 0.18, side: THREE.DoubleSide
+      });
+      const gcRing1 = new THREE.Mesh(new THREE.TorusGeometry(10, 0.3, 8, 64), ringMat());
+      gcRing1.userData.role = 'ring';
+      gravityCenterObj.add(gcRing1);
+      const gcRing2 = new THREE.Mesh(new THREE.TorusGeometry(14, 0.2, 8, 64), ringMat());
+      gcRing2.rotation.x = Math.PI / 3; gcRing2.rotation.z = Math.PI / 6;
+      gcRing2.userData.role = 'ring';
+      gravityCenterObj.add(gcRing2);
+      const gcRing3 = new THREE.Mesh(new THREE.TorusGeometry(12, 0.15, 8, 64), ringMat());
+      gcRing3.rotation.y = Math.PI / 2; gcRing3.rotation.z = -Math.PI / 4;
+      gcRing3.userData.role = 'ring';
+      gravityCenterObj.add(gcRing3);
+
+      gravityCenterObj.visible = false;
+      scene.add(gravityCenterObj);
+
+      // Rotation + gravity center animation loop
       (function animate() {
         requestAnimationFrame(animate);
         const time = Date.now() * 0.001;
@@ -665,6 +830,42 @@
             }
           }
         });
+
+        // Animate gravity center
+        if (gravityCenterObj) {
+          const hasGravity = gravityStrength > 0;
+          const hasTargets = Object.values(gravityModes).some(m => m !== 'neutral')
+            || Object.values(subGravityModes).some(m => m !== 'neutral');
+          const active = hasGravity && hasTargets;
+          gravityCenterObj.visible = active;
+
+          if (active) {
+            const s = 0.5 + expScale(gravityStrength) * 2;
+            const pulse = 1 + Math.sin(time * 1.8) * 0.1;
+            gravityCenterObj.scale.setScalar(s * pulse);
+
+            // Rotate rings at different speeds
+            gravityCenterObj.children.forEach((child, i) => {
+              if (child.userData.role === 'ring') {
+                child.rotation.z += 0.004 * (1 + i * 0.3);
+              }
+            });
+
+            // Color: green if mostly attract, red if mostly repel, purple if mixed
+            const allModes = Object.values(gravityModes).concat(Object.values(subGravityModes));
+            const aCount = allModes.filter(m => m === 'attract').length;
+            const rCount = allModes.filter(m => m === 'repel').length;
+            let targetColor;
+            if (aCount > 0 && rCount === 0) targetColor = new THREE.Color(0x22c55e);
+            else if (rCount > 0 && aCount === 0) targetColor = new THREE.Color(0xef4444);
+            else if (aCount > 0 && rCount > 0) targetColor = new THREE.Color(0xf59e0b);
+            else targetColor = new THREE.Color(0x6366f1);
+
+            gravityCenterObj.children.forEach(child => {
+              if (child.material) child.material.color.lerp(targetColor, 0.015);
+            });
+          }
+        }
       })();
 
       await switchView(currentView);
@@ -694,7 +895,7 @@
         return;
       }
 
-      graphData = {
+      fullGraphData = {
         nodes: (data.nodes || []).map(n => ({
           id: n.id,
           display_name: n.display_name,
@@ -708,35 +909,256 @@
         })),
       };
 
+      // Ensure any new labels from data are tracked
+      fullGraphData.nodes.forEach(n => {
+        if (!(n.label in gravityModes)) gravityModes[n.label] = 'neutral';
+        if (!visibleLabels.has(n.label) && visibleLabels.size > 0) visibleLabels.add(n.label);
+        else if (visibleLabels.size === 0) visibleLabels.add(n.label);
+      });
+      // First load: show everything
+      if (visibleLabels.size === 0) {
+        fullGraphData.nodes.forEach(n => visibleLabels.add(n.label));
+      }
+
+      graphData = getFilteredData();
       graph3d.graphData(graphData);
 
       document.getElementById('stat-nodes').textContent = graphData.nodes.length;
       document.getElementById('stat-edges').textContent = graphData.links.length;
       document.getElementById('stat-view').textContent = VIEWS.find(v => v.id === viewId)?.label || viewId;
+      document.getElementById('stat-orphans').textContent = getOrphanIds().size;
 
-      updateLegend(graphData.nodes);
+      updateNodeTypePanel();
       document.getElementById('loading').style.display = 'none';
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // LEGEND
+    // NODE TYPES PANEL — collapsible tree with subcategories
     // ═══════════════════════════════════════════════════════════════
 
-    function updateLegend(nodes) {
-      const counts = {};
-      nodes.forEach(n => {
-        counts[n.label] = (counts[n.label] || 0) + 1;
-      });
+    const ATTRACT_ICON = '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const NEUTRAL_ICON = '<svg width="8" height="8" viewBox="0 0 16 16"><line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" stroke-width="2"/></svg>';
+    const REPEL_ICON = '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l-2 2M8 1l2 2M8 15l-2-2M8 15l2-2M1 8l2-2M1 8l2 2M15 8l-2-2M15 8l-2 2"/></svg>';
 
-      const legend = document.getElementById('legend');
-      legend.innerHTML = '';
-      Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([label, count]) => {
-        const color = LABEL_COLORS[label] || '#64748b';
-        const item = document.createElement('div');
-        item.className = 'legend-item';
-        item.innerHTML = `${legendSVG(label, color)}${label} (${count})`;
-        legend.appendChild(item);
+    function buildModeButtons(mode, onAttract, onNeutral, onRepel) {
+      return '<div class="mode-btns">'
+        + '<button class="mode-btn ' + (mode === 'attract' ? 'attract' : '') + '" onclick="' + onAttract + '" title="Attract">' + ATTRACT_ICON + '</button>'
+        + '<button class="mode-btn ' + (mode === 'neutral' ? 'neutral-active' : '') + '" onclick="' + onNeutral + '" title="Neutral">' + NEUTRAL_ICON + '</button>'
+        + '<button class="mode-btn ' + (mode === 'repel' ? 'repel' : '') + '" onclick="' + onRepel + '" title="Repel">' + REPEL_ICON + '</button>'
+        + '</div>';
+    }
+
+    function computeCategoryTree() {
+      const tree = {};
+      fullGraphData.nodes.forEach(n => {
+        if (!tree[n.label]) tree[n.label] = { total: 0, subs: {} };
+        tree[n.label].total++;
+        const sub = getNodeSub(n);
+        if (sub) {
+          tree[n.label].subs[sub] = (tree[n.label].subs[sub] || 0) + 1;
+        }
       });
+      // Only keep subs if there are 2+ distinct subcategories
+      for (const label in tree) {
+        if (Object.keys(tree[label].subs).length < 2) tree[label].subs = {};
+      }
+      return tree;
+    }
+
+    function updateNodeTypePanel() {
+      const tree = computeCategoryTree();
+      const list = document.getElementById('node-types-list');
+      list.innerHTML = '';
+
+      Object.entries(tree).sort((a, b) => b[1].total - a[1].total).forEach(([label, info]) => {
+        const color = LABEL_COLORS[label] || '#64748b';
+        const visible = visibleLabels.has(label);
+        const mode = gravityModes[label] || 'neutral';
+        const hasSubs = Object.keys(info.subs).length > 0;
+        const expanded = expandedLabels[label] === true;
+
+        // ── Parent row ──
+        const row = document.createElement('div');
+        row.className = 'node-type-row';
+        row.style.opacity = visible ? '1' : '0.35';
+
+        const esc = label.replace(/'/g, "\\'");
+        row.innerHTML =
+          (hasSubs
+            ? '<button class="tree-toggle" onclick="toggleExpand(\'' + esc + '\')">' + (expanded ? '▼' : '▶') + '</button>'
+            : '<span style="width:14px;flex-shrink:0"></span>')
+          + '<button class="vis-eye ' + (visible ? 'active' : '') + '" onclick="toggleVisibility(\'' + esc + '\')" title="' + (visible ? 'Hide' : 'Show') + ' ' + label + '">'
+          + (visible ? eyeOpenSVG : eyeClosedSVG) + '</button>'
+          + '<div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">'
+          + legendSVG(label, color)
+          + '<span style="font-size:10px;color:' + (visible ? '#e2e8f0' : '#475569') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</span>'
+          + '<span style="font-size:9px;color:#475569">' + info.total + '</span>'
+          + '</div>'
+          + buildModeButtons(mode,
+              "setGravityMode('" + esc + "','" + "attract')",
+              "setGravityMode('" + esc + "','" + "neutral')",
+              "setGravityMode('" + esc + "','" + "repel')");
+        list.appendChild(row);
+
+        // ── Subcategory rows ──
+        if (hasSubs && expanded) {
+          Object.entries(info.subs).sort((a, b) => b[1] - a[1]).forEach(([sub, count]) => {
+            const key = label + ':' + sub;
+            const escKey = key.replace(/'/g, "\\'");
+            const subHidden = hiddenSubs.has(key);
+            const subVisible = visible && !subHidden;
+            const subMode = subGravityModes[key] || mode; // inherit from parent
+
+            const subRow = document.createElement('div');
+            subRow.className = 'sub-row';
+            subRow.style.opacity = subVisible ? '1' : '0.35';
+
+            subRow.innerHTML =
+              '<button class="vis-eye ' + (subVisible ? 'active' : '') + '" onclick="toggleSubVisibility(\'' + escKey + '\')">'
+              + (subVisible ? eyeOpenSVG : eyeClosedSVG) + '</button>'
+              + '<div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">'
+              + '<span style="font-size:9px;color:' + (subVisible ? color : '#475569') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sub + '</span>'
+              + '<span style="font-size:8px;color:#475569">' + count + '</span>'
+              + '</div>'
+              + buildModeButtons(subMode,
+                  "setSubGravityMode('" + escKey + "','attract')",
+                  "setSubGravityMode('" + escKey + "','neutral')",
+                  "setSubGravityMode('" + escKey + "','repel')");
+            list.appendChild(subRow);
+          });
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // GRAVITY & VISIBILITY CONTROLS
+    // ═══════════════════════════════════════════════════════════════
+
+    function updateGravityStrength(val) {
+      gravityStrength = Number(val);
+      const pct = Math.round(expScale(gravityStrength) * 100);
+      document.getElementById('gravity-val').textContent = pct + '%';
+      document.getElementById('gravity-val').style.color = val > 0 ? '#e2e8f0' : '#64748b';
+      graph3d.d3ReheatSimulation();
+    }
+
+    function setGravityMode(label, mode) {
+      gravityModes[label] = mode;
+      // Cascade to subcategories that haven't been explicitly set
+      const tree = computeCategoryTree();
+      if (tree[label]) {
+        Object.keys(tree[label].subs).forEach(sub => {
+          const key = label + ':' + sub;
+          if (!(key in subGravityModes)) return; // already inherits
+          subGravityModes[key] = mode; // cascade override
+        });
+      }
+      updateNodeTypePanel();
+      if (gravityStrength > 0) graph3d.d3ReheatSimulation();
+    }
+
+    function setSubGravityMode(key, mode) {
+      subGravityModes[key] = mode;
+      updateNodeTypePanel();
+      if (gravityStrength > 0) graph3d.d3ReheatSimulation();
+    }
+
+    function toggleExpand(label) {
+      expandedLabels[label] = !expandedLabels[label];
+      updateNodeTypePanel();
+    }
+
+    function toggleVisibility(label) {
+      if (visibleLabels.has(label)) {
+        visibleLabels.delete(label);
+      } else {
+        visibleLabels.add(label);
+        // Un-hide all subcategories when re-showing parent
+        const tree = computeCategoryTree();
+        if (tree[label]) {
+          Object.keys(tree[label].subs).forEach(sub => hiddenSubs.delete(label + ':' + sub));
+        }
+      }
+      applyVisibilityFilter();
+    }
+
+    function toggleSubVisibility(key) {
+      const label = key.substring(0, key.indexOf(':'));
+      if (hiddenSubs.has(key)) {
+        // Showing this subcategory
+        hiddenSubs.delete(key);
+        // If parent was hidden, show parent but hide all OTHER subs
+        if (!visibleLabels.has(label)) {
+          visibleLabels.add(label);
+          const tree = computeCategoryTree();
+          if (tree[label]) {
+            Object.keys(tree[label].subs).forEach(s => {
+              const sibling = label + ':' + s;
+              if (sibling !== key) hiddenSubs.add(sibling);
+            });
+          }
+        }
+      } else {
+        // Hiding this subcategory
+        hiddenSubs.add(key);
+      }
+      applyVisibilityFilter();
+    }
+
+    function showAllTypes() {
+      fullGraphData.nodes.forEach(n => visibleLabels.add(n.label));
+      hiddenSubs.clear();
+      applyVisibilityFilter();
+    }
+
+    function hideAllTypes() {
+      visibleLabels.clear();
+      applyVisibilityFilter();
+    }
+
+    // Compute set of node IDs that have zero edges in fullGraphData
+    function getOrphanIds() {
+      const connected = new Set();
+      fullGraphData.links.forEach(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        connected.add(s);
+        connected.add(t);
+      });
+      return new Set(fullGraphData.nodes.filter(n => !connected.has(n.id)).map(n => n.id));
+    }
+
+    function getFilteredData() {
+      let nodes = fullGraphData.nodes.filter(n => isNodeVisible(n));
+      if (showOrphansOnly) {
+        const orphans = getOrphanIds();
+        nodes = nodes.filter(n => orphans.has(n.id));
+      }
+      const nodeIds = new Set(nodes.map(n => n.id));
+      const links = fullGraphData.links.filter(l => {
+        const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+        const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+        return nodeIds.has(srcId) && nodeIds.has(tgtId);
+      });
+      return { nodes, links };
+    }
+
+    function toggleOrphans() {
+      showOrphansOnly = !showOrphansOnly;
+      document.getElementById('btn-orphans').classList.toggle('active', showOrphansOnly);
+      applyVisibilityFilter();
+    }
+
+    function applyVisibilityFilter() {
+      graphData = getFilteredData();
+      graph3d.graphData(graphData);
+      graph3d.d3ReheatSimulation();
+      document.getElementById('stat-nodes').textContent = graphData.nodes.length;
+      document.getElementById('stat-edges').textContent = graphData.links.length;
+      // Update orphan count
+      const orphanCount = getOrphanIds().size;
+      document.getElementById('stat-orphans').textContent = orphanCount;
+      updateNodeTypePanel();
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -915,11 +1337,29 @@
     // CONTROLS
     // ═══════════════════════════════════════════════════════════════
 
+    function buildNodeObject(n) {
+      const size = nodeSize(n) * 0.7;
+      const color = nodeColor(n);
+      const group = new THREE.Group();
+      const icon = make3moticon(n.label, color, size);
+      icon.userData.rotates = true;
+      group.add(icon);
+      if (labelsVisible && n.display_name) {
+        const labelText = n.display_name.length > 22
+          ? n.display_name.substring(0, 20) + '..'
+          : n.display_name;
+        const sprite = makeTextSprite(labelText, color);
+        sprite.position.set(0, size + 3, 0);
+        group.add(sprite);
+      }
+      return group;
+    }
+
     function toggleLabels() {
       labelsVisible = !labelsVisible;
       document.getElementById('btn-labels').classList.toggle('active', labelsVisible);
-      // Force re-render of all node objects
-      graph3d.nodeThreeObject(graph3d.nodeThreeObject());
+      // New wrapper function each call forces library to rebuild all node meshes
+      graph3d.nodeThreeObject(n => buildNodeObject(n));
     }
 
     function debounce(fn, ms) {
