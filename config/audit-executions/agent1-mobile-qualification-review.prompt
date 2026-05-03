@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/Mobile Qualification Review Page.md
+
+## Title
+Mobile Qualification Review Page
+
+## Recommendation Summary
+
+### Intent Assessment
+Design spec for a mobile-friendly web page for reviewing, editing, and approving qualification queue items, replacing verbose Telegram messages with minimal pings + web links.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original design document with UI mockups and API specs. Evergreen. Missing content_stage field.)
+- **TREE**: "meta/tools" → "meta/beestgraph/architecture, technology/web/frontend" (This is a beestgraph feature spec with frontend UI design. meta/tools is too generic.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to Qualification Pipeline, Telegram as Capture Source, Content Types Taxonomy. Mobile Review and Qualification UI should be Concept nodes." (Design spec should connect to related pipeline docs.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — appropriate since this is a design spec not yet implemented. Missing created_at/updated_at. The ASCII mockup is a nice design artifact. API routes are well-defined.
+
+### Suggested Interlinks
+- [[[[Pluggable Notification and Review Channels]]]]
+- [[[[Beestgraph Knowledge Standard (BKS)]]]]
+- [[[[3D Knowledge Graph Viewer]]]]
+- [[[[CalDAV Integration]]]]
+
+### Enrichment
+Mobile-first design remains dominant in 2026 with over 60% of web traffic from mobile. Modern queue management systems use QR codes and web-based check-in. The design pattern of minimal notification + rich web review page is widely validated. Consider implementing progressive web app (PWA) features for offline queue review.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/OpenClaw Identity.md
+
+## Title
+OpenClaw Identity
+
+## Recommendation Summary
+
+### Intent Assessment
+Defines the persistent Claude identity framework via soul.md (values), being.md (memory), and heartbeat.md (health), enabling AI agent continuity across sessions.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original conceptual framework for AI identity persistence. Novel thinking — evergreen. Missing content_stage field.)
+- **TREE**: "technology/ai-ml, meta/pkm" → "meta/beestgraph/architecture, technology/ai-ml/agents" (This is about beestgraph architecture. technology/ai-ml/agents is more specific than technology/ai-ml.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to Heartbeat System, Qualification Pipeline, The Herd Protocol. AI Agent Identity, Session Continuity, Persistent Personality should be Concept nodes." (Identity framework connects to multiple system components.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — should be published as a core architectural doc. Missing created_at/updated_at. Summary is well-written. Tags are appropriate.
+
+### Suggested Interlinks
+- [[[[Privacy Barriers]]]]
+- [[[[LLM Content Boundaries]]]]
+- [[[[Beestgraph Knowledge Standard (BKS)]]]]
+- [[[[beestgraph Parking Lot]]]]
+
+### Enrichment
+AI agent memory is a rapidly evolving field in 2026. Mem0 (state of AI agent memory 2026), Letta (persistent identity with editable memory blocks), and AWS AgentCore all tackle session persistence. Key insight from research: memory persistence across sessions creates new security risks (Echoleak incident 2024). Structured memory attributes (added Jun 2025) enable queryable metadata alongside semantic content. The OpenClaw three-file approach (soul/being/heartbeat) is simpler and more transparent than framework-based solutions.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

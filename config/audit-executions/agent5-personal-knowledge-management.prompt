@@ -1,0 +1,49 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/entities/concepts/personal-knowledge-management.md
+
+## Title
+Personal Knowledge Management
+
+## Recommendation Summary
+
+### Intent Assessment
+Entity page for PKM as a discipline. Hub entity linking major PKM concepts (Zettelkasten, PARA), people (Luhmann, Forte), and tools (Obsidian, FalkorDB).
+
+### Categorization Changes
+- **ZETT**: "not set" → "reference" (Missing content_stage. Should be reference — stable concept definition.)
+- **TREE**: "not set" → "meta/pkm" (Missing topics field. Should be meta/pkm — exact match in tree.)
+- **GRAPH**: "Linked to Zettelkasten, PARA Method, Niklas Luhmann, Tiago Forte, Obsidian, Knowledge Graph" → "Add HAS_METHOD -> Zettelkasten, HAS_METHOD -> PARA Method, PIONEERED_BY -> Niklas Luhmann, ADVANCED_BY -> Tiago Forte, IMPLEMENTED_IN -> Obsidian, RELATED_TO -> beestgraph" (Should use typed relationships. beestgraph is itself a PKM system and should be linked.)
+
+### Metadata Issues
+Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [meta/pkm].
+
+### Suggested Interlinks
+- [[Zettelkasten]]
+- [[PARA Method]]
+- [[Niklas Luhmann]]
+- [[Tiago Forte]]
+- [[Obsidian]]
+- [[Knowledge Graph]]
+- [[beestgraph]]
+- [[FalkorDB]]
+
+### Enrichment
+PKM in 2026 increasingly integrates AI. Building a Second Brain methodology being adapted for AI-augmented capture and retrieval. Obsidian v1.12.7 latest with new CLI for automation. The intersection of PKM and knowledge graphs is growing.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

@@ -1,0 +1,147 @@
+{
+  "areas": [
+    {
+      "id": 10, "name": "Technology", "slug": "technology",
+      "categories": [
+        { "id": 11, "name": "Web", "slug": "technology/web", "subs": [
+          { "id": 1, "name": "Frontend", "slug": "technology/web/frontend", "subs": [] },
+          { "id": 2, "name": "Backend", "slug": "technology/web/backend", "subs": [] }
+        ]},
+        { "id": 12, "name": "Infrastructure", "slug": "technology/infrastructure", "subs": [
+          { "id": 1, "name": "Docker", "slug": "technology/infrastructure/docker", "subs": [] },
+          { "id": 2, "name": "Networking", "slug": "technology/infrastructure/networking", "subs": [] },
+          { "id": 3, "name": "Homelab", "slug": "technology/infrastructure/homelab", "subs": [] }
+        ]},
+        { "id": 13, "name": "Programming", "slug": "technology/programming", "subs": [
+          { "id": 1, "name": "Languages", "slug": "technology/programming/languages", "subs": [] },
+          { "id": 2, "name": "Patterns", "slug": "technology/programming/patterns", "subs": [] },
+          { "id": 3, "name": "Tooling", "slug": "technology/programming/tooling", "subs": [] }
+        ]},
+        { "id": 14, "name": "AI & ML", "slug": "technology/ai-ml", "subs": [
+          { "id": 1, "name": "LLM", "slug": "technology/ai-ml/llm", "subs": [] },
+          { "id": 2, "name": "Agents", "slug": "technology/ai-ml/agents", "subs": [] },
+          { "id": 3, "name": "Training", "slug": "technology/ai-ml/training", "subs": [] }
+        ]},
+        { "id": 15, "name": "Security", "slug": "technology/security", "subs": [
+          { "id": 1, "name": "AppSec", "slug": "technology/security/appsec", "subs": [] },
+          { "id": 2, "name": "Networking", "slug": "technology/security/networking", "subs": [] },
+          { "id": 3, "name": "Crypto", "slug": "technology/security/crypto", "subs": [] }
+        ]}
+      ]
+    },
+    {
+      "id": 20, "name": "Meta", "slug": "meta",
+      "categories": [
+        { "id": 21, "name": "PKM", "slug": "meta/pkm", "subs": [
+          { "id": 1, "name": "Zettelkasten", "slug": "meta/pkm/zettelkasten", "subs": [] },
+          { "id": 2, "name": "Workflows", "slug": "meta/pkm/workflows", "subs": [] }
+        ]},
+        { "id": 22, "name": "Tools", "slug": "meta/tools", "subs": [
+          { "id": 1, "name": "Obsidian", "slug": "meta/tools/obsidian", "subs": [] },
+          { "id": 2, "name": "Editors", "slug": "meta/tools/editors", "subs": [] },
+          { "id": 3, "name": "CLI", "slug": "meta/tools/cli", "subs": [] }
+        ]},
+        { "id": 23, "name": "Workflows", "slug": "meta/workflows", "subs": [
+          { "id": 1, "name": "Automation", "slug": "meta/workflows/automation", "subs": [] },
+          { "id": 2, "name": "Pipelines", "slug": "meta/workflows/pipelines", "subs": [] }
+        ]},
+        { "id": 24, "name": "Beestgraph", "slug": "meta/beestgraph", "subs": [
+          { "id": 1, "name": "Architecture", "slug": "meta/beestgraph/architecture", "subs": [] },
+          { "id": 2, "name": "Roadmap", "slug": "meta/beestgraph/roadmap", "subs": [] }
+        ]}
+      ]
+    },
+    {
+      "id": 30, "name": "Eat Drink Merriment", "slug": "eat-drink-merriment",
+      "categories": [
+        { "id": 31, "name": "Meals", "slug": "eat-drink-merriment/meals", "subs": [
+          { "id": 1, "name": "Breakfast", "slug": "eat-drink-merriment/meals/breakfast", "subs": [] },
+          { "id": 2, "name": "Dinner", "slug": "eat-drink-merriment/meals/dinner", "subs": [] },
+          { "id": 3, "name": "Lunch", "slug": "eat-drink-merriment/meals/lunch", "subs": [] }
+        ]},
+        { "id": 32, "name": "Desserts", "slug": "eat-drink-merriment/desserts", "subs": [
+          { "id": 1, "name": "Cakes", "slug": "eat-drink-merriment/desserts/cakes", "subs": [] },
+          { "id": 2, "name": "Cookies", "slug": "eat-drink-merriment/desserts/cookies", "subs": [] }
+        ]},
+        { "id": 33, "name": "Alcohol", "slug": "eat-drink-merriment/alcohol", "subs": [
+          { "id": 1, "name": "Spirits", "slug": "eat-drink-merriment/alcohol/spirits", "subs": [] },
+          { "id": 2, "name": "Cocktails", "slug": "eat-drink-merriment/alcohol/cocktails", "subs": [] }
+        ]},
+        { "id": 34, "name": "Sauces", "slug": "eat-drink-merriment/sauces", "subs": [
+          { "id": 1, "name": "Hot Sauce", "slug": "eat-drink-merriment/sauces/hot-sauce", "subs": [] },
+          { "id": 2, "name": "Condiments", "slug": "eat-drink-merriment/sauces/condiments", "subs": [] }
+        ]},
+        { "id": 35, "name": "Nutrition", "slug": "eat-drink-merriment/nutrition", "subs": [
+          { "id": 1, "name": "Macros", "slug": "eat-drink-merriment/nutrition/macros", "subs": [] },
+          { "id": 2, "name": "Diets", "slug": "eat-drink-merriment/nutrition/diets", "subs": [] }
+        ]},
+        { "id": 36, "name": "Dining", "slug": "eat-drink-merriment/dining", "subs": [
+          { "id": 1, "name": "Restaurants", "slug": "eat-drink-merriment/dining/restaurants", "subs": [] },
+          { "id": 2, "name": "Reviews", "slug": "eat-drink-merriment/dining/reviews", "subs": [] }
+        ]}
+      ]
+    },
+    {
+      "id": 40, "name": "Entertainment", "slug": "entertainment",
+      "categories": [
+        { "id": 41, "name": "Film", "slug": "entertainment/film", "subs": [] },
+        { "id": 42, "name": "Television", "slug": "entertainment/television", "subs": [] },
+        { "id": 43, "name": "Reading", "slug": "entertainment/reading", "subs": [] }
+      ]
+    },
+    {
+      "id": 50, "name": "Personal", "slug": "personal",
+      "categories": [
+        { "id": 51, "name": "Goals", "slug": "personal/goals", "subs": [] },
+        { "id": 52, "name": "Journal", "slug": "personal/journal", "subs": [] },
+        { "id": 53, "name": "Recreation", "slug": "personal/recreation", "subs": [
+          { "id": 1, "name": "Outdoors", "slug": "personal/recreation/outdoors", "subs": [] },
+          { "id": 2, "name": "Camping", "slug": "personal/recreation/camping", "subs": [] }
+        ]},
+        { "id": 54, "name": "Bucket List", "slug": "personal/bucket-list", "subs": [
+          { "id": 1, "name": "Adventure", "slug": "personal/bucket-list/adventure", "subs": [] },
+          { "id": 2, "name": "Exotic Food & Drink", "slug": "personal/bucket-list/exotic-food-drink", "subs": [] },
+          { "id": 3, "name": "Food & Drink Experiences", "slug": "personal/bucket-list/food-drink-experiences", "subs": [] },
+          { "id": 4, "name": "Creative", "slug": "personal/bucket-list/creative", "subs": [] },
+          { "id": 5, "name": "Style & Wellness", "slug": "personal/bucket-list/style-wellness", "subs": [] },
+          { "id": 6, "name": "Nature & Wildlife", "slug": "personal/bucket-list/nature-wildlife", "subs": [] },
+          { "id": 7, "name": "Finance & Luxury", "slug": "personal/bucket-list/finance-luxury", "subs": [] },
+          { "id": 8, "name": "Entertainment", "slug": "personal/bucket-list/entertainment", "subs": [] },
+          { "id": 9, "name": "Personal Growth", "slug": "personal/bucket-list/personal-growth", "subs": [] }
+        ]}
+      ]
+    },
+    {
+      "id": 60, "name": "Business", "slug": "business",
+      "categories": [
+        { "id": 61, "name": "Finance", "slug": "business/finance", "subs": [] },
+        { "id": 62, "name": "Startups", "slug": "business/startups", "subs": [] }
+      ]
+    },
+    {
+      "id": 70, "name": "Culture", "slug": "culture",
+      "categories": [
+        { "id": 71, "name": "Books", "slug": "culture/books", "subs": [] },
+        { "id": 72, "name": "Film", "slug": "culture/film", "subs": [] },
+        { "id": 73, "name": "History", "slug": "culture/history", "subs": [] },
+        { "id": 74, "name": "Music", "slug": "culture/music", "subs": [] }
+      ]
+    },
+    {
+      "id": 80, "name": "Health", "slug": "health",
+      "categories": [
+        { "id": 81, "name": "Fitness", "slug": "health/fitness", "subs": [] },
+        { "id": 82, "name": "Mental Health", "slug": "health/mental-health", "subs": [] },
+        { "id": 83, "name": "Nutrition", "slug": "health/nutrition", "subs": [] }
+      ]
+    },
+    {
+      "id": 90, "name": "Science", "slug": "science",
+      "categories": [
+        { "id": 91, "name": "Biology", "slug": "science/biology", "subs": [] },
+        { "id": 92, "name": "Physics", "slug": "science/physics", "subs": [] },
+        { "id": 93, "name": "Mathematics", "slug": "science/mathematics", "subs": [] }
+      ]
+    }
+  ]
+}

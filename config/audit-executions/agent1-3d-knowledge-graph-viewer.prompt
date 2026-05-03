@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/3D Knowledge Graph Viewer.md
+
+## Title
+3D Knowledge Graph Viewer
+
+## Recommendation Summary
+
+### Intent Assessment
+Documents the primary visual interface for beestgraph — a 3D graph viewer with three organizational views (PARA, Zettelkasten, Topic Tree) rendered via Three.js and 3d-force-graph. Serves as both design spec and feature documentation.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: reference" (System documentation describing a feature. Should be reference stage. Missing content_stage field entirely.)
+- **TREE**: "technology/web, meta/pkm" → "meta/beestgraph/architecture, technology/web/frontend" (Primary topic is beestgraph architecture. technology/web/frontend is more specific since this is a Three.js frontend component.)
+- **GRAPH**: "Likely has a Document node" → "Ensure Document node exists with edges to Three.js, 3d-force-graph, Next.js, CodeMirror (Tool nodes) and Force-Directed Layout, 3D Graph Visualization (Concept nodes). Verify LINKS_TO edges to PARA Method, Zettelkasten Method, Topic Tree Organization, and MOCs documents." (Key architectural doc that should be well-connected in the graph.)
+
+### Metadata Issues
+Missing content_stage field. Tags include 'cytoscape' but body mentions Three.js/3d-force-graph, not Cytoscape — remove the cytoscape tag. Status is qualifying but should be published. Missing created_at and updated_at dates.
+
+### Suggested Interlinks
+- [[[[Vault Folder Architecture]]]]
+- [[[[Beestgraph Knowledge Standard (BKS)]]]]
+- [[[[Qualification Pipeline]]]]
+- [[[[FalkorDB]]]]
+
+### Enrichment
+3d-force-graph (github.com/vasturiano/3d-force-graph) remains actively maintained. The library now supports incremental loading with array spread operators for live-updating graphs — useful for real-time ingestion visualization. Neo4j published guides on 3D graph visualization with WebGL offering layout algorithm ideas. Consider d3-force library for alternative physics engine options.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

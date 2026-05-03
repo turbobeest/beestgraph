@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/entities/people/niklas-luhmann.md
+
+## Title
+Niklas Luhmann
+
+## Recommendation Summary
+
+### Intent Assessment
+Entity page for Niklas Luhmann, creator of the Zettelkasten method. Well-written biography with key facts (1927-1998, 90k index cards, 70+ books).
+
+### Categorization Changes
+- **ZETT**: "not set" → "reference" (Missing content_stage. Should be reference — stable biographical entry.)
+- **TREE**: "not set" → "meta/pkm/zettelkasten" (Missing topics field. Should be meta/pkm/zettelkasten — Luhmann is synonymous with Zettelkasten.)
+- **GRAPH**: "Linked to Zettelkasten, Personal Knowledge Management, Tiago Forte, Obsidian" → "Add CREATED -> Zettelkasten, INFLUENCED -> Tiago Forte, INFLUENCED -> Personal Knowledge Management, RELATED_TO -> Knowledge Graph" (Should use typed relationships. Luhmann created Zettelkasten and influenced Forte and the PKM field.)
+
+### Metadata Issues
+Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [meta/pkm/zettelkasten].
+
+### Suggested Interlinks
+- [[Zettelkasten]]
+- [[Personal Knowledge Management]]
+- [[Tiago Forte]]
+- [[Obsidian]]
+- [[Knowledge Graph]]
+
+### Enrichment
+Niklas Luhmann (1927-1998) remains the foundational figure in PKM. His Zettelkasten archive is preserved at Bielefeld University and has been digitized. His method continues to inspire modern PKM tools and workflows in 2026.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

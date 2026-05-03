@@ -1,0 +1,11 @@
+{
+  "id": "agent2-camping-list",
+  "state": "complete",
+  "steps": [
+    "Initializing Claude Code...",
+    "Starting Claude Code session...",
+    "Claude Code session complete."
+  ],
+  "started": "2026-05-01T01:06:12.398Z",
+  "finished": "2026-04-30T21:06:12.881437-04:00"
+}

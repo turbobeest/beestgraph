@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/Telegram as Capture Source.md
+
+## Title
+Telegram as Capture Source
+
+## Recommendation Summary
+
+### Intent Assessment
+Design spec for using the Telegram bot as a universal capture endpoint — send anything (URL, photo, voice, text) and it becomes a markdown note.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original design document with input/output mapping and flow diagrams. Evergreen. Missing content_stage field.)
+- **TREE**: "meta/pkm, meta/tools" → "meta/beestgraph/architecture, meta/workflows/pipelines" (This is about a beestgraph pipeline component. meta/tools is too generic.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to Qualification Pipeline, Content Types Taxonomy, Markdown Auto-Formatter, beestgraph Parking Lot. Telegram (Tool), Universal Capture and Content Extraction should be Concept nodes." (Capture source doc needs connections to downstream processing.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — appropriate for a design spec. Missing created_at/updated_at. Has mocs: [] and related field. The input/output table is a well-structured design artifact.
+
+### Suggested Interlinks
+- [[[[Privacy Barriers]]]]
+- [[[[Security Scanner]]]]
+- [[[[LLM Content Boundaries]]]]
+- [[[[Pluggable Notification and Review Channels]]]]
+- [[[[Mobile Qualification Review Page]]]]
+
+### Enrichment
+Telegram Bot API supports MarkdownV2 parse mode for formatting. telegramify-markdown (PyPI, updated Apr 2026) converts raw Markdown to Telegram-compatible format. The universal capture pattern (URL/photo/voice/text/forward) aligns with AI4PKM vision of automated capture. Consider mentioning telegramify-markdown for rendering markdown back to Telegram in notifications.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

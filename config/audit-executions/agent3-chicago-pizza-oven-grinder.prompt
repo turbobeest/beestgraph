@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Chicago Pizza Oven Grinder.md
+
+## Title
+Chicago Pizza Oven Grinder
+
+## Recommendation Summary
+
+### Intent Assessment
+A Chicago-style pizza pot pie baked in a bowl, inspired by the famous Chicago Pizza and Oven Grinder Co. restaurant. Stub with no ingredients or instructions.
+
+### Categorization Changes
+- **PARA**: "resources" → "07-resources" (Correct as reference recipe material.)
+- **TREE**: "eat-drink-merriment/meals" → "eat-drink-merriment/meals/dinner" (Could be more specific under meals/dinner since this is a hearty dinner entree.)
+- **GRAPH**: "links to Recipes - Meals, Food & Nutrition List" → "Add link to Pizza Dough (complementary recipe), Food Sourcing (cheese/protein sourcing)" (This recipe requires pizza dough. Food sourcing helps find quality mozzarella and sausage.)
+
+### Metadata Issues
+Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).
+
+### Suggested Interlinks
+- [[Recipes - Meals]]
+- [[Food & Nutrition List]]
+- [[Pizza Dough]]
+- [[Food Sourcing]]
+- [[Rosemary Pull-Apart Mozzarella Bread]]
+
+### Enrichment
+Original Chicago Pizza and Oven Grinder Co is in Lincoln Park, Chicago. Pizza pot pie is made upside-down — cheese first in greased ramekin, then toppings, then dough draped over top. Flip after baking so cheese is on top. Uses store-bought or homemade dough. Cook at 450F about 20 minutes. One of the most sought-after copycat recipes. Ready in 20 minutes with store-bought ingredients.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

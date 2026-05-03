@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/Privacy Barriers.md
+
+## Title
+Privacy Barriers
+
+## Recommendation Summary
+
+### Intent Assessment
+Documents the three-layer privacy defense: deterministic security scanning, LLM content boundaries, and explicit human publish gate. Defense-in-depth for content privacy.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original defense-in-depth architecture with three independent layers. Novel design thinking — evergreen. Missing content_stage field.)
+- **TREE**: "technology/security, meta/pkm" → "meta/beestgraph/architecture, technology/security/appsec" (Primarily beestgraph architecture. Security aspect is application security.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to Security Scanner, LLM Content Boundaries, Qualification Pipeline, The Herd Protocol. Privacy Barriers, Defense in Depth, Publish Gate should be Concept nodes." (Central privacy doc should be a hub connecting all three layers.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — should be published as a core architectural doc. Missing created_at/updated_at. Summary is concise and accurate. Tags are appropriate.
+
+### Suggested Interlinks
+- [[[[OpenClaw Identity]]]]
+- [[[[Beestgraph Knowledge Standard (BKS)]]]]
+- [[[[Telegram as Capture Source]]]]
+- [[[[CalDAV Integration]]]]
+- [[[[Vault Folder Architecture]]]]
+
+### Enrichment
+The 2026 International AI Safety Report specifically advocates defense-in-depth with multiple safeguards. New privacy laws in 2026: California Training Data Transparency Act (AB2013), EU AI Act enforcement, 8 new US state privacy laws. The three-layer approach (deterministic scanning, LLM filtering, human gate) aligns with regulatory best practices. The 'failures are safe' design principle (default private) is particularly relevant given that all major AI providers now train on user inputs by default (since Sep 2025).
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

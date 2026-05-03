@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Gluten Free Lemon Crinkle Cookies.md
+
+## Title
+Gluten Free Lemon Crinkle Cookies
+
+## Recommendation Summary
+
+### Intent Assessment
+Gluten-free lemon crinkle cookies recipe placeholder. Addresses dietary restrictions. Stub with no ingredients or instructions.
+
+### Categorization Changes
+- **PARA**: "resources" → "07-resources" (Correct as reference recipe material.)
+- **TREE**: "eat-drink-merriment/desserts" → "eat-drink-merriment/desserts/cookies" (Could be more specific under desserts/cookies sub-topic which exists in the tree.)
+- **GRAPH**: "links to Recipes - Desserts, Food & Nutrition List" → "Add link to Lemon Curd (lemon flavor synergy — curd could fill these cookies), Good Food List (dietary accommodation)" (Lemon curd and lemon cookies are natural companions. The GF aspect connects to health-conscious eating.)
+
+### Metadata Issues
+Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).
+
+### Suggested Interlinks
+- [[Recipes - Desserts]]
+- [[Food & Nutrition List]]
+- [[Lemon Curd]]
+- [[Healthy Brownies]]
+
+### Enrichment
+GF lemon crinkle cookies use almond flour base for tender melt-in-mouth texture. Key technique: rub lemon zest into sugar to infuse flavor. Chill dough 2+ hours before rolling. Roll in powdered sugar for signature crinkle effect. Cream of tartar helps with texture. Popular versions from The Loopy Whisk, Snixy Kitchen use almond flour for naturally GF approach. Consider noting which flour blend works best (almond flour vs GF blend).
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

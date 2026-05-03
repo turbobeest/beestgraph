@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/Beestgraph Knowledge Standard (BKS).md
+
+## Title
+Beestgraph Knowledge Standard (BKS)
+
+## Recommendation Summary
+
+### Intent Assessment
+Defines the BKS — the foundational specification unifying PARA, Zettelkasten, and Topic Trees into one interoperable standard enabling agent-to-agent knowledge exchange.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original insight about combining three methods into a unified standard. Represents personal design decisions — evergreen. Missing content_stage field.)
+- **TREE**: "meta/pkm, meta/workflows" → "meta/beestgraph/architecture, meta/pkm" (BKS is fundamentally about beestgraph architecture. meta/beestgraph/architecture is more precise than meta/workflows.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to PARA Method, Zettelkasten Method, Topic Tree Organization, Content Types Taxonomy, Markdown Auto-Formatter, The Herd Protocol. BKS should also be a Concept node." (Central specification doc should be a hub node with many connections.)
+
+### Metadata Issues
+Missing content_stage field. Status is qualifying — should be published. Missing created_at/updated_at dates. Summary is accurate.
+
+### Suggested Interlinks
+- [[[[Vault Folder Architecture]]]]
+- [[[[Privacy Barriers]]]]
+- [[[[Qualification Pipeline]]]]
+- [[[[Knowledge Graph Audit Playbook]]]]
+- [[[[Topic Tree Organization Index]]]]
+
+### Enrichment
+No formal PKM interoperability standard exists in the broader ecosystem as of 2026 — BKS is a novel contribution. The AI4PKM project (Seattle, 2025) combines AI and PKM but lacks a formal interchange spec. Obsidian community preference for open Markdown formats validates the BKS Markdown-first approach. Consider publishing BKS as a public specification.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

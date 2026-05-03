@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/PARA Method in beestgraph.md
+
+## Title
+PARA Method in beestgraph
+
+## Recommendation Summary
+
+### Intent Assessment
+Explains how beestgraph implements Tiago Forte's PARA method with numbered folders, graph edges, and actionability as the primary organizational axis.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Describes beestgraph's unique implementation of PARA with graph edges — original insight. Missing content_stage field.)
+- **TREE**: "meta/pkm" → "meta/beestgraph/architecture, meta/pkm" (This is about beestgraph's specific implementation of PARA. meta/beestgraph/architecture should be primary.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to BKS, Zettelkasten Method, Topic Tree Organization, 3D Knowledge Graph Viewer, Vault Folder Architecture. PARA Method and Actionability should be Concept nodes." (Core organizational doc needs strong connections.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — should be published. Missing created_at/updated_at. IMPORTANT: The body says PARA maps to folders 05-08 (06-areas, 08-archive) but the actual vault uses 05-areas and 09-archive per the Audit Playbook. This factual inconsistency should be corrected.
+
+### Suggested Interlinks
+- [[[[Vault Folder Architecture]]]]
+- [[[[Qualification Pipeline]]]]
+- [[[[Diary of Bygones]]]]
+- [[[[Knowledge Graph Audit Playbook]]]]
+- [[[[Content Types Taxonomy]]]]
+
+### Enrichment
+Tiago Forte updated team PARA guidance in Jun 2025. An AI-powered PARA+Claude Code+Obsidian integration has been documented on Substack (aimaker.substack.com). PARA combined with Johnny Decimal reduces mental burden for categorization. Graph views (Obsidian Graph View) are increasingly used to complement PARA folder hierarchy. Note: the doc says folders 05-08 map to PARA, but the actual vault uses 05-projects, 05-areas (same prefix!), 07-resources, 09-archive — this discrepancy should be noted.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

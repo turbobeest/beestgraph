@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/LLM Content Boundaries.md
+
+## Title
+LLM Content Boundaries
+
+## Recommendation Summary
+
+### Intent Assessment
+Documents the tiered visibility system that controls what the AI agent can access: private (title only), shared (title + summary), public (full content). Second layer of Privacy Barriers.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original design insight about AI content access control. Represents novel thinking. Missing content_stage field.)
+- **TREE**: "technology/security, technology/ai-ml" → "meta/beestgraph/architecture, technology/security/appsec" (Primarily about beestgraph architecture. The security aspect is application security specifically.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to Privacy Barriers, The Herd Protocol, Security Scanner. LLM Content Boundaries and Tiered Visibility should be Concept nodes." (Privacy concepts deserve their own graph presence.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — should be published. Missing created_at/updated_at. Tags include ai-safety which is good given the regulatory landscape. Summary is accurate.
+
+### Suggested Interlinks
+- [[[[OpenClaw Identity]]]]
+- [[[[Qualification Pipeline]]]]
+- [[[[Beestgraph Knowledge Standard (BKS)]]]]
+- [[[[CalDAV Integration]]]]
+
+### Enrichment
+The 2026 International AI Safety Report emphasizes defense-in-depth for AI risk management. Anthropic abandoned opt-in for training data as of Sep 2025 — all providers now train on inputs by default, validating the need for local content filtering. RECAP framework combines regex with context-aware LLMs for PII detection. California Training Data Transparency Act (AB2013) takes effect 2026. The filter_for_llm approach aligns with industry best practices for data minimization.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

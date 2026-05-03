@@ -1,0 +1,11 @@
+{
+  "id": "agent1-llm-content-boundaries",
+  "state": "complete",
+  "steps": [
+    "Initializing Claude Code...",
+    "Starting Claude Code session...",
+    "Claude Code session complete."
+  ],
+  "started": "2026-04-11T16:52:59.396Z",
+  "finished": "2026-04-11T12:53:23.726582-04:00"
+}
