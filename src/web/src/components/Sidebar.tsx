@@ -22,6 +22,7 @@ export default function Sidebar() {
 
   return (
     <nav
+      className="bg-nav"
       style={{
         position: "fixed",
         top: 0,
@@ -34,6 +35,9 @@ export default function Sidebar() {
         background: "rgba(6,10,19,0.95)",
         borderBottom: "1px solid rgba(100,116,139,0.15)",
         backdropFilter: "blur(12px)",
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
       }}
     >
       {/* Brand */}
@@ -47,6 +51,7 @@ export default function Sidebar() {
           height: "100%",
           display: "flex",
           alignItems: "center",
+          flexShrink: 0,
           fontFamily: "-apple-system, 'Segoe UI', sans-serif",
         }}
       >
@@ -71,6 +76,8 @@ export default function Sidebar() {
               letterSpacing: 0.5,
               textTransform: "uppercase",
               borderBottom: isActive ? "2px solid #3b82f6" : "2px solid transparent",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
               fontFamily: "-apple-system, 'Segoe UI', sans-serif",
             }}
           >
@@ -86,6 +93,7 @@ export default function Sidebar() {
           display: "flex",
           alignItems: "center",
           height: "100%",
+          flexShrink: 0,
         }}
       >
         {EXTERNAL_LINKS.map((item) => (
@@ -104,6 +112,8 @@ export default function Sidebar() {
               textDecoration: "none",
               fontSize: 9,
               letterSpacing: 0.3,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
               fontFamily: "-apple-system, 'Segoe UI', sans-serif",
             }}
           >

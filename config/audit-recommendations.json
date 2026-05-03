@@ -1,0 +1,2813 @@
+{
+  "recommendations": [
+    {
+      "id": "agent1-herd-protocol",
+      "file": "00-meta/beestgraph/The Herd Protocol.md",
+      "title": "The Herd Protocol",
+      "agent": "agent-1-meta",
+      "timestamp": "2026-04-10T10:19:00Z",
+      "intent": "Defines the agent-to-agent knowledge trading protocol: beestgraph instances discover each other, match on interests, trade public notes, and introduce their humans.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "no change",
+          "justification": "Reference documentation about a protocol/vision. Resources is correct."
+        },
+        "zett": {
+          "current": "none (status: qualifying)",
+          "recommended": "content_stage: evergreen",
+          "justification": "Original visionary concept for decentralized knowledge networking. Highly novel — evergreen. Missing content_stage field."
+        },
+        "tree": {
+          "current": "meta/pkm, technology/ai-ml",
+          "recommended": "meta/beestgraph/architecture, technology/ai-ml/agents",
+          "justification": "This is core beestgraph architecture. The AI aspect is specifically about agents."
+        },
+        "atlas": {
+          "current": "N/A",
+          "recommended": "no change",
+          "justification": "System documentation, correctly in 00-meta/."
+        },
+        "graph": {
+          "current": "Likely has Document node",
+          "recommended": "Ensure edges to BKS, botmeetbot.com, Privacy Barriers, LLM Content Boundaries. Herd Protocol, Knowledge Trading, Agent-to-Agent Communication should be Concept nodes.",
+          "justification": "Visionary doc needs rich concept representation."
+        }
+      },
+      "enrichment": "Agent-to-agent protocols are booming in 2026: ATCP/IP enables trustless agent-to-agent IP transactions on-chain. Clawstr uses Nostr protocol for persistent cryptographic AI agent identities. OriginTrail Decentralized Knowledge Graph hosts 1.32B knowledge assets. Daily active on-chain AI agents crossed 250K in early 2026 (400% YoY growth). The Herd Protocol vision aligns with but differentiates from crypto/blockchain approaches by being Markdown-first and privacy-default.",
+      "metadata": "Missing content_stage field. Status qualifying — could be published as a vision document. Missing created_at/updated_at. Summary is well-written. Consider adding a 'status: vision' or 'maturity: conceptual' indicator to distinguish from implemented features.",
+      "interlinking": [
+        "[[OpenClaw Identity]]",
+        "[[Qualification Pipeline]]",
+        "[[Content Types Taxonomy]]",
+        "[[Security Scanner]]",
+        "[[beestgraph Parking Lot]]"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent1-topic-tree-index",
+      "file": "00-meta/beestgraph/Topic Tree Organization Index.md",
+      "title": "Topic Tree Organization Index",
+      "agent": "agent-1-meta",
+      "timestamp": "2026-04-10T10:20:00Z",
+      "intent": "Living index defining the JD-hybrid numbering hierarchy for the TREE sidebar. Source of truth for topic organization. Edit this page to reorganize.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "no change",
+          "justification": "Reference index document. Resources is correct."
+        },
+        "zett": {
+          "current": "evergreen",
+          "recommended": "no change",
+          "justification": "content_stage: evergreen is correct. This is a living, maintained document."
+        },
+        "tree": {
+          "current": "meta/pkm",
+          "recommended": "meta/beestgraph/architecture, meta/pkm",
+          "justification": "This defines the beestgraph topic tree structure — core architecture. Should include meta/beestgraph."
+        },
+        "atlas": {
+          "current": "N/A",
+          "recommended": "no change",
+          "justification": "System documentation, correctly in 00-meta/."
+        },
+        "graph": {
+          "current": "Likely has Document node",
+          "recommended": "Ensure edges to Topic Tree Organization, BKS, Vault Folder Architecture. Should connect to all top-level Topic nodes in the graph.",
+          "justification": "Source of truth for topics should connect to topic nodes."
+        }
+      },
+      "enrichment": "Johnny Decimal Fifth Edition Workbook released Jan 2026 with updated guidance. Community discussions show combining JD with PARA reduces mental burden. The JD-hybrid approach (using numbers for sort order only, readable paths in frontmatter) is a pragmatic adaptation. IMPORTANT: The index shows 50-59 and 60-69 as unclaimed, but the audit instructions list personal (50), business (60), culture (70), health (80), science (90). The index is missing personal/recreation, culture, and health categories and has numbering gaps vs the master topic list.",
+      "metadata": "Good metadata — has content_stage, created_at, updated_at, related, type:reference, status:published. One of the better-formatted files. Missing author, entities, source_type, source_url, visibility fields. The dates field uses nested format (dates.created/dates.modified) while other files use created_at/updated_at — inconsistent date format across vault.",
+      "interlinking": [
+        "[[PARA Method in beestgraph]]",
+        "[[Zettelkasten Method in beestgraph]]",
+        "[[Maps of Content (MOCs)]]",
+        "[[Content Types Taxonomy]]",
+        "[[Knowledge Graph Audit Playbook]]"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent1-topic-tree-org",
+      "file": "00-meta/beestgraph/Topic Tree Organization.md",
+      "title": "Topic Tree Organization",
+      "agent": "agent-1-meta",
+      "timestamp": "2026-04-10T10:21:00Z",
+      "intent": "Explains the topic tree as the navigation layer of beestgraph, with hierarchical classification, MOCs as entry points, and FalkorDB SUBTOPIC_OF edges.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "no change",
+          "justification": "Reference documentation about organizational method. Resources is correct."
+        },
+        "zett": {
+          "current": "none (status: qualifying)",
+          "recommended": "content_stage: evergreen",
+          "justification": "Original implementation insight about topic hierarchies in beestgraph. Missing content_stage field."
+        },
+        "tree": {
+          "current": "meta/pkm",
+          "recommended": "meta/beestgraph/architecture, meta/pkm",
+          "justification": "This describes a core beestgraph architectural component. Should include meta/beestgraph."
+        },
+        "atlas": {
+          "current": "N/A",
+          "recommended": "no change",
+          "justification": "System documentation, correctly in 00-meta/."
+        },
+        "graph": {
+          "current": "Likely has Document node",
+          "recommended": "Ensure edges to BKS, MOCs, PARA Method, Zettelkasten Method, 3D Knowledge Graph Viewer, Qualification Pipeline. Topic Tree and Hierarchical Classification should be Concept nodes.",
+          "justification": "Core organizational doc needs strong connections."
+        }
+      },
+      "enrichment": "Johnny Decimal system continues active development with Fifth Edition (Jan 2026). Obsidian MOC Explorer plugin provides interactive visualization of content hierarchies. Combining topic trees with graph databases enables multi-dimensional navigation beyond traditional folder hierarchies. The seven top-level branches mentioned (technology, science, business, culture, health, personal, meta) should be verified against the Topic Tree Organization Index.",
+      "metadata": "Missing content_stage field. Status qualifying — should be published. Missing created_at/updated_at. Summary is accurate. This file and Topic Tree Organization Index have overlapping concerns — consider clarifying the relationship (Index = editable source of truth, this = conceptual explanation).",
+      "interlinking": [
+        "[[Topic Tree Organization Index]]",
+        "[[Vault Folder Architecture]]",
+        "[[Qualification Pipeline]]",
+        "[[Content Types Taxonomy]]",
+        "[[Diary of Bygones]]"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-agent-discovery",
+      "file": "/home/turbobeest/vault/entities/concepts/agent-discovery.md",
+      "title": "Agent Discovery",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the concept of agent discovery in multi-agent AI systems. Properly scoped as a concept. Well-written definition linking to Herd Protocol and Self-Hosting.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a concept, not an active project."
+        },
+        "zett": {
+          "current": "reference",
+          "recommended": "reference",
+          "justification": "Accurately staged as reference — a stable concept definition."
+        },
+        "tree": {
+          "current": "technology/ai-ml/agents",
+          "recommended": "technology/ai-ml/agents",
+          "justification": "Correct tree placement under AI/ML agents."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct entity type — agent discovery is an abstract concept, not a tool or person."
+        },
+        "graph": {
+          "current": "Linked to Herd Protocol, Self-Hosting, botmeetbot.com",
+          "recommended": "Add RELATED_TO -> Interest Matching, RELATED_TO -> Meet the Parents, ENABLES -> botmeetbot.com, IMPLEMENTED_BY -> Herd Protocol",
+          "justification": "Agent discovery is broader than Herd Protocol; should show IMPLEMENTED_BY relationship. Also closely related to Interest Matching and Meet the Parents concepts."
+        }
+      },
+      "enrichment": "Agent discovery is an active research area in multi-agent systems. Comparable platforms include Agent.ai and AgentX. The concept maps to service discovery patterns in microservices (Consul, etcd). No specific external standard exists yet for agent discovery protocols.",
+      "metadata": "Has content_stage: reference and topics: technology/ai-ml/agents. Missing summary field — should add a one-line summary.",
+      "interlinking": [
+        "Interest Matching",
+        "Meet the Parents",
+        "botmeetbot.com",
+        "Herd Protocol",
+        "Self-Hosting",
+        "beestgraph"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-container-networking",
+      "file": "/home/turbobeest/vault/entities/concepts/container-networking.md",
+      "title": "Container Networking",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the broad discipline of container networking. Properly scoped as a concept. References multiple networking drivers and practical application in beestgraph.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a technical concept."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable technical overview."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/networking",
+          "justification": "Missing topics field. Should be technology/infrastructure/networking."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — container networking is a conceptual discipline, not a specific tool."
+        },
+        "graph": {
+          "current": "Linked to Bridge Network, Host Network, Docker, Docker Compose",
+          "recommended": "Add HAS_PART -> Bridge Network, HAS_PART -> Host Network, USED_BY -> beestgraph, DOCUMENTED_IN -> docs.docker.com",
+          "justification": "Container networking is the parent concept containing bridge and host modes."
+        }
+      },
+      "enrichment": "Docker Engine v29 is current. Docker Desktop MCP Toolkit profiles added in 2026. Overlay and macvlan remain relevant. QUIC-based container networking is emerging.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/networking].",
+      "interlinking": [
+        "Bridge Network",
+        "Host Network",
+        "Docker",
+        "Docker Compose",
+        "beestgraph",
+        "FalkorDB",
+        "docs.docker.com"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-graph-database",
+      "file": "/home/turbobeest/vault/entities/concepts/graph-database.md",
+      "title": "Graph Database",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the graph database concept. Well-written definition linking to FalkorDB, Knowledge Graph, and Cypher.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a database paradigm."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable concept definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure",
+          "justification": "Missing topics field. Should be technology/infrastructure."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — graph database is a conceptual paradigm; FalkorDB is the specific tool."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Knowledge Graph, Cypher",
+          "recommended": "Add IMPLEMENTED_BY -> FalkorDB, USES -> Cypher, ENABLES -> Knowledge Graph, RELATED_TO -> beestgraph",
+          "justification": "Should use typed relationships. FalkorDB implements graph databases. Cypher is the query language."
+        }
+      },
+      "enrichment": "FalkorDB v4.16.6 latest (March 2026). GQL ISO standard (ISO/IEC 39075) published April 2024 — first new ISO DB language since SQL. Cypher evolving toward GQL compliance. FalkorDB supports GraphRAG for AI/ML and has Snowflake integration.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure].",
+      "interlinking": [
+        "FalkorDB",
+        "Knowledge Graph",
+        "Cypher",
+        "beestgraph",
+        "Python"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-herd-protocol",
+      "file": "/home/turbobeest/vault/entities/concepts/herd-protocol.md",
+      "title": "Herd Protocol",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the Herd Protocol agent discovery mechanism. Well-defined as a concept with links to Agent Discovery and botmeetbot.com.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a protocol concept."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — protocol definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/ai-ml/agents",
+          "justification": "Missing topics field. Should be technology/ai-ml/agents."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — describes a pattern/design rather than runnable software."
+        },
+        "graph": {
+          "current": "Linked to Agent Discovery, Self-Hosting, botmeetbot.com",
+          "recommended": "Add IMPLEMENTS -> Agent Discovery, USED_BY -> botmeetbot.com, RELATED_TO -> Interest Matching, RELATED_TO -> Meet the Parents",
+          "justification": "Herd Protocol implements agent discovery. Used by botmeetbot.com. Should link to related botmeetbot concepts."
+        }
+      },
+      "enrichment": "No external references found — appears to be a custom/internal protocol for botmeetbot.com. Comparable protocols include mDNS/DNS-SD, libp2p for peer discovery, and FIPA Agent Communication Language (ACL).",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/ai-ml/agents].",
+      "interlinking": [
+        "Agent Discovery",
+        "Self-Hosting",
+        "botmeetbot.com",
+        "Interest Matching",
+        "Meet the Parents",
+        "beestgraph"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-homelab",
+      "file": "/home/turbobeest/vault/entities/concepts/homelab.md",
+      "title": "Homelab",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the homelab concept. Well-written with good links to Docker, Tailscale, Syncthing, and Self-Hosting.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a computing philosophy/practice."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable concept definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/homelab",
+          "justification": "Missing topics field. Should be technology/infrastructure/homelab — exact match in tree."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — homelab is a concept/practice, not a specific tool."
+        },
+        "graph": {
+          "current": "Linked to Self-Hosting, Docker, Tailscale, Syncthing, Raspberry Pi Foundation",
+          "recommended": "Add RELATED_TO -> beestgraph, HOSTS -> FalkorDB, USES -> Docker Compose, RELATED_TO -> Container Networking",
+          "justification": "beestgraph runs on a homelab. Should link to FalkorDB as hosted service and Docker Compose for orchestration."
+        }
+      },
+      "enrichment": "Raspberry Pi Foundation reported 25% sales rise in March 2026. Pi 4 3GB model introduced. Official Raspberry Pi Handbook 2026 published. Homelab community continues growing with containerized workloads as standard.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/homelab].",
+      "interlinking": [
+        "Self-Hosting",
+        "Docker",
+        "Tailscale",
+        "Syncthing",
+        "Raspberry Pi Foundation",
+        "beestgraph",
+        "FalkorDB",
+        "Docker Compose"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-host-network",
+      "file": "/home/turbobeest/vault/entities/concepts/host-network.md",
+      "title": "Host Network",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Docker host networking mode. Properly scoped concept. Clear explanation of tradeoffs vs bridge networking.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — technical reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable technical definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/docker",
+          "justification": "Missing topics field. Should be technology/infrastructure/docker."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — host network is a networking concept/mode, not a tool."
+        },
+        "graph": {
+          "current": "Linked to Bridge Network, Container Networking, Docker",
+          "recommended": "Add PART_OF -> Container Networking, USED_BY -> FalkorDB, DOCUMENTED_IN -> docs.docker.com, CONTRASTS_WITH -> Bridge Network",
+          "justification": "Host network is part of container networking. FalkorDB uses it for low-latency access. Should link to docs source."
+        }
+      },
+      "enrichment": "Docker Engine v29 is current. Host networking remains recommended for performance-sensitive services. No major changes to host networking behavior in recent Docker releases.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/docker].",
+      "interlinking": [
+        "Bridge Network",
+        "Container Networking",
+        "Docker",
+        "Docker Compose",
+        "FalkorDB",
+        "docs.docker.com"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-interest-matching",
+      "file": "/home/turbobeest/vault/entities/concepts/interest-matching.md",
+      "title": "Interest Matching",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the interest matching concept in botmeetbot.com. Well-scoped concept describing AI agent topic overlap discovery.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a concept."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — concept definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/ai-ml/agents",
+          "justification": "Missing topics field. Should be technology/ai-ml/agents."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — interest matching is an abstract process/concept."
+        },
+        "graph": {
+          "current": "Linked to Meet the Parents, botmeetbot.com, The Herd Protocol",
+          "recommended": "Add ENABLES -> Meet the Parents, PART_OF -> botmeetbot.com, USES -> Knowledge Graph, RELATED_TO -> Agent Discovery",
+          "justification": "Interest matching enables Meet the Parents flow. It uses knowledge graph data. Should link to Agent Discovery."
+        }
+      },
+      "enrichment": "Interest matching in AI agents is related to recommendation systems and collaborative filtering. Agent.ai uses similar concepts for agent networking. The approach of comparing entity/tag distributions is novel compared to keyword-based matching.",
+      "metadata": "Missing content_stage, topics, and summary fields. Connection to 'The Herd Protocol' uses inconsistent naming — file is herd-protocol.md but link text says 'The Herd Protocol'.",
+      "interlinking": [
+        "Meet the Parents",
+        "botmeetbot.com",
+        "Herd Protocol",
+        "Agent Discovery",
+        "Knowledge Graph",
+        "beestgraph"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-knowledge-graph",
+      "file": "/home/turbobeest/vault/entities/concepts/knowledge-graph.md",
+      "title": "Knowledge Graph",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the knowledge graph concept. Core entity for the entire beestgraph project. Well-linked to FalkorDB, Cypher, PKM, and beestgraph.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a foundational concept."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable concept definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/ai-ml",
+          "justification": "Missing topics field. Should be technology/ai-ml as knowledge graphs are central to AI/ML applications."
+        },
+        "atlas": {
+          "current": "concepts",
+          "recommended": "concepts",
+          "justification": "Correct — knowledge graph is an abstract concept; FalkorDB is the implementation."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Cypher, Personal Knowledge Management, beestgraph",
+          "recommended": "Add STORED_IN -> FalkorDB, QUERIED_BY -> Cypher, USED_BY -> Interest Matching, RELATED_TO -> Graph Database, RELATED_TO -> Zettelkasten",
+          "justification": "Should link to Graph Database as parent concept, Interest Matching as a consumer, and Zettelkasten as conceptual peer."
+        }
+      },
+      "enrichment": "FalkorDB v4.16.6 (March 2026) with GraphRAG support. Knowledge graphs increasingly used for LLM grounding to reduce hallucinations. FalkorDB positioned as 'best Knowledge Graph for LLM'. GQL standard published 2024.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/ai-ml].",
+      "interlinking": [
+        "FalkorDB",
+        "Cypher",
+        "Personal Knowledge Management",
+        "beestgraph",
+        "Graph Database",
+        "Zettelkasten",
+        "Interest Matching"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-docs-docker-com",
+      "file": "/home/turbobeest/vault/entities/sources/docs-docker-com.md",
+      "title": "docs.docker.com",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Docker official documentation source. Minimal but functional. Links to Docker and Docker Compose.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — source reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — source metadata."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/docker",
+          "justification": "Missing topics field. Should be technology/infrastructure/docker."
+        },
+        "atlas": {
+          "current": "sources",
+          "recommended": "sources",
+          "justification": "Correct — docs.docker.com is a documentation source."
+        },
+        "graph": {
+          "current": "Linked to Docker, Docker Compose",
+          "recommended": "Add SOURCE_FOR -> Bridge Network, SOURCE_FOR -> Host Network, SOURCE_FOR -> Container Networking, PUBLISHED_BY -> Docker (organization)",
+          "justification": "Should link to all concepts sourced from Docker docs. Missing links to networking concept entities."
+        }
+      },
+      "enrichment": "docs.docker.com covers Docker Engine v29 (latest 2026), Docker Desktop 4.66+, Docker Compose v5.1.2. Documentation site remains the primary reference for Docker networking, compose, and container management.",
+      "metadata": "Missing content_stage, topics, and summary fields. About section is very brief — could be expanded. Has source.url which is good.",
+      "interlinking": [
+        "Docker",
+        "Docker Compose",
+        "Bridge Network",
+        "Host Network",
+        "Container Networking"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-falkordb-falkordb-py",
+      "file": "/home/turbobeest/vault/entities/sources/falkordb-falkordb-py.md",
+      "title": "FalkorDB/falkordb-py",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the FalkorDB Python client library GitHub repository source. Minimal but functional.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — source reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — source metadata."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/programming/languages",
+          "justification": "Missing topics field. Should be technology/programming/languages as it is a Python library."
+        },
+        "atlas": {
+          "current": "sources",
+          "recommended": "sources",
+          "justification": "Correct — this is a GitHub repository source."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Python, github.com",
+          "recommended": "Add PROVIDES_CLIENT_FOR -> FalkorDB, WRITTEN_IN -> Python, HOSTED_ON -> github.com, USED_BY -> beestgraph",
+          "justification": "Should use typed relationships. beestgraph uses this client library."
+        }
+      },
+      "enrichment": "FalkorDB Python client (falkordb-py) is available on PyPI. Latest FalkorDB server is v4.16.6 (March 2026). The Python client supports Cypher queries and property graph operations. FalkorDB also has clients for Node.js, Go, and Rust.",
+      "metadata": "Missing content_stage, topics, and summary fields. Has source.url which is good. About section is very brief.",
+      "interlinking": [
+        "FalkorDB",
+        "Python",
+        "github.com",
+        "beestgraph",
+        "Cypher",
+        "Knowledge Graph"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-github-com",
+      "file": "/home/turbobeest/vault/entities/sources/github-com.md",
+      "title": "github.com",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for GitHub as a source. Somewhat generic — scoped to the beestgraph repository specifically rather than GitHub as a platform.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — source reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — source metadata."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "meta/beestgraph",
+          "justification": "Missing topics field. Should be meta/beestgraph since it specifically references the beestgraph repo."
+        },
+        "atlas": {
+          "current": "sources",
+          "recommended": "sources",
+          "justification": "Correct — GitHub is a code hosting source. However, the entity is ambiguous — it represents both github.com as a platform and specifically turbobeest/beestgraph repo."
+        },
+        "graph": {
+          "current": "Linked to beestgraph, FalkorDB/falkordb-py",
+          "recommended": "Add HOSTS -> beestgraph, HOSTS -> FalkorDB/falkordb-py, RELATED_TO -> FalkorDB, RELATED_TO -> Python",
+          "justification": "Should use typed HOSTS relationships. Could link to more repos hosted on GitHub."
+        }
+      },
+      "enrichment": "GitHub continues as the primary code hosting platform. The entity is narrowly scoped to the beestgraph repo source — consider whether this should be a more general github.com entity or remain project-specific.",
+      "metadata": "Missing content_stage, topics, and summary fields. Source URL points to turbobeest/beestgraph specifically. About section references 'meta and planning documents' suggesting narrow scope.",
+      "interlinking": [
+        "beestgraph",
+        "FalkorDB/falkordb-py",
+        "FalkorDB",
+        "Python"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-instagram",
+      "file": "/home/turbobeest/vault/entities/sources/instagram.md",
+      "title": "Instagram",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Instagram as a source for recipe documents. Unusual entity — primarily a social media platform used as source for recipe reels.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — source reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — source metadata."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "meta/tools",
+          "justification": "Missing topics field. No ideal tree match. meta/tools is closest as a content source tool."
+        },
+        "atlas": {
+          "current": "sources",
+          "recommended": "sources",
+          "justification": "Correct — Instagram is used as a content source for recipe documents."
+        },
+        "graph": {
+          "current": "Linked to beestgraph",
+          "recommended": "Add SOURCE_FOR -> Brazilian Limeade, SOURCE_FOR -> Boujee Lemonade, SOURCE_FOR -> Lemon Coconut Ice Cream Cocktail, SOURCE_FOR -> Pizza Dough, SOURCE_FOR -> Souffle Espresso Martini",
+          "justification": "Should have explicit SOURCE_FOR relationships to each recipe document listed. Currently only links to beestgraph which is too generic."
+        }
+      },
+      "enrichment": "Instagram is Meta's photo and video sharing platform. Recipe content via reels is a major content category. The entity serves as a provenance tracker for recipe documents in the vault.",
+      "metadata": "Missing content_stage, topics, and summary fields. Lists 5 recipe documents — these should be graph edges. Connection to beestgraph is too indirect — should link to specific recipe documents instead.",
+      "interlinking": [
+        "Brazilian Limeade",
+        "Boujee Lemonade",
+        "Lemon Coconut Ice Cream Cocktail",
+        "Pizza Dough",
+        "Souffle Espresso Martini"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-beestgraph",
+      "file": "/home/turbobeest/vault/entities/tools/beestgraph.md",
+      "title": "beestgraph",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the beestgraph project itself. Central entity of the vault. Well-linked hub with good feature description. Uses para: projects correctly.",
+      "categorization": {
+        "para": {
+          "current": "projects",
+          "recommended": "projects",
+          "justification": "Correct — beestgraph is an active project, not just reference material."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "evergreen",
+          "justification": "Missing content_stage. Should be evergreen — this is a living, actively maintained project entity."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "meta/beestgraph",
+          "justification": "Missing topics field. Should be meta/beestgraph — exact match in tree."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — beestgraph is a tool/software project. Could also be classified as a 'project' but tools is acceptable."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Knowledge Graph, Obsidian, Python, Docker, Tailscale",
+          "recommended": "Add USES -> Syncthing, USES -> Docker Compose, RUNS_ON -> Raspberry Pi (need hardware node), IMPLEMENTS -> Personal Knowledge Management, RELATED_TO -> Zettelkasten, RELATED_TO -> PARA Method",
+          "justification": "Missing links to Syncthing, Docker Compose, and PKM methodologies that beestgraph implements."
+        }
+      },
+      "enrichment": "beestgraph v0.1.0-alpha with 54 tests passing, 5 build tracks complete. Uses FalkorDB v4.16.6, runs on Raspberry Pi 5, Docker-based deployment. Web dashboard at port 3001 with 3D graph visualization, wiki pages, and audit system.",
+      "metadata": "Missing content_stage, topics, and summary fields. Has source.url and para: projects which are correct. Should add content_stage: evergreen, topics: [meta/beestgraph].",
+      "interlinking": [
+        "FalkorDB",
+        "Knowledge Graph",
+        "Obsidian",
+        "Python",
+        "Docker",
+        "Tailscale",
+        "Syncthing",
+        "Docker Compose",
+        "Cypher",
+        "Personal Knowledge Management"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-botmeetbot-com",
+      "file": "/home/turbobeest/vault/entities/tools/botmeetbot-com.md",
+      "title": "botmeetbot.com",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the botmeetbot.com platform concept. A planned/future project for AI agent networking. Uses para: projects correctly.",
+      "categorization": {
+        "para": {
+          "current": "projects",
+          "recommended": "projects",
+          "justification": "Correct — planned project with active documentation."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "evergreen",
+          "justification": "Missing content_stage. Should be evergreen — actively evolving project concept."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/ai-ml/agents",
+          "justification": "Missing topics field. Should be technology/ai-ml/agents."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct as a planned tool/platform. Could also be considered a 'concept' since it is not yet built, but tools is fine for a planned tool."
+        },
+        "graph": {
+          "current": "Linked to beestgraph, Interest Matching, Meet the Parents, The Herd Protocol",
+          "recommended": "Add USES -> Agent Discovery, USES -> Knowledge Graph, RELATED_TO -> Self-Hosting, EXTENDS -> beestgraph",
+          "justification": "Should link to Agent Discovery concept, Knowledge Graph (used for interest matching), Self-Hosting philosophy, and show it extends beestgraph."
+        }
+      },
+      "enrichment": "No external presence found for botmeetbot.com — it is a planned/conceptual project. Comparable platforms: Agent.ai (professional AI agent network), AgentX (multi-agent build platform). The AI agent networking space is growing rapidly in 2026.",
+      "metadata": "Missing content_stage, topics, and summary fields. Self-references in Mentioned In section (botmeetbot.com -> botmeetbot.com) is redundant. Connection uses 'The Herd Protocol' — inconsistent with file name herd-protocol.md.",
+      "interlinking": [
+        "beestgraph",
+        "Interest Matching",
+        "Meet the Parents",
+        "Herd Protocol",
+        "Agent Discovery",
+        "Knowledge Graph",
+        "Self-Hosting"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-cypher",
+      "file": "/home/turbobeest/vault/entities/tools/cypher.md",
+      "title": "Cypher",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for the Cypher graph query language. Well-written with mention of Neo4j origins and FalkorDB support. Good technical detail.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a query language."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable language definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/programming/languages",
+          "justification": "Missing topics field. Should be technology/programming/languages as Cypher is a query language."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Cypher is a tool/language used to interact with databases. Could arguably be a concept, but tools is appropriate for a query language."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Knowledge Graph, Python",
+          "recommended": "Add QUERIES -> FalkorDB, QUERIES -> Knowledge Graph, USED_BY -> beestgraph, RELATED_TO -> Graph Database, STANDARDIZED_AS -> GQL (new node)",
+          "justification": "Should link to beestgraph and Graph Database concept. GQL ISO standard relationship is notable."
+        }
+      },
+      "enrichment": "Cypher is evolving toward GQL (ISO/IEC 39075) compliance — the first new ISO database language since SQL (published April 2024). Neo4j decided to organically evolve Cypher toward GQL rather than offering a separate language. openCypher project continues as the open specification. FalkorDB supports Cypher natively.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/programming/languages].",
+      "interlinking": [
+        "FalkorDB",
+        "Knowledge Graph",
+        "Python",
+        "beestgraph",
+        "Graph Database"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-docker-compose",
+      "file": "/home/turbobeest/vault/entities/tools/docker-compose.md",
+      "title": "Docker Compose",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Docker Compose. Well-written with links to Docker, FalkorDB, and networking concepts. References beestgraph usage.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/docker",
+          "justification": "Missing topics field. Should be technology/infrastructure/docker."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Docker Compose is a tool."
+        },
+        "graph": {
+          "current": "Linked to Docker, FalkorDB, Bridge Network, Host Network, Container Networking",
+          "recommended": "Add USED_BY -> beestgraph, ORCHESTRATES -> FalkorDB, PART_OF -> Docker (ecosystem), DOCUMENTED_IN -> docs.docker.com",
+          "justification": "Should link to beestgraph as user. Should show orchestration relationship with FalkorDB. Missing source doc link."
+        }
+      },
+      "enrichment": "Docker Compose v5.1.2 released April 9, 2026. Compose v5 introduced in December 2025 (codename Mont Blanc) — removed internal builder in favor of Docker Bake. New official Go SDK provides programmatic API. Compose specification continues to evolve.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/docker].",
+      "interlinking": [
+        "Docker",
+        "FalkorDB",
+        "Bridge Network",
+        "Host Network",
+        "Container Networking",
+        "beestgraph",
+        "docs.docker.com"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-docker",
+      "file": "/home/turbobeest/vault/entities/tools/docker.md",
+      "title": "Docker",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Docker. Well-written hub entity with multiple Mentioned In references. Good links to Self-Hosting, Homelab, FalkorDB.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/docker",
+          "justification": "Missing topics field. Should be technology/infrastructure/docker — exact match in tree."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Docker is a tool/platform."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Self-Hosting, Homelab, Tailscale",
+          "recommended": "Add USED_BY -> beestgraph, HAS_COMPONENT -> Docker Compose, ENABLES -> Container Networking, DOCUMENTED_IN -> docs.docker.com, RELATED_TO -> Raspberry Pi Foundation",
+          "justification": "Missing links to Docker Compose, Container Networking, docs.docker.com, and beestgraph."
+        }
+      },
+      "enrichment": "Docker Engine v29 is latest (2026). Docker Desktop 4.66+ with MCP Toolkit profiles. Docker Compose v5.1.2. Docker continues as the dominant containerization platform. Security hardening and AI integration (MCP) are 2026 focus areas.",
+      "metadata": "Missing content_stage, topics, and summary fields. Has 3 Mentioned In references — good interlinking. Should add content_stage: reference, topics: [technology/infrastructure/docker].",
+      "interlinking": [
+        "FalkorDB",
+        "Self-Hosting",
+        "Homelab",
+        "Tailscale",
+        "beestgraph",
+        "Docker Compose",
+        "Container Networking",
+        "docs.docker.com",
+        "Raspberry Pi Foundation"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-falkordb",
+      "file": "/home/turbobeest/vault/entities/tools/falkordb.md",
+      "title": "FalkorDB",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for FalkorDB graph database. Central tool entity for beestgraph. Well-written with technical detail about Redis module architecture. Multiple Mentioned In references.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure",
+          "justification": "Missing topics field. Should be technology/infrastructure as it is a database infrastructure tool."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — FalkorDB is a tool/software."
+        },
+        "graph": {
+          "current": "Linked to Knowledge Graph, Cypher, Python, Docker, beestgraph",
+          "recommended": "Add IMPLEMENTS -> Graph Database, STORES -> Knowledge Graph, USES -> Cypher, DEPLOYED_VIA -> Docker Compose, CLIENT_LIB -> FalkorDB/falkordb-py, USES_NETWORK -> Host Network",
+          "justification": "Should link to Graph Database concept, Docker Compose for deployment, falkordb-py client, and Host Network mode."
+        }
+      },
+      "enrichment": "FalkorDB v4.16.6 released March 13, 2026. Requires Redis 7.4. New browser updates April 2026 (Favorite Queries, Connection Endpoints). GraphRAG support for LLM applications. Snowflake integration added. Uses GraphBLAS with AVX acceleration for performance. Positioned as 'best Knowledge Graph for LLM'.",
+      "metadata": "Missing content_stage, topics, and summary fields. Has 3 Mentioned In references — good interlinking. Should add content_stage: reference, topics: [technology/infrastructure].",
+      "interlinking": [
+        "Knowledge Graph",
+        "Cypher",
+        "Python",
+        "Docker",
+        "beestgraph",
+        "Graph Database",
+        "Docker Compose",
+        "FalkorDB/falkordb-py",
+        "Host Network"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-obsidian",
+      "file": "/home/turbobeest/vault/entities/tools/obsidian.md",
+      "title": "Obsidian",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Obsidian note-taking app. Hub entity linking to PKM concepts (Zettelkasten, PARA), people (Forte, Luhmann), and Knowledge Graph.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "meta/tools/obsidian",
+          "justification": "Missing topics field. Should be meta/tools/obsidian — exact match in tree."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Obsidian is a software tool."
+        },
+        "graph": {
+          "current": "Linked to Personal Knowledge Management, Zettelkasten, PARA Method, Tiago Forte, Niklas Luhmann, Knowledge Graph",
+          "recommended": "Add USED_BY -> beestgraph, IMPLEMENTS -> Zettelkasten, IMPLEMENTS -> PARA Method, SYNCED_BY -> Syncthing",
+          "justification": "beestgraph vault is an Obsidian vault. Obsidian implements both Zettelkasten and PARA. Syncthing syncs the vault."
+        }
+      },
+      "enrichment": "Obsidian v1.12.7 is latest (2026). New Obsidian CLI introduced for terminal automation and scripting. Image resizing in Live Preview. iOS Share extension added. HTML formatting on copy. Plugin ecosystem continues to grow. Local-first architecture remains core philosophy.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [meta/tools/obsidian].",
+      "interlinking": [
+        "Personal Knowledge Management",
+        "Zettelkasten",
+        "PARA Method",
+        "Tiago Forte",
+        "Niklas Luhmann",
+        "Knowledge Graph",
+        "beestgraph",
+        "Syncthing"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-python",
+      "file": "/home/turbobeest/vault/entities/tools/python.md",
+      "title": "Python",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Python programming language. Well-written with focus on beestgraph usage. Links to FalkorDB, Cypher, Knowledge Graph.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool/language."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/programming/languages",
+          "justification": "Missing topics field. Should be technology/programming/languages."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Python is a tool/programming language."
+        },
+        "graph": {
+          "current": "Linked to FalkorDB, Cypher, Knowledge Graph",
+          "recommended": "Add USED_BY -> beestgraph, CLIENT_FOR -> FalkorDB/falkordb-py, RELATED_TO -> Docker, RELATED_TO -> Graph Database",
+          "justification": "Missing link to beestgraph (Python is core stack). Should link to falkordb-py client and Docker."
+        }
+      },
+      "enrichment": "Python 3.14.4 released April 7, 2026 (latest stable). Python 3.15 in alpha, planned for October 2026 release. Python 3.13 receives bug fixes until October 2026. Python remains dominant for data science, AI, and automation.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/programming/languages].",
+      "interlinking": [
+        "FalkorDB",
+        "Cypher",
+        "Knowledge Graph",
+        "beestgraph",
+        "FalkorDB/falkordb-py",
+        "Docker"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-syncthing",
+      "file": "/home/turbobeest/vault/entities/tools/syncthing.md",
+      "title": "Syncthing",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Syncthing file sync tool. Well-written with technical detail about block-exchange protocol. Links to Homelab, Self-Hosting, Tailscale.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/homelab",
+          "justification": "Missing topics field. Should be technology/infrastructure/homelab."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Syncthing is a software tool."
+        },
+        "graph": {
+          "current": "Linked to Homelab, Self-Hosting, Tailscale",
+          "recommended": "Add USED_BY -> beestgraph, SYNCS -> Obsidian (vault), RELATED_TO -> Raspberry Pi Foundation, RELATED_TO -> Docker",
+          "justification": "Syncthing syncs the beestgraph/Obsidian vault. Runs on Raspberry Pi nodes. Should link to more entities."
+        }
+      },
+      "enrichment": "Syncthing v2.0.16 released April 7, 2026. Major: Syncthing 2.0 released August 2025, v1 now deprecated since February 2026. v2.0.16 includes fixes for protocol message decompression, systemd config overrides, QUIC and TCP connection handling.",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/homelab]. Note: Syncthing 2.0 is a major version change — About section should be updated.",
+      "interlinking": [
+        "Homelab",
+        "Self-Hosting",
+        "Tailscale",
+        "beestgraph",
+        "Obsidian",
+        "Raspberry Pi Foundation"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent5-tailscale",
+      "file": "/home/turbobeest/vault/entities/tools/tailscale.md",
+      "title": "Tailscale",
+      "agent": "agent-5-entities",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Entity page for Tailscale mesh VPN. Well-written with good technical detail about WireGuard, zero-config, and subnet routing.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "resources",
+          "justification": "Correct — reference material about a tool."
+        },
+        "zett": {
+          "current": "not set",
+          "recommended": "reference",
+          "justification": "Missing content_stage. Should be reference — stable tool definition."
+        },
+        "tree": {
+          "current": "not set",
+          "recommended": "technology/infrastructure/networking",
+          "justification": "Missing topics field. Should be technology/infrastructure/networking."
+        },
+        "atlas": {
+          "current": "tools",
+          "recommended": "tools",
+          "justification": "Correct — Tailscale is a software tool."
+        },
+        "graph": {
+          "current": "Linked to Homelab, Self-Hosting, Docker, Syncthing",
+          "recommended": "Add USED_BY -> beestgraph, CONNECTS -> Raspberry Pi Foundation (hardware), RELATED_TO -> Container Networking, ENABLES -> botmeetbot.com",
+          "justification": "beestgraph uses Tailscale for mesh access. Connects Pi nodes. Enables remote access for botmeetbot agents."
+        }
+      },
+      "enrichment": "Tailscale v1.96.5 latest (April 2026). Major 2026 features: Aperture AI gateway, Peer Relays GA, Tailscale Services GA, workload identity federation GA, Kubernetes audit logging. Pricing updated April 2026: seat-based billing, unlimited user devices, Personal plan now 6 free users (was 3).",
+      "metadata": "Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/networking]. About section should note Tailscale has significantly expanded in 2026.",
+      "interlinking": [
+        "Homelab",
+        "Self-Hosting",
+        "Docker",
+        "Syncthing",
+        "beestgraph",
+        "Raspberry Pi Foundation",
+        "botmeetbot.com"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-healthy-brownies",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Healthy Brownies.md",
+      "title": "Healthy Brownies",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "A healthier take on classic brownies recipe placeholder. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/desserts",
+          "recommended": "eat-drink-merriment/desserts",
+          "justification": "Correct under desserts."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Desserts, Food & Nutrition List",
+          "recommended": "Add links to Blueprint Protocol (health eating), Chocolate Chip Protein Banana Bread (fellow healthy dessert), Good Food List",
+          "justification": "Health-focused desserts should cluster together and connect to the health eating framework."
+        }
+      },
+      "enrichment": "Popular healthy brownie approaches include: avocado replacing butter (fudgy, GF, dairy-free), black beans replacing flour (adds protein and fiber, lower calories, GF), and sweet potato base. Black bean brownies are especially popular for protein/fiber. Cannellini beans work as a substitute. Chia seeds or flaxseeds can replace eggs. Most versions accommodate vegan, GF, and dairy-free diets. Consider specifying which healthy approach (avocado, black bean, or sweet potato) this recipe uses.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Desserts",
+        "Food & Nutrition List",
+        "Blueprint Protocol",
+        "Chocolate Chip Protein Banana Bread",
+        "Good Food List",
+        "Gluten Free Lemon Crinkle Cookies"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-homemade-bacon",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Homemade Bacon.md",
+      "title": "Homemade Bacon",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "How to cure and make bacon at home recipe placeholder. A charcuterie/meat curing project. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals",
+          "recommended": "eat-drink-merriment/meals",
+          "justification": "Correct under meals — bacon is a meal component/protein."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Meals, Food & Nutrition List",
+          "recommended": "Add links to Food Sourcing (pork belly sourcing — Heartstone Farm, Good Chop, etc), Potato Hashbrown Casserole (bacon is common addition)",
+          "justification": "Sourcing quality pork belly is essential for homemade bacon. Bacon pairs naturally with breakfast casserole."
+        }
+      },
+      "enrichment": "Homemade bacon requires pork belly cured with kosher salt, pink curing salt (sodium nitrite), brown sugar, honey, and spices (paprika, black pepper, garlic, cumin). Coat pork belly, refrigerate 7-10 days flipping daily until firm. Smoke with applewood chips at 200F for 3 hours to internal temp of 150F. Alternative: oven at 200F. Pink curing salt keeps meat pink and prevents bacteria. Store wrapped in plastic, refrigerate up to 1 week, freeze up to 2 months. Consider noting where to source pork belly from the Food Sourcing list.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Meals",
+        "Food & Nutrition List",
+        "Food Sourcing",
+        "Potato Hashbrown Casserole",
+        "Japanese Pancakes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-ice-cream-bread",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Ice Cream Bread.md",
+      "title": "Ice Cream Bread",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Two-ingredient bread made from melted ice cream and flour. Viral TikTok recipe placeholder. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/desserts",
+          "recommended": "eat-drink-merriment/desserts",
+          "justification": "Correct under desserts — its a sweet bread/dessert."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Desserts, Food & Nutrition List",
+          "recommended": "Add link to Naughty Food List (indulgent treat), Banana Pudding (fellow comfort dessert)",
+          "justification": "Ice cream bread is quintessential indulgence that connects to the naughty food theme."
+        }
+      },
+      "enrichment": "Viral 2-ingredient recipe: 2 pints melted ice cream + 3 cups self-rising flour. Bake at 350F for 40 minutes. Works because ice cream provides sugar fat and flavor while self-rising flour has baking powder and salt. Use full-fat ice cream for best results. Let ice cream melt on counter (not microwave). Flavors with chocolate chips or fruit chunks add texture. Result is similar to banana bread or zucchini bread — sweet but not cake. Extremely popular on TikTok. Any ice cream flavor works making it infinitely customizable.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Desserts",
+        "Food & Nutrition List",
+        "Naughty Food List",
+        "Banana Pudding"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-japanese-pancakes",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Japanese Pancakes.md",
+      "title": "Japanese Pancakes",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Fluffy Japanese-style souffle pancakes recipe placeholder. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals",
+          "recommended": "eat-drink-merriment/meals/breakfast",
+          "justification": "Should be more specifically tagged as breakfast under meals/breakfast since pancakes are a breakfast dish."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Meals, Food & Nutrition List",
+          "recommended": "Add link to Homemade Bacon (breakfast companion), Potato Hashbrown Casserole (breakfast pairing), Lemon Curd (topping)",
+          "justification": "Breakfast recipes should cross-reference each other. Lemon curd is a classic pancake topping."
+        }
+      },
+      "enrichment": "Japanese souffle pancakes use whipped egg whites folded into batter (like chiffon cake technique). Only 6 ingredients: eggs, sugar, milk, flour, baking powder, cream of tartar. Whip egg whites to stiff peaks (6-8 min with stand mixer). Cook on LOW heat with lid to steam — this creates the signature tall, jiggly, airy texture. The result is bouncy, light, and melts in the mouth. Extremely popular on social media. Key: patience with low heat is essential. Do not rush the cooking.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Meals",
+        "Food & Nutrition List",
+        "Homemade Bacon",
+        "Potato Hashbrown Casserole",
+        "Lemon Curd"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-lemon-coconut-ice-cream-cocktail",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Lemon Coconut Ice Cream Cocktail.md",
+      "title": "Lemon Coconut Ice Cream Cocktail",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "A lemon coconut ice cream cocktail recipe placeholder. Sourced from Instagram reel. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content. Move to reference once populated."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/alcohol/cocktails",
+          "recommended": "eat-drink-merriment/alcohol/cocktails",
+          "justification": "Correct under cocktails."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Drinks List, Food & Nutrition List",
+          "recommended": "Add links to Boujee Lemonade (citrus cocktail), Brazilian Limeade (tropical), Pina Colada Creme Brulee (coconut theme)",
+          "justification": "Tropical and citrus cocktails should cross-reference. Coconut connects to pina colada theme."
+        }
+      },
+      "enrichment": "Lemon and coconut are surprisingly complementary — the tangy citrus balances the sweet creaminess of coconut for a tropical flavor profile. No-churn lemon coconut ice cream uses whipped cream, lemon zest/juice, condensed milk, and toasted coconut. Cocktail variations include coconut rum with lime, cream of coconut with vanilla rum, or coconut lemonade with Malibu. Instagram source link should be verified. Consider whether this is a blended frozen cocktail or a poured cocktail with ice cream.",
+      "metadata": "Uses newer metadata format. connections.related references Alcohol Notes (should be Drinks List) and Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Drinks List",
+        "Food & Nutrition List",
+        "Boujee Lemonade",
+        "Brazilian Limeade",
+        "Souffle Espresso Martini",
+        "Pina Colada Creme Brulee"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-pina-colada-creme-brulee",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Pina Colada Creme Brulee.md",
+      "title": "Pina Colada Creme Brulee",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Creme brulee with pina colada flavors — coconut and pineapple. A tropical-cocktail-meets-French-dessert fusion. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/desserts",
+          "recommended": "eat-drink-merriment/desserts",
+          "justification": "Correct under desserts."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Desserts, Food & Nutrition List",
+          "recommended": "Add links to Drinks List (pina colada/rum connection), Lemon Coconut Ice Cream Cocktail (coconut theme), Naughty Food List (indulgent dessert)",
+          "justification": "The cocktail inspiration bridges desserts and drinks. Coconut theme connects to other tropical recipes."
+        }
+      },
+      "enrichment": "Can be made in ramekins or dramatically inside hollowed pineapple halves. Ramekin version: combine coconut cream, rum, salt, egg yolks, and sugar, bake in water bath. Pineapple version: blend coconut cream, egg yolks, cornstarch, sugar, rum, pour into hollowed pineapple, refrigerate overnight. Finish with powdered sugar torched to golden caramel. Garnish with fresh pineapple slice or maraschino cherry. The pineapple shell presentation is a show-stopper for entertaining. Uses rum which bridges the cocktail/dessert worlds.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Desserts",
+        "Food & Nutrition List",
+        "Drinks List",
+        "Lemon Coconut Ice Cream Cocktail",
+        "Naughty Food List"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-pizza-dough",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Pizza Dough.md",
+      "title": "Pizza Dough",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Homemade pizza dough recipe placeholder. Foundational recipe for pizza-making. Sourced from Instagram reel. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals",
+          "recommended": "eat-drink-merriment/meals/dinner",
+          "justification": "Could be more specific under meals/dinner since pizza is typically a dinner dish."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Meals, Food & Nutrition List",
+          "recommended": "Add link to Chicago Pizza Oven Grinder (uses pizza dough), Rosemary Pull-Apart Mozzarella Bread (fellow bread/dough recipe)",
+          "justification": "Pizza dough is a prerequisite for the pizza pot pie recipe. Bread recipes form a natural cluster."
+        }
+      },
+      "enrichment": "Most easy recipes use 5-6 basic ingredients: flour, yeast, water, salt, sugar, olive oil. Bobby Flay recommends bread flour for crispier crust (all-purpose for chewier). Dough should puff up and nearly double — look for soft, airy, noticeably bigger dough. No-rise options exist for under 30 minutes. Instagram source should be verified. Key tip: let dough rest at least 1 hour for best texture. Consider noting whether this is a thin-crust, deep-dish, or Neapolitan style.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List). Has source.url to Instagram reel.",
+      "interlinking": [
+        "Recipes - Meals",
+        "Food & Nutrition List",
+        "Chicago Pizza Oven Grinder",
+        "Rosemary Pull-Apart Mozzarella Bread"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-potato-hashbrown-casserole",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Potato Hashbrown Casserole.md",
+      "title": "Potato Hashbrown Casserole",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "A cheesy potato hashbrown casserole recipe placeholder. Classic comfort food / breakfast side dish. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals",
+          "recommended": "eat-drink-merriment/meals/breakfast",
+          "justification": "Should be more specifically tagged as breakfast — hashbrown casserole is a classic breakfast/brunch side dish."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Meals, Food & Nutrition List",
+          "recommended": "Add links to Homemade Bacon (breakfast pairing), Japanese Pancakes (breakfast companion), Naughty Food List (comfort food)",
+          "justification": "Breakfast recipes should cross-reference. This is comfort food connecting to the indulgence theme."
+        }
+      },
+      "enrichment": "This is essentially a Cracker Barrel hashbrown casserole copycat — one of the most searched comfort food recipes. Uses frozen hashbrowns, cream of chicken soup, sour cream, butter, minced onions, and shredded cheddar. Bake at 350F for 45 minutes. Pro tips: thaw hashbrowns completely beforehand, use room-temperature sour cream for smoother mixing, freshly grated cheese melts better than pre-shredded. Consider noting it serves 8-10 and is ideal for holidays and potlucks.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List). Tags include breakfast which is correct.",
+      "interlinking": [
+        "Recipes - Meals",
+        "Food & Nutrition List",
+        "Homemade Bacon",
+        "Japanese Pancakes",
+        "Naughty Food List"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-rosemary-pull-apart-mozzarella-bread",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Rosemary Pull-Apart Mozzarella Bread.md",
+      "title": "Rosemary Pull-Apart Mozzarella Bread",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Pull-apart bread stuffed with mozzarella and rosemary recipe placeholder. Artisan bread/appetizer. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals",
+          "recommended": "eat-drink-merriment/meals",
+          "justification": "Correct under meals — this is a bread side dish or appetizer."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Meals, Food & Nutrition List",
+          "recommended": "Add links to Pizza Dough (fellow bread/dough recipe), Chicago Pizza Oven Grinder (mozzarella theme), Food Sourcing (cheese sourcing)",
+          "justification": "Bread recipes cluster together. Mozzarella connects to other cheese-heavy recipes. Quality cheese sourcing matters."
+        }
+      },
+      "enrichment": "Dough uses bread flour, warm milk, butter, sugar, yeast, salt, and garlic powder. Filling includes softened butter, mozzarella, parmesan, minced garlic, and parsley. Key tip: go heavy on cheese for perfect bread-to-filling ratio. Brush with garlic butter fresh out of the oven. The recipe has gone viral on TikTok (via @mxriyum). Popular versions from Sallys Baking Addiction and Red Star Yeast. This is an impressive entertaining/party bread that pulls apart into cheesy, garlicky pieces.",
+      "metadata": "Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Meals",
+        "Food & Nutrition List",
+        "Pizza Dough",
+        "Chicago Pizza Oven Grinder",
+        "Food Sourcing"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-souffle-espresso-martini",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Souffle Espresso Martini.md",
+      "title": "Souffle Espresso Martini",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "A souffle-topped espresso martini cocktail recipe placeholder. Elevated cocktail with dramatic coffee foam presentation. Sourced from Instagram reel. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/alcohol/cocktails",
+          "recommended": "eat-drink-merriment/alcohol/cocktails",
+          "justification": "Correct under cocktails."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Drinks List, Food & Nutrition List",
+          "recommended": "Add links to Boujee Lemonade (fellow cocktail), Pina Colada Creme Brulee (dessert-cocktail fusion)",
+          "justification": "Cocktail recipes should cross-reference. The dessert-like presentation connects to the dessert-cocktail fusion theme."
+        }
+      },
+      "enrichment": "Two-part recipe: (1) Coffee foam — egg white, sugar, espresso, water; shake 30s with ice, strain, shake 30s without ice (reverse dry shake). (2) Espresso martini — 2oz vanilla vodka, 1oz espresso, 0.5oz coffee liqueur. CRITICAL: use straight-walled glasses (not V-shaped martini glasses) so the souffle can rise. Pour foam first, let sit 5 minutes to stiffen, poke hole in center with straw, pour martini through the hole. Souffle rises above the glass rim. Garnish with 3 coffee beans and cocoa powder. Dramatic presentation.",
+      "metadata": "Uses newer metadata format. connections.related references Alcohol Notes (should be Drinks List) and Food & Nutrition (should be Food & Nutrition List). Has source.url to Instagram reel.",
+      "interlinking": [
+        "Drinks List",
+        "Food & Nutrition List",
+        "Boujee Lemonade",
+        "Brazilian Limeade",
+        "Lemon Coconut Ice Cream Cocktail",
+        "Pina Colada Creme Brulee"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-viral-banana-bark",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Viral Banana Bark.md",
+      "title": "Viral Banana Bark",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Frozen banana bark with chocolate — the viral TikTok snack. A healthy-ish frozen treat recipe placeholder. Stub with no ingredients or instructions.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference recipe material."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Correctly fleeting — stub needing content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/desserts",
+          "recommended": "eat-drink-merriment/desserts",
+          "justification": "Correct under desserts. Could also be tagged as a snack."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Recipes - Desserts, Food & Nutrition List",
+          "recommended": "Add links to Good Food List (bananas are healthy), Naughty Food List (healthier alternative to ice cream), Banana Pudding (banana theme), Chocolate Chip Protein Banana Bread (banana + chocolate theme)",
+          "justification": "Banana-based recipes should cluster. This is a healthier indulgence alternative connecting both Good and Naughty food lists."
+        }
+      },
+      "enrichment": "Only 4 ingredients: sliced bananas, peanut butter, dark chocolate (80%), and sea salt. Arrange banana slices touching in a rectangle on parchment-lined baking sheet. Spread peanut butter evenly, freeze while melting chocolate. Drizzle melted chocolate over frozen bananas. Freeze 90+ minutes until firm. Result tastes like ice cream with Snickers-bar vibes. Extremely popular on TikTok. Healthy-ish: frozen bananas mimic ice cream texture. Variations include adding crushed nuts, using almond butter, or white chocolate. No-bake, naturally GF, can be vegan with dairy-free chocolate.",
+      "metadata": "Uses newer metadata format. Tags include snack which is appropriate. connections.related references Food & Nutrition (should be Food & Nutrition List).",
+      "interlinking": [
+        "Recipes - Desserts",
+        "Food & Nutrition List",
+        "Good Food List",
+        "Naughty Food List",
+        "Banana Pudding",
+        "Chocolate Chip Protein Banana Bread"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-blueprint-protocol",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Blueprint Protocol.md",
+      "title": "Blueprint Protocol",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Health-optimized recipes inspired by Bryan Johnson Blueprint protocol — Super Veggie and Nutty Pudding with exact measurements. Serves as a reference for longevity-focused nutrition.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference material — stable recipes for ongoing use, not an active project."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Well-structured reference note with exact measurements and ingredient tables. Content is mature and complete."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/nutrition/diets, health/nutrition",
+          "recommended": "eat-drink-merriment/nutrition/diets, health/nutrition",
+          "justification": "Dual-topic placement is correct — it is both a diet protocol and a health/nutrition reference."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable (not in entities/ folder)",
+          "justification": "File lives in resources, not entities. Bryan Johnson could be an entity page if desired."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Diet Menu, Good Food List, Food Sourcing",
+          "recommended": "Add links to Recipes - Meals (Super Veggie is a meal), Healthy Brownies (health-focused dessert)",
+          "justification": "Super Veggie is essentially a meal recipe and should cross-link. The health theme connects to other health-focused recipes."
+        }
+      },
+      "enrichment": "Bryan Johnson updated Blueprint — Super Veggie now includes cumin (1 Tbsp) which is missing from this file. The vault lists mushrooms at 250g but Blueprint official uses 50g. The Nutty Pudding lists 1 tsp (20g) ground flax seeds — 1 tsp is only ~3-4g, not 20g; measurement likely incorrect. Consider adding macro/calorie breakdowns. The protocol has expanded beyond Super Veggie and Nutty Pudding.",
+      "metadata": "Uses older metadata format (created/updated as flat fields vs dates.created/dates.modified). Missing content_stage field (should be reference). Missing para field. Missing version field. Has uid which is good.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Diet Menu",
+        "Good Food List",
+        "Food Sourcing",
+        "Recipes - Meals",
+        "Healthy Brownies",
+        "Chocolate Chip Protein Banana Bread"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-diet-menu",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Diet Menu.md",
+      "title": "Diet Menu",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Structured daily meal plan with breakfast smoothie, lunch salad, dinner options (salmon, white fish, chicken), and a weekly grocery list. Practical actionable guide for healthy eating.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct placement as stable reference material for ongoing meal planning."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Complete structured reference with actionable meal plan and grocery list. Mature content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/nutrition/diets",
+          "recommended": "eat-drink-merriment/nutrition/diets",
+          "justification": "Correctly categorized as a diet plan within nutrition."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Blueprint Protocol, Good Food List, Food Sourcing",
+          "recommended": "Add links to Recipes - Meals (dinner options reference specific recipes), Restaurants - RI (dining out alternatives)",
+          "justification": "Dinner options naturally connect to meal recipes. The plan benefits from fallback dining-out options."
+        }
+      },
+      "enrichment": "The plan follows Mediterranean-style approach well-supported by research. 2026 trends emphasize balanced plate model (1/2 veggies, 1/4 protein, 1/4 complex carbs) which aligns well. Consider adding estimated daily calorie totals and macros. Grocery list could benefit from estimated weekly cost. Batch-cooking tips (cook chicken and quinoa in bulk) would add practical value.",
+      "metadata": "Uses older metadata format (created/updated flat fields). Missing content_stage, para, version, and dates object. Has uid. Tags include action which is good for an actionable plan.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Blueprint Protocol",
+        "Good Food List",
+        "Food Sourcing",
+        "Recipes - Meals",
+        "Restaurants - RI"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-entertainment-index",
+      "file": "/home/turbobeest/vault/07-resources/entertainment/Entertainment Index.md",
+      "title": "Entertainment Index",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Master index/hub page for the entertainment domain. Aggregates links to Watchlist - Movies, Watchlist - TV Shows, Reading List, and Bucket List. Serves as a navigation entry point (Map of Content) for all entertainment-related resources.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as a resource-level index. The type: project in metadata is misleading — this functions as a reference index, not an active project. Should be type: index or type: reference."
+        },
+        "zett": {
+          "current": "reference (implied by status)",
+          "recommended": "reference",
+          "justification": "Structural/navigational MOC note. Curates links rather than containing substantive content. Reference is correct."
+        },
+        "tree": {
+          "current": "entertainment",
+          "recommended": "entertainment",
+          "justification": "Correct — top-level entertainment hub. Tree slug accurately reflects its root index position."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "none (not an entity file)",
+          "justification": "Not an atomic entity — structural index note."
+        },
+        "graph": {
+          "current": "Links to Watchlist - Movies, Watchlist - TV Shows, Reading List, Bucket List, Food & Nutrition List, Restaurants - RI",
+          "recommended": "Current links are good. Consider adding hub/index node type in graph to distinguish MOC pages from content pages. Could link to Music or Gaming notes if they exist.",
+          "justification": "Hub structure is clean but could benefit from being typed as an index/MOC node for structural queries."
+        }
+      },
+      "enrichment": "Index is lean and functional. No enrichment needed for the index itself. Observation: no Music section despite entertainment typically including music. Gaming is also absent. If user has music or gaming notes, subsections would round out the index.",
+      "metadata": "Issues: (1) type: project is incorrect — should be type: index or type: reference. (2) project field is empty string. (3) Missing content_stage field. (4) Missing dates object. (5) Missing entities and connections fields. (6) Summary is accurate. (7) Aliases entertainment and media are good.",
+      "interlinking": [
+        "Watchlist - Movies (linked, correct)",
+        "Watchlist - TV Shows (linked, correct)",
+        "Reading List (linked, correct)",
+        "Bucket List (linked, correct)",
+        "Food & Nutrition List (linked, correct)",
+        "Restaurants - RI (linked, correct)",
+        "MISSING: No link to Music-related notes",
+        "MISSING: No link to Gaming-related notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-reading-list",
+      "file": "/home/turbobeest/vault/07-resources/entertainment/Reading List.md",
+      "title": "Reading List",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Curated book recommendations with personal annotations. Covers sci-fi (Three Body Problem, Permutation City), psychology (Good Reasons for Bad Feelings, Wherever You Go There You Are), philosophy (Musashi), business/tech (Zero to One, Algorithm Design Manual, DataHead), and culture (The Coddling of the American Mind). Personal notes reveal taste: hard sci-fi, simulation theory, samurai philosophy, practical psychology.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct. Reference list of books, not an active project."
+        },
+        "zett": {
+          "current": "reference (implied)",
+          "recommended": "reference",
+          "justification": "Correct — curated reference list. Each book could spawn its own literature note if read and annotated."
+        },
+        "tree": {
+          "current": "entertainment/reading",
+          "recommended": "entertainment/reading",
+          "justification": "Correct tree slug. Some books (Algorithm Design Manual, DataHead, Zero to One) could also tag under technology/programming, but entertainment/reading is right primary classification."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "none (not an entity file)",
+          "justification": "Not an atomic entity. Individual books could become entity notes (type: source) if expanded."
+        },
+        "graph": {
+          "current": "Links to Entertainment Index, Watchlist - Movies, Bucket List",
+          "recommended": "Each book should be a node with author relationships. The @-prefixed author names suggest entity references. Graph should have Book nodes linked to Author (people) and Genre (concept) nodes.",
+          "justification": "Flat table format loses graph potential. Node-per-book with author/genre edges would enable richer queries."
+        }
+      },
+      "enrichment": "Recent sci-fi aligned with user's taste: Adrian Tchaikovsky's Children of Strife (2026, Children of Time series), Kaliane Bradley's The Ministry of Time (time travel). Three Body Problem Netflix adaptation renewed interest in Liu Cixin. Greg Egan fans should check Diaspora and Schild's Ladder. 2025 Nebula Awards highlighted new hard SF voices. List has only 11 books — quite short. Sources: panmacmillan.com, goodreads.com, andrewliptak.com, fivebooks.com.",
+      "metadata": "Issues: (1) Missing content_stage field. (2) Missing dates object. (3) @ symbol before author names is non-standard — should use [[wikilink]] syntax for entity references. (4) Several books have no author (Algorithm Design Manual = Steven Skiena, DataHead = Alex Gutman). (5) No read/unread tracking — a checkbox column would help. (6) Notes column has useful annotations but some are blank.",
+      "interlinking": [
+        "Entertainment Index (linked, correct)",
+        "Watchlist - Movies (linked, correct — many books have film adaptations)",
+        "Bucket List (linked, correct — references reading-related goals)",
+        "MISSING: Author entity notes (Liu Cixin, Jon Haidt) if they exist",
+        "MISSING: Three Body Problem Netflix adaptation link to Watchlist",
+        "MISSING: Algorithm Design Manual link to technology/programming notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-watchlist-movies",
+      "file": "/home/turbobeest/vault/07-resources/entertainment/Watchlist - Movies.md",
+      "title": "Watchlist - Movies",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Curated movie watchlist heavily weighted toward sci-fi, cyberpunk, and tech thrillers spanning 1968-2023. Features 34 films in a chronological table plus 13 unsorted recommendations. Strong thematic coherence around AI, dystopia, simulation, hacking, transhumanism. Includes external Movies for Hackers GitHub link.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct — reference watchlist, not an active project."
+        },
+        "zett": {
+          "current": "reference (implied)",
+          "recommended": "reference",
+          "justification": "Correct — curated reference list."
+        },
+        "tree": {
+          "current": "entertainment/film",
+          "recommended": "entertainment/film",
+          "justification": "Correct slug. However, the Also Recommended (Unsorted) section contains mostly TV shows (Longmire, Blue Eye Samurai, Travelers, Bloodline, The Last Kingdom, The OA, Supernatural, Outer Banks, Arcane, 3%) mixed into a movies-only list. These should move to Watchlist - TV Shows."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "none (not an entity file)",
+          "justification": "Not an atomic entity. Individual films could become entity notes if expanded."
+        },
+        "graph": {
+          "current": "Links to Entertainment Index, Watchlist - TV Shows, Bucket List",
+          "recommended": "Each film could be a node with Year, Genre, Director edges. Strong genre clustering (cyberpunk, AI, dystopia) makes this ideal for graph-based recommendation. Should link to Reading List since several films are book adaptations (Blade Runner, Dune, 2001).",
+          "justification": "Chronological table is useful but graph representation would enable genre clustering and adaptation tracking between books and films."
+        }
+      },
+      "enrichment": "List stops at 2023. Missing recent sci-fi: Dune Part Two (2024), Mars Express (2024, animated cyberpunk), The Creator (2023, AI warfare). Upcoming: Blade Runner 2099 (Amazon series, Michelle Yeoh). CRITICAL DATA ISSUE: Also Recommended section contains mostly TV shows, not movies — Blue Eye Samurai, Longmire, Travelers, Bloodline, The Last Kingdom, Fall of the House of Usher, The OA, Supernatural, 3%, Arcane, Outer Banks are all TV series. The Recruit in the main table is also a TV show (2022 Netflix). Sources: imdb.com, collider.com, tasteray.com.",
+      "metadata": "Issues: (1) Missing content_stage field. (2) Missing dates object. (3) No watched/unwatched tracking. (4) The Recruit has year as dash — should be identified and dated. (5) Also Recommended mixes movies and TV shows — data integrity issue. (6) Missing genre tags per film. (7) External Wired link is good context.",
+      "interlinking": [
+        "Entertainment Index (linked, correct)",
+        "Watchlist - TV Shows (linked, correct — unsorted section has TV shows that belong there)",
+        "Bucket List (linked, correct)",
+        "MISSING: Reading List — several films are book adaptations (Blade Runner, Dune, 2001)",
+        "MISSING: Three Body Problem adaptation connection",
+        "MISSING: Movies for Hackers GitHub could link to technology notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-watchlist-tv-shows",
+      "file": "/home/turbobeest/vault/07-resources/entertainment/Watchlist - TV Shows.md",
+      "title": "Watchlist - TV Shows",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "TV series watchlist with streaming platform annotations. Very sparse — only 8 entries mixing sci-fi (For All Mankind, Ascension, Silent Sea, Station Eleven, WandaVision) with comedy (Broken Lizard, Tacoma FD, Slammin' Salmon). Data integrity issues: Broken Lizard is a comedy troupe, not a show; Slammin' Salmon is a movie, not a series.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct — reference watchlist."
+        },
+        "zett": {
+          "current": "reference (implied)",
+          "recommended": "reference",
+          "justification": "Correct — curated reference list."
+        },
+        "tree": {
+          "current": "entertainment/television",
+          "recommended": "entertainment/television",
+          "justification": "Correct slug. But Broken Lizard is a comedy group (Super Troopers, Beerfest), not a TV show. Slammin Salmon is a Broken Lizard movie. These belong in Movies or should be noted as comedy troupe filmography."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "none (not an entity file)",
+          "justification": "Not an atomic entity."
+        },
+        "graph": {
+          "current": "Links to Entertainment Index, Watchlist - Movies, Bucket List",
+          "recommended": "Thinnest file in the entertainment set. Should absorb ~13 TV shows misplaced in Movies Also Recommended section (Blue Eye Samurai, Longmire, Travelers, Bloodline, The Last Kingdom, The OA, Supernatural, 3%, Arcane, Outer Banks, etc). Each show should be a node with Platform and Genre edges.",
+          "justification": "File is underpopulated. Merging misplaced TV content from Movies watchlist would fix both files."
+        }
+      },
+      "enrichment": "File is notably thin. Recent highly-rated sci-fi TV aligned with user taste: Severance S2 (Apple TV+, 2025), Andor S2 (Disney+, 2025), Foundation S3 (Apple TV+), Pluribus (Apple TV+, 2025 — alien invasion twist), The Eternaut (Netflix, Argentine sci-fi), Blade Runner 2099 (Amazon, 2026), Star Trek: Starfleet Academy (Paramount+, 2026), Alien: Earth (Hulu, 2025), Murderbot (Apple TV+), Silo (Apple TV+), The Three-Body Problem (Netflix — connects to Reading List). For All Mankind S5 drops March 2026. Data issues: Broken Lizard is a troupe, Slammin' Salmon is a film. Sources: t3.com, space.com, inverse.com, collider.com.",
+      "metadata": "Issues: (1) Missing content_stage field. (2) Missing dates object. (3) No platform column for most entries — only some have platform in parentheses. Should standardize as table format. (4) No watched/unwatched tracking. (5) No genre categorization. (6) Bullet point format is inconsistent with table format in Movies and Reading List. (7) Broken Lizard and Slammin Salmon are misclassified — not TV shows.",
+      "interlinking": [
+        "Entertainment Index (linked, correct)",
+        "Watchlist - Movies (linked, correct — should receive Broken Lizard/Slammin' Salmon)",
+        "Bucket List (linked, correct)",
+        "MISSING: Reading List — Three Body Problem Netflix adaptation is a direct connection",
+        "MISSING: Should absorb TV shows from Movies Also Recommended section"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-botmeetbot",
+      "file": "/home/turbobeest/vault/07-resources/technology/infrastructure/botmeetbot.com.md",
+      "title": "botmeetbot.com",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Concept note for a centralized registry where knowledge graph agents (beestgraph instances) create profiles, publish interest manifests, and discover peers with overlapping topics. Includes Meet the Parents double opt-in human introduction flow. Design document for a future protocol, not documentation of a running system.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources (or 05-projects if actively being built)",
+          "justification": "Currently resources which is correct if this is a reference concept. If actively building botmeetbot.com, should move to 05-projects. Fleeting content_stage suggests early-stage ideation."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "evergreen",
+          "justification": "Marked fleeting but the note is well-structured with Summary, How It Works, Design Principles, Future Direction, Connections. More developed than fleeting. This captures original thinking — evergreen is appropriate."
+        },
+        "tree": {
+          "current": "technology/infrastructure, technology/ai-ml",
+          "recommended": "technology/ai-ml (primary), technology/infrastructure (secondary)",
+          "justification": "Both topics are relevant. Primary focus is AI agent discovery and Herd Protocol (ai-ml), with infrastructure as supporting context. Dual-topic assignment is correct."
+        },
+        "atlas": {
+          "current": "concepts: Agent Discovery, Interest Matching, Herd Protocol, Meet the Parents; tools: botmeetbot.com, beestgraph",
+          "recommended": "Add ActivityPub and DHT to tools (mentioned as future transport options). Meet the Parents could be a concept entity note.",
+          "justification": "Entity tagging is thorough. Minor additions would capture all referenced technologies."
+        },
+        "graph": {
+          "current": "Links to The Herd Protocol, Building a Raspberry Pi Homelab, beestgraph",
+          "recommended": "Add links to ActivityPub notes, decentralized protocol notes, Telegram notes (mentioned as opt-in channel). Could link to AI mesh network architecture.",
+          "justification": "Connections are solid but could expand to include transport protocols and communication channels mentioned in the note."
+        }
+      },
+      "enrichment": "AI agent discovery has exploded in 2025-2026: (1) Google A2A protocol addresses inter-agent communication — similar goals to botmeetbot at enterprise scale. (2) ANP (Agent Networking Protocol) uses DID-based verifiable identities for agent discovery — directly relevant. (3) Anthropic MCP standardizes how agents use tools. (4) Virtuals Protocol: 18,000+ agents deployed, agent-to-agent commerce layer. The Meet the Parents human-in-the-loop concept differentiates botmeetbot from these largely autonomous protocols. Consider referencing A2A and ANP as related work. Sources: getstream.io, onereach.ai, theconversation.com.",
+      "metadata": "Most complete metadata in the batch — full dates object, entities, key_claims, connections, visibility, version. This is the target schema other files should adopt. Issues: (1) content_stage fleeting undersells maturity — should be evergreen. (2) source.url points to beestgraph GitHub, not botmeetbot-specific. (3) type: note could be type: concept.",
+      "interlinking": [
+        "The Herd Protocol (linked, correct)",
+        "Building a Raspberry Pi Homelab (linked, correct)",
+        "beestgraph (linked, correct)",
+        "MISSING: AI mesh architecture notes",
+        "MISSING: Telegram-related notes (Meet the Parents flow)",
+        "MISSING: External protocol references (A2A, ANP, MCP)"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-docker-networking",
+      "file": "/home/turbobeest/vault/07-resources/technology/infrastructure/docker-networking.md",
+      "title": "Understanding Docker Networking",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Reference article covering Docker network drivers (bridge, host, overlay, macvlan) with practical context for beestgraph stack. Explains how FalkorDB, web UIs, and bots communicate via Docker bridge networking. Operational knowledge for homelab infrastructure.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference article. Foundational knowledge, not an active project."
+        },
+        "zett": {
+          "current": "literature",
+          "recommended": "literature",
+          "justification": "Correct — synthesizes Docker official docs with practical application notes. Classic literature note."
+        },
+        "tree": {
+          "current": "technology/infrastructure",
+          "recommended": "technology/infrastructure/docker",
+          "justification": "More specific slug technology/infrastructure/docker exists in valid tree slugs and would be more precise. Also technology/infrastructure/networking is valid and relevant."
+        },
+        "atlas": {
+          "current": "concepts: Bridge Network, Host Network, Container Networking; tools: Docker, Docker Compose",
+          "recommended": "Add Overlay Network and Macvlan Network to concepts (both have dedicated sections). Add nftables and iptables as tools given Docker's transition.",
+          "justification": "Entity extraction covers main topics but misses overlay and macvlan which have dedicated sections."
+        },
+        "graph": {
+          "current": "Links to Building a Raspberry Pi Homelab, FalkorDB Python Client Tutorial, beestgraph",
+          "recommended": "Current connections are strong. Could add links to Tailscale (mentioned in host network section) and Docker Compose configuration notes.",
+          "justification": "Connections form a tight infrastructure cluster. Minor additions would capture all referenced tools."
+        }
+      },
+      "enrichment": "Docker networking updates 2025-2026: (1) Engine transitioning from iptables to nftables for bridge/overlay networks on Linux — directly relevant, should be added. (2) CVE-2025-54388 fixed container port exposure after firewalld reload. (3) Docker Desktop added Multi-Node Kubernetes integration. (4) 2026 roadmap demands better network isolation for AI/Wasm workloads. The iptables-to-nftables transition should be added to the note since it affects bridge networking. Sources: docs.docker.com, docker.com/blog, dohost.us.",
+      "metadata": "Uses full schema with dates, entities, key_claims, connections, version. Well-structured. Issues: (1) Missing visibility field (inconsistent with botmeetbot note). (2) Topics could be more specific: technology/infrastructure/docker. (3) Could add container-networking tag for specificity.",
+      "interlinking": [
+        "Building a Raspberry Pi Homelab (linked, correct)",
+        "FalkorDB Python Client Tutorial (linked, correct)",
+        "beestgraph (linked, correct)",
+        "MISSING: Tailscale notes (mentioned in host network section)",
+        "MISSING: Docker Compose configuration notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-raspberry-pi-homelab",
+      "file": "/home/turbobeest/vault/07-resources/technology/infrastructure/raspberry-pi-homelab.md",
+      "title": "Building a Raspberry Pi Homelab",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Guide to building a self-hosted homelab on Raspberry Pi 5 (16GB, NVMe SSD) with Docker, Tailscale, and Syncthing. Directly documents the infrastructure stack powering beestgraph. Both reference for the user's setup and a general guide.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct. Reference material about infrastructure setup, not active project deliverable."
+        },
+        "zett": {
+          "current": "literature",
+          "recommended": "literature",
+          "justification": "Correct — synthesizes source article with practical application. Classic literature note."
+        },
+        "tree": {
+          "current": "technology/infrastructure",
+          "recommended": "technology/infrastructure/homelab",
+          "justification": "More specific slug technology/infrastructure/homelab exists in valid tree slugs and is a perfect match. Current slug is too broad."
+        },
+        "atlas": {
+          "current": "concepts: Homelab, Self-hosting; organizations: Raspberry Pi Foundation; tools: Docker, Tailscale, Syncthing",
+          "recommended": "Add NVMe SSD, PCIe adapter to tools. Consider adding Pi-hole, Uptime Kuma, Portainer if user runs these. Add ARM64 as concept.",
+          "justification": "Entity extraction covers main software stack but misses hardware components load-bearing for the guide."
+        },
+        "graph": {
+          "current": "Links to Understanding Docker Networking, botmeetbot.com, FalkorDB Python Client Tutorial",
+          "recommended": "Strong connections. Add direct beestgraph link (mentioned in body but only implicit through sub-components). Add Syncthing and Tailscale notes if they exist.",
+          "justification": "Graph captures infrastructure cluster well. Adding direct beestgraph link would make project relationship explicit."
+        }
+      },
+      "enrichment": "Pi 5 homelab 2026: Popular stack now includes Portainer (~200MB RAM), Pi-hole (DNS/ad-blocking), Uptime Kuma (monitoring), WireGuard VPN. New: FalkorDBLite v0.9.0 (March 2026) offers embedded zero-config FalkorDB without Docker — could simplify dev workflows. Budget build: Pi 5 8GB setup ~$120. Key tip: keep services lightweight, Pi excels at always-on low-power (~5W) services. CRITICAL: source.url is 'https://example.com/pi-homelab' — placeholder, not a real source. Should be replaced. Sources: berkem.xyz, howtogeek.com, rpiserver.com.",
+      "metadata": "Uses full schema. Issues: (1) source.url is placeholder 'example.com/pi-homelab' — not a real source. (2) source.author is 'Pi Enthusiast' — also placeholder-like. (3) Missing visibility field. (4) Topics should use technology/infrastructure/homelab. (5) Tags are comprehensive (raspberry-pi, homelab, docker, tailscale, self-hosting).",
+      "interlinking": [
+        "Understanding Docker Networking (linked, correct)",
+        "botmeetbot.com (linked, correct)",
+        "FalkorDB Python Client Tutorial (linked, correct)",
+        "MISSING: Direct link to beestgraph (mentioned in body, not in connections)",
+        "MISSING: Tailscale-specific notes",
+        "MISSING: Syncthing-specific notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent4-falkordb-python-tutorial",
+      "file": "/home/turbobeest/vault/07-resources/technology/programming/falkordb-python-tutorial.md",
+      "title": "FalkorDB Python Client Tutorial",
+      "agent": "agent-4-entertainment",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Tutorial on FalkorDB Python client for graph database operations. Covers installation, connection, graph selection, and Cypher queries (CREATE, MATCH, MERGE, RETURN). References beestgraph's ingester module (src/pipeline/ingester.py) as real-world usage. Both general reference and project-specific documentation.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference tutorial. Operational knowledge, not active project deliverable."
+        },
+        "zett": {
+          "current": "literature",
+          "recommended": "literature",
+          "justification": "Correct — synthesizes official docs with practical application context. Well-structured literature note."
+        },
+        "tree": {
+          "current": "technology/programming",
+          "recommended": "technology/programming",
+          "justification": "Correct slug. Could additionally tag technology/ai-ml since FalkorDB is positioned as Knowledge Graph for LLM/GraphRAG, but programming is primary focus."
+        },
+        "atlas": {
+          "current": "tools: FalkorDB, Python, Cypher; concepts: Graph Database, Knowledge Graph",
+          "recommended": "Add Redis to tools (FalkorDB runs on Redis protocol, port 6379). Add MERGE as concept (highlighted as idempotent pattern used by beestgraph). Add GraphRAG as concept.",
+          "justification": "Entity extraction covers main tools but misses Redis (underlying protocol) and MERGE concept emphasized as beestgraph's primary operation."
+        },
+        "graph": {
+          "current": "Links to Building a Raspberry Pi Homelab, Understanding Docker Networking, Obsidian PKM Workflows, Knowledge Graph",
+          "recommended": "Strong connections. Add direct beestgraph link since 'How beestgraph Uses This' section explicitly references src/pipeline/ingester.py. Add Cypher query reference notes if they exist.",
+          "justification": "Note bridges infrastructure (Pi, Docker) with application (beestgraph, Obsidian). Direct beestgraph link warranted by explicit code reference."
+        }
+      },
+      "enrichment": "FalkorDB updates: Latest versions v1.6.0 (Feb 2026), v1.5.0, v1.4.0. Supports Python 3.10-3.14 and PyPy. Now has both sync and async operations. New: FalkorDBLite v0.9.0 (March 2026) — embedded, zero-config, no Docker needed, Python >=3.12. Tutorial code uses basic sync API which is still valid; async API could be mentioned for web/bot applications. FalkorDB positions itself as 'best Knowledge Graph for LLM (GraphRAG)' — aligns with beestgraph use case. Sources: github.com/FalkorDB, pypi.org, docs.falkordb.com.",
+      "metadata": "Uses full schema with dates, entities, key_claims, connections, version. Well-structured. Issues: (1) Missing visibility field. (2) Could add FalkorDB docs URL to source field (referenced in body). (3) Connection to Obsidian PKM Workflows is good cross-domain linking. (4) key_claims are accurate and verifiable.",
+      "interlinking": [
+        "Building a Raspberry Pi Homelab (linked, correct)",
+        "Understanding Docker Networking (linked, correct)",
+        "Obsidian PKM Workflows (linked, correct)",
+        "Knowledge Graph (linked, correct)",
+        "MISSING: Direct link to beestgraph (explicitly references src/pipeline/ingester.py)",
+        "MISSING: Redis notes if they exist (FalkorDB runs on Redis protocol)",
+        "MISSING: Cypher query reference notes"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-drinks-list",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Drinks List.md",
+      "title": "Drinks List",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Hub page for drink preferences — beer, wine, liquor, and cocktails. Serves as an index linking to individual cocktail recipes and related food pages.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference hub for drink preferences."
+        },
+        "zett": {
+          "current": "reference",
+          "recommended": "reference",
+          "justification": "Hub/index page with stable drink preferences and recipe links. Properly a reference note."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/alcohol",
+          "recommended": "eat-drink-merriment/alcohol",
+          "justification": "Correct top-level alcohol topic for a hub spanning beers, wine, liquor, and cocktails."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Recipes - Desserts, Naughty Food List, Restaurants - RI",
+          "recommended": "Current links good. Add Pina Colada Creme Brulee (alcohol-adjacent dessert using rum)",
+          "justification": "Pina colada creme brulee uses rum and bridges drinks and desserts."
+        }
+      },
+      "enrichment": "Wine and Liquor sections are empty. Shipyard Pumpkinhead Ale has 3.6/5 on Untappd with 156K+ ratings, a wheat ale with pumpkin spices. Wachusetts Blueberry is from Wachusetts Brewing in Westminster MA. Weihenstephaner is the worlds oldest brewery (founded 1040 AD) in Bavaria. Consider adding tasting notes or ABV for each beer. Cider Donut beers are a seasonal New England craft trend.",
+      "metadata": "Uses newer metadata format with dates object, content_stage, para, version — well structured. All fields present. Good model file.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Recipes - Desserts",
+        "Naughty Food List",
+        "Restaurants - RI",
+        "Boujee Lemonade",
+        "Lemon Coconut Ice Cream Cocktail",
+        "Brazilian Limeade",
+        "Souffle Espresso Martini",
+        "Pina Colada Creme Brulee"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-food-nutrition-list",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Food & Nutrition List.md",
+      "title": "Food & Nutrition List",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Master hub/index page for all food, nutrition, recipes, sourcing, and dining notes. Central navigation node for the entire eat-drink-merriment section of the vault.",
+      "categorization": {
+        "para": {
+          "current": "resources",
+          "recommended": "07-resources",
+          "justification": "Correct as the master reference hub for the food domain."
+        },
+        "zett": {
+          "current": "reference",
+          "recommended": "reference",
+          "justification": "Pure index/hub page — stable, evergreen reference structure."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/meals, eat-drink-merriment/nutrition",
+          "recommended": "eat-drink-merriment/meals, eat-drink-merriment/nutrition",
+          "justification": "Dual topic is appropriate for a hub spanning meals and nutrition."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file. This is a hub page."
+        },
+        "graph": {
+          "current": "links to all major sub-hubs: Recipes Meals/Desserts/Sauces, Blueprint, Diet, Good/Naughty Food, Drinks, Sourcing, Restaurants",
+          "recommended": "Current graph structure is excellent — comprehensive hub with all spokes connected. No additions needed.",
+          "justification": "Already serves as the complete central hub with links to all sub-pages."
+        }
+      },
+      "enrichment": "This hub is well-organized with clear sections. Consider adding a quick-reference section with meal prep tips or seasonal highlights. Hub could benefit from brief descriptions of each linked page. All sub-pages properly back-link here — good bidirectional linking.",
+      "metadata": "Uses newer metadata format with dates, content_stage, para, version — well structured. All fields present. Good model for other files to follow.",
+      "interlinking": [
+        "Recipes - Meals",
+        "Recipes - Desserts",
+        "Recipes - Sauces & Dips",
+        "Blueprint Protocol",
+        "Diet Menu",
+        "Good Food List",
+        "Naughty Food List",
+        "Drinks List",
+        "Food Sourcing",
+        "Restaurants - RI"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-food-sourcing",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Food Sourcing.md",
+      "title": "Food Sourcing",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Comprehensive directory of online food suppliers — general grocery delivery, premium protein farms, artisan cheese shops, and mail-order pie bakeries. A curated sourcing reference.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as stable reference material for ongoing purchasing decisions."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Mature well-organized reference directory with tables and links. Content is complete."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/dining",
+          "recommended": "eat-drink-merriment/dining",
+          "justification": "Dining is acceptable though this is more sourcing/shopping than dining out. Consider new slug if taxonomy expands."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file. Individual suppliers could become entity pages if desired."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Good Food List, Diet Menu, Blueprint Protocol",
+          "recommended": "Add link to Homemade Bacon (pork belly sourcing), Recipes - Meals (ingredient sourcing)",
+          "justification": "Protein suppliers directly serve the homemade bacon recipe and meal recipes."
+        }
+      },
+      "enrichment": "Thrive Market has 1.6M+ members and $700M+ annual sales (2025). They carry 2000+ organic items but dont offer refrigerated goods to all customers. Public Goods uses similar membership model. Rogue River Blue Cheese has won multiple World Cheese Awards. Consider adding price/subscription costs. Some links may need periodic verification.",
+      "metadata": "Uses older metadata format (created/updated flat fields). Missing content_stage, dates object, version. Has uid. Type is resource (not reference) — minor inconsistency.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Good Food List",
+        "Diet Menu",
+        "Blueprint Protocol",
+        "Homemade Bacon",
+        "Recipes - Meals"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-good-food-list",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Good Food List.md",
+      "title": "Good Food List",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Curated list of approved healthy foods — salmon, sauerkraut, spinach, blueberries, soups, and couscous. Acts as an aspirational grocery guide and health-food reference.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as stable reference material for healthy food choices."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Simple curated list — stable, evergreen reference content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/nutrition",
+          "recommended": "eat-drink-merriment/nutrition",
+          "justification": "Correct placement under nutrition."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Naughty Food List, Diet Menu, Blueprint Protocol, Food Sourcing",
+          "recommended": "Current links are comprehensive. Consider adding Recipes - Meals since many approved foods appear in recipes.",
+          "justification": "Cross-linking to recipes that use these ingredients adds practical value."
+        }
+      },
+      "enrichment": "Poppi prebiotic soda (listed) had an $8.9M lawsuit settlement in July 2025 over health claims — each can has only 2g prebiotics vs 4g+ research suggests for gut benefits. Still lower sugar (5g) vs regular soda (40g). Sauerkraut is a top probiotic food. Consider organizing by food category (proteins, veggies, grains, beverages). Tapioca pudding is unusual on a health list.",
+      "metadata": "Uses older metadata format. Missing content_stage, para, version, dates object. Has uid. Tags include reference overlapping with type field.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Naughty Food List",
+        "Diet Menu",
+        "Blueprint Protocol",
+        "Food Sourcing",
+        "Recipes - Meals"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-naughty-food-list",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Naughty Food List.md",
+      "title": "Naughty Food List",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Indulgence foods and guilty pleasures — ice cream, chocolate, sodas, and comfort food. The counterpart to Good Food List, tracking treats and cheat foods.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference material for indulgence tracking."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Simple curated list — stable reference content."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/nutrition",
+          "recommended": "eat-drink-merriment/nutrition",
+          "justification": "Correct under nutrition as a food-tracking reference."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Good Food List, Recipes - Desserts",
+          "recommended": "Add links to Drinks List (apple cider/sodas bridge), Viral Banana Bark and Ice Cream Bread (healthier indulgence alternatives)",
+          "justification": "Drinks items overlap with Drinks List. Healthier dessert recipes serve as alternatives."
+        }
+      },
+      "enrichment": "Ben and Jerrys Cherry Garcia and Mint Chip are listed — classic premium flavors. Sprechers Black Cherry is a craft soda from Milwaukee WI. Consider adding portion sizes or calorie counts. Comfort Food section (mozzarella/turkey/potato rolls/gravy) could link to Recipes - Meals for homemade versions. Tazo chai mix widely available at grocery stores.",
+      "metadata": "Uses older metadata format. Missing content_stage, para, version, dates object. Has uid.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Good Food List",
+        "Recipes - Desserts",
+        "Drinks List",
+        "Viral Banana Bark",
+        "Ice Cream Bread"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-all-docs",
+      "file": "00-meta/dashboards/Dashboard — All Documents.md",
+      "title": "Dashboard — All Documents",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:00Z",
+      "intent": "Master index of every markdown file in the vault. Serves as the top-level MOC (Map of Content) for browsing, sorting, and discovering documents regardless of PARA folder or topic.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as system-level vault infrastructure in 00-meta/dashboards."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "This is a permanent reference dashboard; it should carry content_stage: reference to distinguish it from content notes."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph",
+          "justification": "As vault infrastructure, this belongs under the meta/beestgraph topic tree."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC/dashboard type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as a Map of Content."
+        }
+      },
+      "enrichment": "Obsidian community best practices in 2026 recommend using LIMIT in dataview dashboards to prevent performance issues on large vaults. Consider adding a LIMIT 100 or pagination note. The Obsidian Bases plugin (successor to Dataview) is gaining traction and may eventually replace Dataview queries. Also consider adding a quality column to this master view for audit visibility.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates fields. The uid format is correct. Should add content_stage: reference, topics: [meta/beestgraph], and a brief summary describing its purpose.",
+      "interlinking": [
+        "Dashboard — By Topic",
+        "Dashboard — By Status",
+        "Dashboard — Recent Activity",
+        "Dashboard — Resources",
+        "Dashboard — Beestgraph Design"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-beestgraph-design",
+      "file": "00-meta/dashboards/Dashboard — Beestgraph Design.md",
+      "title": "Dashboard — Beestgraph Design",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:01Z",
+      "intent": "Focused MOC for beestgraph architecture and design documents. Scoped to 00-meta/beestgraph folder, showing type, quality, capture date, and summary of planning/design notes.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as vault system infrastructure."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "Permanent reference dashboard for beestgraph design docs."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph/architecture",
+          "justification": "This dashboard indexes beestgraph architecture and design documents specifically."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as a Map of Content."
+        }
+      },
+      "enrichment": "No novel external enrichment needed for this meta-dashboard. Consider adding a status filter to show draft vs. published design docs, and a column for version number to track document evolution.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates. Should add content_stage: reference, topics: [meta/beestgraph/architecture], and a brief summary.",
+      "interlinking": [
+        "Dashboard — All Documents",
+        "Dashboard — By Status",
+        "Dashboard — Resources"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-by-status",
+      "file": "00-meta/dashboards/Dashboard — By Status.md",
+      "title": "Dashboard — By Status",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:02Z",
+      "intent": "Groups all vault documents by their status field (draft, qualifying, published, etc.), providing a pipeline view of content maturity across the vault.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as vault system infrastructure."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "Permanent reference dashboard."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph",
+          "justification": "Vault-level system dashboard."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as MOC."
+        }
+      },
+      "enrichment": "Best practice from the Obsidian community: status-based dashboards benefit from color-coding or emoji indicators for visual scanning. Consider adding a count summary at the top showing how many documents are in each status bucket.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates. Should add content_stage: reference, topics: [meta/beestgraph], summary describing it as a status pipeline view.",
+      "interlinking": [
+        "Dashboard — All Documents",
+        "Dashboard — By Topic",
+        "Dashboard — Recent Activity"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-by-topic",
+      "file": "00-meta/dashboards/Dashboard — By Topic.md",
+      "title": "Dashboard — By Topic",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:03Z",
+      "intent": "Groups all vault documents by their primary topic (from the TREE taxonomy), giving a thematic overview of vault content distribution across the Johnny Decimal topic hierarchy.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as vault system infrastructure."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "Permanent reference dashboard."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph",
+          "justification": "Vault-level system dashboard."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as MOC."
+        }
+      },
+      "enrichment": "Consider adding a second-level grouping or companion dashboard that breaks topics into subtopics to identify topic coverage gaps.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates. Should add content_stage: reference, topics: [meta/beestgraph], summary describing it as a topic-grouped index.",
+      "interlinking": [
+        "Dashboard — All Documents",
+        "Dashboard — By Status",
+        "Dashboard — Resources"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-recent-activity",
+      "file": "00-meta/dashboards/Dashboard — Recent Activity.md",
+      "title": "Dashboard — Recent Activity",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:04Z",
+      "intent": "Shows the 20 most recently modified files in the vault, serving as a quick-glance activity feed to see what has changed recently.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as vault system infrastructure."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "Permanent reference dashboard."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph",
+          "justification": "Vault-level system dashboard."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as MOC."
+        }
+      },
+      "enrichment": "Consider increasing LIMIT from 20 to 30. The Obsidian Dashboard Navigator plugin (2026) provides clickable filtering. Also consider adding a file.mtime column to make the time dimension explicit.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates. Should add content_stage: reference, topics: [meta/beestgraph], summary describing it as a recent activity feed.",
+      "interlinking": [
+        "Dashboard — All Documents",
+        "Dashboard — By Status",
+        "Dashboard — By Topic"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-dashboard-resources",
+      "file": "00-meta/dashboards/Dashboard — Resources.md",
+      "title": "Dashboard — Resources",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:05Z",
+      "intent": "Focused MOC for the 07-resources folder, listing articles, tutorials, and reference material with their type, topic, quality score, and summary.",
+      "categorization": {
+        "para": {
+          "current": "00-meta",
+          "recommended": "00-meta",
+          "justification": "Correctly placed as vault system infrastructure indexing the resources folder."
+        },
+        "zett": {
+          "current": "none",
+          "recommended": "reference",
+          "justification": "Permanent reference dashboard."
+        },
+        "tree": {
+          "current": "none",
+          "recommended": "meta/beestgraph",
+          "justification": "Vault-level system dashboard."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. MOC type is correct."
+        },
+        "graph": {
+          "current": "type: moc",
+          "recommended": "type: moc",
+          "justification": "Correctly typed as MOC."
+        }
+      },
+      "enrichment": "Consider adding a status filter to differentiate published resources from drafts. Also consider adding a date_captured column to see which resources are newest.",
+      "metadata": "Missing content_stage, topics, summary, tags, and dates. Should add content_stage: reference, topics: [meta/beestgraph], summary describing it as a resources index.",
+      "interlinking": [
+        "Dashboard — All Documents",
+        "Dashboard — By Topic",
+        "Dashboard — By Status"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-notion-migration",
+      "file": "05-projects/Notion Migration Tracker.md",
+      "title": "Notion Migration Tracker",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:10Z",
+      "intent": "Project log tracking migration of pages from Notion to Obsidian. Documents which pages have been migrated, which are pending, and session notes. Active project with progress checkboxes.",
+      "categorization": {
+        "para": {
+          "current": "05-projects",
+          "recommended": "05-projects",
+          "justification": "Correctly placed as an active project with deliverables and progress tracking."
+        },
+        "zett": {
+          "current": "fleeting",
+          "recommended": "fleeting",
+          "justification": "Active working document that changes frequently. Fleeting is appropriate while migration is in progress."
+        },
+        "tree": {
+          "current": "meta/beestgraph",
+          "recommended": "meta/beestgraph",
+          "justification": "Correct -- about beestgraph vault infrastructure and migration."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Not an entity. Project log."
+        },
+        "graph": {
+          "current": "type: log",
+          "recommended": "type: log",
+          "justification": "Correctly typed."
+        }
+      },
+      "enrichment": "In 2026, the Obsidian Importer plugin and InfantLab/notion-to-obsidian provide automated Notion database migration. For the 87 untitled pages, batch review is correct -- most are likely empty database rows. Consider using Notion API to programmatically check which untitled pages have content.",
+      "metadata": "Good metadata overall. Status says draft in frontmatter but In Progress in body -- should be consistent. Missing summary field. Consider adding a completion percentage.",
+      "interlinking": [
+        "GH Links (migrated)",
+        "Camping List (migrated)",
+        "Entertainment (migrated)",
+        "Food (migrated)"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent2-production-test",
+      "file": "07-resources/meta/tools/production-test.md",
+      "title": "Production Smoke Test",
+      "agent": "agent-2-queue",
+      "timestamp": "2026-04-10T17:00:13Z",
+      "intent": "Documents end-to-end verification of beestgraph pipeline on production Raspberry Pi 5. Confirms inbox watcher, FalkorDB ingestion, Telegram bot, and Docker container health.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "00-meta/beestgraph",
+          "justification": "Beestgraph system verification document, not a general resource. Belongs in 00-meta/beestgraph/ as operational documentation."
+        },
+        "zett": {
+          "current": "reference",
+          "recommended": "reference",
+          "justification": "Correct -- reference record of a test run."
+        },
+        "tree": {
+          "current": "meta/tools",
+          "recommended": "meta/beestgraph",
+          "justification": "Specifically about beestgraph production readiness, not tools in general."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "N/A",
+          "justification": "Test verification document, not an entity."
+        },
+        "graph": {
+          "current": "type: note",
+          "recommended": "type: log",
+          "justification": "Documents a specific test event/result -- log type is more accurate."
+        }
+      },
+      "enrichment": "Best practice for production smoke tests: include timestamp, service versions tested, and metrics (ingestion time, node count before/after). Consider adding test_date field and making this a repeatable template for periodic testing.",
+      "metadata": "Source URL is generic beestgraph repo. Missing test_date or run_date field. Consider adding results section with metrics.",
+      "interlinking": [
+        "Building a Raspberry Pi Homelab (already linked)",
+        "FalkorDB Python Client Tutorial (already linked)",
+        "Understanding Docker Networking",
+        "beestgraph (entity)"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    },
+    {
+      "id": "agent3-restaurants-ri",
+      "file": "/home/turbobeest/vault/07-resources/eat-drink-merriment/Restaurants - RI.md",
+      "title": "Restaurants - RI",
+      "agent": "agent-3-food",
+      "timestamp": "2026-04-10T20:30:00Z",
+      "intent": "Restaurant recommendations in Rhode Island. Currently very sparse with only Chinese Tea House in Newport listed, plus a discovery tool link.",
+      "categorization": {
+        "para": {
+          "current": "07-resources",
+          "recommended": "07-resources",
+          "justification": "Correct as reference material for dining recommendations."
+        },
+        "zett": {
+          "current": "reference (via status field)",
+          "recommended": "reference",
+          "justification": "Reference page for restaurant tracking, though content is minimal."
+        },
+        "tree": {
+          "current": "eat-drink-merriment/dining/restaurants",
+          "recommended": "eat-drink-merriment/dining/restaurants",
+          "justification": "Correctly placed under dining/restaurants."
+        },
+        "atlas": {
+          "current": "none",
+          "recommended": "not applicable",
+          "justification": "Not an entity file."
+        },
+        "graph": {
+          "current": "links to Food & Nutrition List, Drinks List, Good Food List",
+          "recommended": "Add link to Diet Menu (healthy restaurant ordering), Food Sourcing (some suppliers also have retail)",
+          "justification": "Cross-linking to diet guidance helps with restaurant ordering choices."
+        }
+      },
+      "enrichment": "Chinese Tea House at Marble House in Newport is run by Stoneacre Brasserie. Prix fixe $65/person for bottomless tea, cocktail, entree, and tea tower. Open Thu-Sun 10AM-3:30PM. Must purchase Marble House ticket or be Preservation Society member. Very sparse page — consider adding more RI restaurants. Map of the Best (mapofthebest.com) is useful discovery tool already linked.",
+      "metadata": "Uses older metadata format. Missing content_stage, dates object, version. Has uid. Type is resource (not reference) — minor inconsistency.",
+      "interlinking": [
+        "Food & Nutrition List",
+        "Drinks List",
+        "Good Food List",
+        "Diet Menu",
+        "Food Sourcing"
+      ],
+      "status": "pending",
+      "defer_note": ""
+    }
+  ]
+}

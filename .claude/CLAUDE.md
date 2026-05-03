@@ -66,9 +66,30 @@ Raspberry Pi 5 at 192.168.1.12 (Tailscale: 100.74.63.55).
 
 ## Key Document Locations
 
+    docs/RESUME.md                                 ← session handoff (codeword: bzzz)
     docs/planning/beestgraph-integration-plan.md   ← READ THIS FIRST
     docs/planning/beestgraph-as-built.md           ← current state
     docs/planning/beestgraph-addendum.md           ← architectural decisions
     docs/planning/beestgraph-template.md           ← frontmatter spec
     docs/planning/beestgraph-active-vault-integration.md  ← implementation detail
     docs/planning/beestgraph-architecture.md       ← original design
+
+## Recent additions (2026-05-03)
+
+**Talk-to-Claude per-entry terminals** — wiki, audit, and review pages each
+have a `>_ Talk to Claude` button that opens a floating, draggable terminal
+running a real Claude Code session focused on that one entry. See:
+
+- Skill:        `.claude/skills/wiki-curator/SKILL.md`
+- Launchers:    `scripts/{wiki,audit,review}-claude`
+- WS bridge:    `src/wterm/server.py` (systemd: `beestgraph-wterm.service`)
+- Caddy proxy:  `/etc/caddy/Caddyfile` (`/wterm` and `/healthz/wterm` → :3002)
+- Web widget:   `src/web/public/talk-to-claude.{css,js}`
+
+All three launchers use `--dangerously-skip-permissions`, Opus 4.7, and
+auto-fire an assessment-and-questions opener via positional prompt.
+
+Pending: align widget styling with the claude.ai design system at
+`/mnt/walnut-drive/dev/walnut-LAN/switch/dashboard-design/` (NFS share
+inaccessible until NAS ACL is fixed). Next-up CLI work: `bg
+{audit,wiki,queue,curate}` subcommands for agent autonomy.

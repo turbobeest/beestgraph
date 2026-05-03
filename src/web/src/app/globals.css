@@ -16,3 +16,8 @@
 .cytoscape-container canvas {
   outline: none;
 }
+
+/* Hide horizontal scrollbar on the top nav (WebKit) — nav is swipe-scrollable on mobile */
+.bg-nav::-webkit-scrollbar {
+  display: none;
+}

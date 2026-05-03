@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="beestgraph">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/talk-to-claude.css">
+  <script src="/talk-to-claude.js" defer></script>
+  <title>beestgraph review</title>
+  <script src="https://unpkg.com/marked@14/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #101418; color: #c8ccd1;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; height: 36px; display: flex;
+      align-items: center; z-index: 150; background: rgba(6,10,19,0.95);
+      border-bottom: 1px solid rgba(100,116,139,0.15); backdrop-filter: blur(12px); }
+    nav .brand { padding: 0 16px; font-size: 13px; font-weight: 700; color: #f1f5f9;
+      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex;
+      align-items: center; }
+    nav a { padding: 0 14px; height: 100%; display: flex; align-items: center;
+      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px;
+      text-transform: uppercase; }
+    nav a.active { color: #10b981; border-bottom: 2px solid #10b981; }
+    nav a:hover { color: #94a3b8; }
+
+    .container { max-width: 960px; margin: 56px auto 40px; padding: 0 20px; }
+    h1 { font-size: 22px; font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    /* Stats bar */
+    .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 4px;
+      padding: 10px 16px; min-width: 100px; }
+    .stat .num { font-size: 24px; font-weight: 700; color: #f1f5f9; }
+    .stat .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: #64748b; margin-top: 2px; }
+    .stat.qualifying .num { color: #fbbf24; }
+    .stat.draft .num { color: #f87171; }
+    .stat.other .num { color: #94a3b8; }
+
+    /* Filter bar */
+    .filters { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 3px;
+      padding: 5px 12px; font-size: 11px; color: #8b949e; cursor: pointer; }
+    .filter-btn:hover { background: #1f2830; color: #c8ccd1; }
+    .filter-btn.active { background: #1a3352; border-color: #2a5090; color: #60a5fa; }
+
+    /* Cards */
+    .card { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 4px;
+      margin-bottom: 10px; overflow: hidden; transition: border-color 0.2s; }
+    .card:hover { border-color: #3a4149; }
+    .card-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+      cursor: pointer; user-select: none; }
+    .card-title { flex: 1; font-size: 14px; font-weight: 600; color: #e3e3e3; }
+    .card-badges { display: flex; gap: 6px; align-items: center; }
+    .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .badge.qualifying { background: #3a2e1a; color: #fbbf24; }
+    .badge.draft { background: #3b1c1c; color: #f87171; }
+    .badge.inbox { background: #1a2e4a; color: #60a5fa; }
+    .badge.actionable { background: #1a3a2a; color: #34d399; }
+    .card-link { font-size: 10px; color: #6b9edd; text-decoration: none; padding: 2px 6px;
+      border: 1px solid #2a3a5a; border-radius: 3px; }
+    .card-link:hover { background: #1a2e4a; color: #8ab4f8; }
+
+    .card-body { display: none; padding: 0 16px 16px; }
+    .card.expanded .card-body { display: block; }
+
+    /* Classification bar inside card */
+    .class-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      margin-bottom: 12px; }
+    .class-cell { background: #14181d; border: 1px solid #22272d; border-radius: 3px;
+      padding: 6px 8px; }
+    .class-cell .cl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+      font-weight: 700; margin-bottom: 2px; }
+    .class-cell .cv { font-size: 12px; color: #c8ccd1; }
+    .class-cell .cv.unset { color: #54606d; font-style: italic; font-size: 11px; }
+    .class-cell .pill { display: inline-block; padding: 1px 7px; border-radius: 9px;
+      font-size: 10px; font-weight: 600; }
+    .class-cell.para .cl { color: #60a5fa; }
+    .class-cell.para .pill { background: #1a2e4a; color: #60a5fa; }
+    .class-cell.zett .cl { color: #34d399; }
+    .class-cell.zett .pill { background: #1a3a2a; color: #34d399; }
+    .class-cell.tree .cl { color: #fbbf24; }
+    .class-cell.tree .pill { background: #3a2e1a; color: #fbbf24; }
+    .class-cell.atlas .cl { color: #c084fc; }
+    .class-cell.atlas .pill { background: #2e1a3a; color: #c084fc; }
+
+    /* Suggestions panel */
+    .suggestions { background: #14181d; border: 1px solid #22272d; border-radius: 3px;
+      padding: 12px; margin-bottom: 12px; }
+    .suggestions-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #64748b; font-weight: 700; margin-bottom: 8px; }
+    .suggestion-row { display: flex; align-items: flex-start; margin-bottom: 6px; gap: 8px; }
+    .suggestion-row:last-child { margin-bottom: 0; }
+    .suggestion-label { width: 100px; min-width: 100px; font-size: 11px; color: #8b949e;
+      font-weight: 600; padding-top: 1px; }
+    .suggestion-value { font-size: 12px; color: #c8ccd1; flex: 1; }
+    .suggestion-value .pill { display: inline-block; padding: 1px 8px; border-radius: 9px;
+      font-size: 10px; font-weight: 600; }
+    .suggestion-value .pill.type { background: #1a2e4a; color: #60a5fa; }
+    .suggestion-value .pill.topic { background: #3a2e1a; color: #fbbf24; }
+    .suggestion-value .pill.tag { background: #1f2830; color: #8b949e; border: 1px solid #2a2f36; margin: 1px 2px; }
+    .suggestion-value .pill.quality { background: #1a3a2a; color: #34d399; }
+    .suggestion-value .pill.quality.low { background: #3b1c1c; color: #f87171; }
+    .suggestion-value .pill.quality.medium { background: #2e2a1a; color: #fbbf24; }
+
+    /* Footer */
+    .footer { max-width: 960px; margin: 20px auto 40px; padding: 16px 20px;
+      border-top: 1px solid #2a2f36; text-align: center; font-size: 11px; color: #3a4149; }
+    .footer a { color: #54606d; text-decoration: none; }
+    .footer a:hover { color: #8b949e; }
+
+    /* Meta row */
+    .meta-row { font-size: 11px; color: #64748b; margin-bottom: 10px; }
+    .meta-row span { margin-right: 16px; }
+    .meta-row .tag { display: inline-block; background: #1f2830; border: 1px solid #2a2f36;
+      border-radius: 2px; padding: 0 5px; font-size: 10px; color: #8b949e; margin: 1px 2px; }
+
+    /* Content preview */
+    .preview { background: #14181d; border: 1px solid #22272d; border-radius: 3px;
+      padding: 14px; max-height: 400px; overflow-y: auto; margin-bottom: 12px;
+      font-size: 13px; line-height: 1.6; }
+    .preview h1, .preview h2, .preview h3 { color: #e3e3e3; margin: 12px 0 6px; }
+    .preview h1 { font-size: 18px; border-bottom: 1px solid #2a2f36; padding-bottom: 4px; }
+    .preview h2 { font-size: 16px; border-bottom: 1px solid #2a2f36; padding-bottom: 2px; }
+    .preview h3 { font-size: 14px; }
+    .preview p { margin: 4px 0 8px; }
+    .preview ul, .preview ol { padding-left: 24px; margin: 4px 0; }
+    .preview code { background: #1a1e24; padding: 1px 4px; border-radius: 2px; font-size: 12px; }
+    .preview pre { background: #161a1f; border: 1px solid #2a2f36; padding: 10px;
+      overflow-x: auto; margin: 8px 0; border-radius: 2px; }
+    .preview pre code { background: none; padding: 0; }
+    .preview blockquote { border-left: 3px solid #3366cc; padding: 6px 12px;
+      background: #161a1f; color: #a0a8b4; margin: 8px 0; font-style: italic; }
+    .preview a { color: #6b9edd; }
+    .preview strong { color: #d4d8dd; }
+    .preview img { max-width: 100%; }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 3px;
+      padding: 6px 16px; font-size: 12px; color: #8b949e; cursor: pointer; }
+    .btn:hover { background: #1f2830; color: #c8ccd1; }
+    .btn.approve { background: #1a3a2a; border-color: #2a5a3a; color: #34d399; }
+    .btn.approve:hover { background: #1f4a34; }
+    .btn.edit { background: #1a3352; border-color: #2a5090; color: #60a5fa; }
+    .btn.edit:hover { background: #1f3d66; }
+    .btn.delete { background: #3b1c1c; border-color: #5c2828; color: #f87171; }
+    .btn.delete:hover { background: #4a2222; color: #f85149; }
+    .btn.defer { background: #2e2a1a; border-color: #4a3a2a; color: #fbbf24; }
+    .btn.defer:hover { background: #3a3420; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .action-status { font-size: 11px; color: #64748b; margin-left: 8px; }
+
+    /* Defer input */
+    .defer-input { display: none; margin-top: 8px; }
+    .defer-input.visible { display: flex; gap: 8px; align-items: center; }
+    .defer-input input { flex: 1; background: #14181d; border: 1px solid #2a2f36;
+      border-radius: 3px; padding: 6px 10px; color: #c8ccd1; font-size: 12px; outline: none; }
+    .defer-input input:focus { border-color: #fbbf24; }
+
+    /* Delete confirmation */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 300; display: flex; align-items: center; justify-content: center; }
+    .modal { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 4px;
+      padding: 24px; max-width: 420px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .modal h3 { font-size: 16px; color: #e3e3e3; margin-bottom: 8px; }
+    .modal p { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.5; }
+    .modal code { background: #14181d; padding: 2px 6px; border-radius: 2px; font-size: 12px; color: #c8ccd1; }
+    .modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* Fade out */
+    .card.fading { opacity: 0; transform: translateY(-10px); transition: all 0.4s; }
+
+    .empty { text-align: center; padding: 60px 20px; color: #54606d; }
+    .empty h2 { font-size: 20px; color: #6b7785; margin-bottom: 8px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #14181d; }
+    ::-webkit-scrollbar-thumb { background: #2a2f36; border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      nav::-webkit-scrollbar { display: none; }
+      nav .brand { padding: 0 12px; flex-shrink: 0; }
+      nav a { padding: 0 10px; flex-shrink: 0; font-size: 9px; }
+      nav a[style*="margin-left:auto"] { margin-left: 0 !important; }
+
+      .container { margin: 50px auto 30px; padding: 0 12px; }
+      h1 { font-size: 18px; }
+      .subtitle { font-size: 11px; margin-bottom: 14px; }
+
+      .stats { gap: 8px; }
+      .stat { flex: 1 1 calc(50% - 4px); min-width: 0; padding: 8px 12px; }
+      .stat .num { font-size: 20px; }
+
+      .filters { gap: 5px; }
+      .filter-btn { flex: 1 1 calc(50% - 3px); padding: 7px 10px; font-size: 11px; }
+
+      .card-header { flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+      .card-title { font-size: 13px; flex: 1 1 100%; min-width: 0; }
+      .card-badges { flex-wrap: wrap; }
+
+      .card.expanded .card-body { padding: 0 12px 12px; }
+
+      .class-bar { grid-template-columns: repeat(2, 1fr); }
+
+      .suggestions { padding: 10px; }
+      .suggestion-row { flex-direction: column; gap: 2px; }
+      .suggestion-label { width: 100%; min-width: 0; font-size: 10px;
+        text-transform: uppercase; letter-spacing: 1px; }
+
+      .preview { padding: 12px; max-height: 300px; }
+
+      .actions { gap: 6px; }
+      .actions .btn { flex: 1 1 calc(50% - 3px); padding: 8px 10px; font-size: 12px; min-width: 0; }
+      .action-status { width: 100%; margin-left: 0; margin-top: 4px; }
+
+      .defer-input.visible { flex-direction: column; gap: 6px; align-items: stretch; }
+      .defer-input input { width: 100%; }
+      .defer-input .btn { width: 100%; }
+
+      .modal { padding: 18px; }
+      .modal h3 { font-size: 15px; }
+      .modal-actions { flex-direction: column; gap: 6px; }
+      .modal-actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">beestgraph</div>
+    <a href="/graph3d.html" target="_blank">3D Graph</a>
+    <a href="/wiki.html" target="_blank">Wiki</a>
+    <a href="/dashboard.html" target="_blank">Dashboard</a>
+    <a href="/queue" target="_blank">Queue</a>
+    <a href="/org.html" target="_blank" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15)">Org</a>
+    <a href="/audit.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#f59e0b">Audit</a>
+    <a href="/review.html" class="active" style="border-left:1px solid rgba(100,116,139,0.15);color:#10b981">Review</a>
+    <a href="/wiki.html#help" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
+  </nav>
+
+  <div class="container">
+    <h1>Content Review</h1>
+    <div class="subtitle">New and qualifying entries awaiting human review. Approve, edit, delete, or defer each item.</div>
+
+    <div class="stats" id="stats"></div>
+    <div class="filters" id="filters"></div>
+    <div id="cards"></div>
+  </div>
+
+  <div class="footer">
+    <a href="/dashboard.html" target="_blank">Dashboard</a> &middot;
+    <a href="/wiki.html" target="_blank">Wiki</a> &middot;
+    <a href="/audit.html" target="_blank">Audit</a> &middot;
+    <a href="/graph3d.html" target="_blank">3D Graph</a> &middot;
+    <a href="/org.html" target="_blank">Org</a>
+    <div style="margin-top:6px">beestgraph &mdash; human review queue</div>
+  </div>
+
+  <script>
+    let items = [];
+    let orgTree = null;
+    let activeFilter = 'all';
+
+    async function init() {
+      const [reviewData, orgData] = await Promise.all([
+        fetch('/api/review').then(r => r.json()),
+        fetch('/api/org').then(r => r.json()).catch(() => null),
+      ]);
+      items = reviewData.items || [];
+      orgTree = orgData && orgData.areas ? orgData : null;
+
+      // Deep-link support: ?path=foo/bar.md
+      const params = new URLSearchParams(location.search);
+      const targetPath = params.get('path');
+
+      renderStats();
+      renderFilters();
+      renderCards();
+
+      if (targetPath) {
+        const card = document.querySelector(`[data-path="${CSS.escape(targetPath)}"]`);
+        if (card) {
+          card.classList.add('expanded');
+          setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        }
+      }
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function renderStats() {
+      const qualifying = items.filter(i => i.status === 'qualifying').length;
+      const draft = items.filter(i => i.status === 'draft').length;
+      const other = items.length - qualifying - draft;
+      document.getElementById('stats').innerHTML = `
+        <div class="stat"><div class="num">${items.length}</div><div class="label">Total</div></div>
+        <div class="stat qualifying"><div class="num">${qualifying}</div><div class="label">Qualifying</div></div>
+        <div class="stat draft"><div class="num">${draft}</div><div class="label">Draft</div></div>
+        ${other > 0 ? `<div class="stat other"><div class="num">${other}</div><div class="label">Other</div></div>` : ''}
+      `;
+    }
+
+    function renderFilters() {
+      const statuses = [...new Set(items.map(i => i.status))].sort();
+      let html = `<button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">All (${items.length})</button>`;
+      statuses.forEach(s => {
+        const count = items.filter(i => i.status === s).length;
+        html += `<button class="filter-btn ${activeFilter === s ? 'active' : ''}" onclick="setFilter('${s}')">${esc(s)} (${count})</button>`;
+      });
+      document.getElementById('filters').innerHTML = html;
+    }
+
+    function setFilter(f) {
+      activeFilter = f;
+      renderFilters();
+      renderCards();
+    }
+
+    function resolveTopicName(slug) {
+      if (!orgTree || !orgTree.areas) return slug;
+      for (const area of orgTree.areas) {
+        if (area.slug === slug) return area.id + ' ' + area.name;
+        for (const cat of (area.categories || [])) {
+          if (cat.slug === slug) return area.id + '.' + cat.id + ' ' + cat.name;
+          for (const sub of (cat.subs || [])) {
+            if (sub.slug === slug) return area.id + '.' + cat.id + '.' + sub.id + ' ' + sub.name;
+          }
+        }
+      }
+      return slug;
+    }
+
+    function renderCards() {
+      const filtered = activeFilter === 'all' ? items : items.filter(i => i.status === activeFilter);
+
+      if (filtered.length === 0) {
+        document.getElementById('cards').innerHTML = `<div class="empty"><h2>All clear</h2><p>No entries need review.</p></div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(item => {
+        const wikiPath = item.path;
+        const paraLabels = { projects: 'Projects', areas: 'Areas', resources: 'Resources', archive: 'Archive' };
+        const zettLabels = { fleeting: 'Fleeting', literature: 'Literature', evergreen: 'Evergreen', reference: 'Reference' };
+        const paraDisplay = paraLabels[item.para] || item.para || '';
+        const zettDisplay = zettLabels[item.content_stage] || item.content_stage || '';
+        const topics = item.topics || [];
+        const treePills = topics.map(t => `<span class="pill">${esc(resolveTopicName(t))}</span>`).join(' ');
+        let atlasType = '';
+        const eMatch = item.path.match(/^entities\/([^/]+)\//);
+        if (eMatch) atlasType = eMatch[1].charAt(0).toUpperCase() + eMatch[1].slice(1);
+
+        const tags = (item.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join(' ');
+        const modified = new Date(item.modified).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        // Render markdown body
+        let rendered = '';
+        try { rendered = marked.parse(item.body || ''); } catch { rendered = esc(item.body || ''); }
+
+        // Build AI suggestions panel
+        const hasRecs = item.recommended_type || item.recommended_topic ||
+          (item.recommended_tags && item.recommended_tags.length) ||
+          item.recommended_quality || item.recommended_summary;
+        let suggestHtml = '';
+        if (hasRecs) {
+          suggestHtml = `<div class="suggestions">
+            <div class="suggestions-title">AI Categorization Suggestions</div>`;
+          if (item.recommended_type) {
+            suggestHtml += `<div class="suggestion-row">
+              <span class="suggestion-label">Type</span>
+              <span class="suggestion-value"><span class="pill type">${esc(item.recommended_type)}</span></span>
+            </div>`;
+          }
+          if (item.recommended_topic) {
+            suggestHtml += `<div class="suggestion-row">
+              <span class="suggestion-label">Topic</span>
+              <span class="suggestion-value"><span class="pill topic">${esc(resolveTopicName(item.recommended_topic))}</span> <span style="font-size:10px;color:#54606d">${esc(item.recommended_topic)}</span></span>
+            </div>`;
+          }
+          if (item.recommended_tags && item.recommended_tags.length) {
+            suggestHtml += `<div class="suggestion-row">
+              <span class="suggestion-label">Tags</span>
+              <span class="suggestion-value">${item.recommended_tags.map(t => `<span class="pill tag">${esc(t)}</span>`).join(' ')}</span>
+            </div>`;
+          }
+          if (item.recommended_quality) {
+            const qclass = item.recommended_quality === 'low' ? ' low' : item.recommended_quality === 'medium' ? ' medium' : '';
+            suggestHtml += `<div class="suggestion-row">
+              <span class="suggestion-label">Quality</span>
+              <span class="suggestion-value"><span class="pill quality${qclass}">${esc(item.recommended_quality)}</span></span>
+            </div>`;
+          }
+          if (item.recommended_summary) {
+            suggestHtml += `<div class="suggestion-row">
+              <span class="suggestion-label">Summary</span>
+              <span class="suggestion-value" style="font-size:11px;color:#a0a8b4;font-style:italic">${esc(item.recommended_summary)}</span>
+            </div>`;
+          }
+          suggestHtml += `</div>`;
+        }
+
+        html += `<div class="card" data-path="${esc(item.path)}">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <span class="card-title">${esc(item.title)}</span>
+            <span class="badge ${item.status}">${esc(item.status)}</span>
+            <a href="/wiki.html?path=${encodeURIComponent(wikiPath)}#${encodeURIComponent(wikiPath)}" target="_blank" onclick="event.stopPropagation()" class="card-link">wiki</a>
+            <a href="/graph3d.html?node=${encodeURIComponent(item.title)}" target="_blank" onclick="event.stopPropagation()" class="card-link">3D</a>
+          </div>
+          <div class="card-body">
+            <div class="class-bar">
+              <div class="class-cell para">
+                <div class="cl">PARA</div>
+                <div class="cv${paraDisplay ? '' : ' unset'}">${paraDisplay ? `<span class="pill">${esc(paraDisplay)}</span>` : 'Not set'}</div>
+              </div>
+              <div class="class-cell zett">
+                <div class="cl">Zettelkasten</div>
+                <div class="cv${zettDisplay ? '' : ' unset'}">${zettDisplay ? `<span class="pill">${esc(zettDisplay)}</span>` : 'Not set'}</div>
+              </div>
+              <div class="class-cell tree">
+                <div class="cl">Topic Tree</div>
+                <div class="cv${treePills ? '' : ' unset'}">${treePills || 'Untagged'}</div>
+              </div>
+              <div class="class-cell atlas">
+                <div class="cl">Atlas</div>
+                <div class="cv${atlasType ? '' : ' unset'}">${atlasType ? `<span class="pill">${esc(atlasType)}</span>` : 'N/A'}</div>
+              </div>
+            </div>
+
+            ${suggestHtml}
+
+            <div class="meta-row">
+              ${item.summary ? `<span><strong>Summary:</strong> ${esc(item.summary)}</span><br>` : ''}
+              <span><strong>Path:</strong> ${esc(item.path)}</span>
+              <span><strong>Modified:</strong> ${modified}</span>
+              ${item.source_type ? `<span><strong>Source:</strong> ${esc(item.source_type)}</span>` : ''}
+              ${tags ? `<br>${tags}` : ''}
+            </div>
+
+            <div class="preview">${rendered}</div>
+
+            <div class="actions">
+              <button class="btn tt-trigger" onclick="talkAboutItem('${esc(item.path)}', '${esc(item.title)}')" title="Open a Claude Code session to refine this entry">&gt;_ Talk to Claude</button>
+              <button class="btn approve" onclick="doApprove('${esc(item.path)}', this)">Approve</button>
+              <button class="btn edit" onclick="window.open('/wiki.html?path=${encodeURIComponent(wikiPath)}#${encodeURIComponent(wikiPath)}', '_blank')">Edit in Wiki</button>
+              <button class="btn defer" onclick="toggleDefer(this)">Defer</button>
+              <button class="btn delete" onclick="confirmDelete('${esc(item.path)}', '${esc(item.title)}')">Delete</button>
+              <span class="action-status"></span>
+            </div>
+            <div class="defer-input">
+              <input type="text" placeholder="Reason for deferring..." onkeydown="if(event.key==='Enter') submitDefer('${esc(item.path)}', this)">
+              <button class="btn defer" onclick="submitDefer('${esc(item.path)}', this.previousElementSibling)">Save</button>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      document.getElementById('cards').innerHTML = html;
+    }
+
+    function talkAboutItem(vaultPath, title) {
+      const fileName = vaultPath.split('/').pop() || vaultPath;
+      window.TalkToClaude.open({
+        mode: 'review',
+        target: vaultPath,
+        label: 'Review — ' + (title || fileName),
+        sublabel: vaultPath,
+      });
+    }
+
+    async function doApprove(filePath, btn) {
+      btn.disabled = true;
+      const status = btn.closest('.actions').querySelector('.action-status');
+      status.textContent = 'Approving...';
+
+      try {
+        const res = await fetch('/api/review', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath, action: 'approve' }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          status.textContent = 'Approved!';
+          status.style.color = '#34d399';
+          // Fade and remove
+          const card = btn.closest('.card');
+          setTimeout(() => {
+            card.classList.add('fading');
+            setTimeout(() => {
+              items = items.filter(i => i.path !== filePath);
+              renderStats();
+              renderFilters();
+              card.remove();
+              if (items.length === 0 || (activeFilter !== 'all' && items.filter(i => i.status === activeFilter).length === 0)) {
+                renderCards();
+              }
+            }, 400);
+          }, 600);
+        } else {
+          status.textContent = data.error || 'Failed';
+          status.style.color = '#f87171';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+        status.style.color = '#f87171';
+        btn.disabled = false;
+      }
+    }
+
+    function toggleDefer(btn) {
+      const deferInput = btn.closest('.card-body').querySelector('.defer-input');
+      deferInput.classList.toggle('visible');
+      if (deferInput.classList.contains('visible')) {
+        deferInput.querySelector('input').focus();
+      }
+    }
+
+    async function submitDefer(filePath, input) {
+      const note = input.value.trim();
+      if (!note) { input.focus(); return; }
+
+      const status = input.closest('.card-body').querySelector('.action-status');
+      status.textContent = 'Deferring...';
+
+      try {
+        const res = await fetch('/api/review', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath, action: 'defer', note }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          status.textContent = 'Deferred: ' + note;
+          status.style.color = '#fbbf24';
+          input.closest('.defer-input').classList.remove('visible');
+        } else {
+          status.textContent = data.error || 'Failed';
+          status.style.color = '#f87171';
+        }
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+        status.style.color = '#f87171';
+      }
+    }
+
+    function confirmDelete(filePath, title) {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `<div class="modal">
+        <h3>Delete entry?</h3>
+        <p>This will move <code>${esc(title)}</code> to the vault trash. This can be undone by restoring from <code>.trash/</code>.</p>
+        <div class="modal-actions">
+          <button class="btn" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button class="btn delete" onclick="doDelete('${esc(filePath)}', this)">Delete</button>
+        </div>
+      </div>`;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    }
+
+    async function doDelete(filePath, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        const res = await fetch('/api/wiki', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.closest('.modal-overlay').remove();
+          const card = document.querySelector(`[data-path="${CSS.escape(filePath)}"]`);
+          if (card) {
+            card.classList.add('fading');
+            setTimeout(() => {
+              items = items.filter(i => i.path !== filePath);
+              renderStats();
+              renderFilters();
+              card.remove();
+              if (items.length === 0) renderCards();
+            }, 400);
+          }
+        } else {
+          btn.textContent = data.error || 'Failed';
+        }
+      } catch (e) {
+        btn.textContent = 'Error';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

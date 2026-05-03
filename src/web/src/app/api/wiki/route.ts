@@ -34,18 +34,44 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   let body = raw;
   if (fmMatch) {
     try {
-      // Simple YAML parse for display (key: value lines)
+      // Simple YAML parse for display (key: value lines + array items)
       const fmLines = fmMatch[1]!.split("\n");
       const fm: Record<string, unknown> = {};
+      let currentArrayKey: string | null = null;
+      let currentArray: string[] = [];
       for (const line of fmLines) {
+        // Check for array item (indented "- value")
+        const arrayItem = line.match(/^\s*-\s+(.+)/);
+        if (arrayItem && currentArrayKey) {
+          currentArray.push(arrayItem[1]!.replace(/^["']|["']$/g, "").trim());
+          continue;
+        }
+        // Flush previous array if we hit a non-array line
+        if (currentArrayKey) {
+          fm[currentArrayKey] = currentArray;
+          currentArrayKey = null;
+          currentArray = [];
+        }
         const match = line.match(/^(\w[\w\s-]*?):\s*(.*)$/);
         if (match && !line.startsWith("  ") && !line.startsWith("#")) {
-          let val: unknown = match[2]!.replace(/^["']|["']$/g, "");
+          const key = match[1]!.trim();
+          const rawVal = match[2]!.replace(/^["']|["']$/g, "");
+          // If value is empty, this might be an array header (e.g. "topics:")
+          if (rawVal === "") {
+            currentArrayKey = key;
+            currentArray = [];
+            continue;
+          }
+          let val: unknown = rawVal;
           if (val === "true") val = true;
           else if (val === "false") val = false;
           else if (!isNaN(Number(val)) && val !== "") val = Number(val);
-          fm[match[1]!.trim()] = val;
+          fm[key] = val;
         }
+      }
+      // Flush trailing array
+      if (currentArrayKey) {
+        fm[currentArrayKey] = currentArray;
       }
       frontmatter = fm;
     } catch { /* ignore parse errors */ }
@@ -114,7 +140,11 @@ function findBacklinks(
 }
 
 function listPages(): NextResponse {
-  const pages: Array<{ title: string; path: string; folder: string }> = [];
+  const pages: Array<{
+    title: string; path: string; folder: string;
+    content_stage?: string; topics?: string[]; para?: string;
+    type?: string; status?: string;
+  }> = [];
 
   function scan(dir: string, depth = 0) {
     if (depth > 4) return;
@@ -131,10 +161,30 @@ function listPages(): NextResponse {
           const rel = path.relative(VAULT_PATH, full);
           const content = fs.readFileSync(full, "utf-8");
           const titleMatch = content.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+          const stageMatch = content.match(/^content_stage:\s*["']?(.+?)["']?\s*$/m);
+          const paraMatch = content.match(/^para:\s*["']?(.+?)["']?\s*$/m);
+          const typeMatch = content.match(/^type:\s*["']?(.+?)["']?\s*$/m);
+          const statusMatch = content.match(/^status:\s*["']?(.+?)["']?\s*$/m);
+
+          // Parse topics array from frontmatter
+          const topics: string[] = [];
+          const topicsBlock = content.match(/^topics:\s*\n((?:(?!---)\s*-\s*.+\n?)*)/m);
+          if (topicsBlock?.[1]) {
+            for (const line of topicsBlock[1].split("\n")) {
+              const item = line.match(/^\s*-\s*(.+)/);
+              if (item?.[1]) topics.push(item[1].replace(/^["']|["']$/g, "").trim());
+            }
+          }
+
           pages.push({
             title: titleMatch?.[1] ?? path.basename(full, ".md"),
             path: rel,
             folder: path.dirname(rel),
+            content_stage: stageMatch?.[1] ?? undefined,
+            topics: topics.length > 0 ? topics : undefined,
+            para: paraMatch?.[1] ?? undefined,
+            type: typeMatch?.[1] ?? undefined,
+            status: statusMatch?.[1] ?? undefined,
           });
         }
       }

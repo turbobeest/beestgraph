@@ -108,11 +108,15 @@
 <body>
   <nav>
     <div class="brand">beestgraph</div>
-    <a href="/graph3d.html">3D Graph</a>
-    <a href="/wiki.html">Wiki</a>
+    <a href="/graph3d.html" target="_blank">3D Graph</a>
+    <a href="/wiki.html" target="_blank">Wiki</a>
     <a href="/dashboard.html" class="active">Dashboard</a>
-    <a href="/queue">Queue</a>
-    <div style="margin-left:auto;display:flex;align-items:center;height:100%">
+    <a href="/queue" target="_blank">Queue</a>
+    <a href="/org.html" target="_blank" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15)">Org</a>
+    <a href="/audit.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#f59e0b">Audit</a>
+    <a href="/review.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#10b981">Review</a>
+    <a href="/wiki.html#help" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
+    <div style="display:flex;align-items:center;height:100%">
       <a href="https://obsidian.md" target="_blank" style="font-size:9px;letter-spacing:0.3px">Obsidian</a>
       <a href="https://keep.md" target="_blank" style="font-size:9px;letter-spacing:0.3px">keep.md</a>
       <a href="https://github.com/turbobeest/beestgraph" target="_blank" style="font-size:9px;letter-spacing:0.3px">GitHub</a>
@@ -295,7 +299,7 @@
       return `
         <div class="entry" onclick="this.classList.toggle('expanded')">
           <div class="entry-header">
-            <div class="entry-title">${wikiPath ? `<a href="/wiki.html#${wikiPath}" onclick="event.stopPropagation()">${esc(d.title || 'Untitled')}</a>` : esc(d.title || 'Untitled')}</div>
+            <div class="entry-title">${wikiPath ? `<a href="/wiki.html#${wikiPath}" target="_blank" onclick="event.stopPropagation()">${esc(d.title || 'Untitled')}</a>` : esc(d.title || 'Untitled')}</div>
             <div class="entry-badges">
               ${d.status ? `<span class="badge ${statusClass}">${esc(d.status)}</span>` : ''}
               ${d.sourceType ? `<span class="badge badge-source">${esc(sourceLabel[d.sourceType] || d.sourceType)}</span>` : ''}
@@ -306,7 +310,7 @@
           <div class="entry-meta">
             ${date ? `<span>${date}</span>` : ''}
             ${d.paraCategory ? `<span>${esc(d.paraCategory)}</span>` : ''}
-            ${wikiPath ? `<a href="/wiki.html#${wikiPath}" onclick="event.stopPropagation()">Open in Wiki</a>` : ''}
+            ${wikiPath ? `<a href="/wiki.html#${wikiPath}" target="_blank" onclick="event.stopPropagation()">Open in Wiki</a>` : ''}
           </div>
           <div class="entry-detail">
             <div class="detail-row"><span class="detail-label">Path</span><span class="detail-value">${esc(d.path)}</span></div>

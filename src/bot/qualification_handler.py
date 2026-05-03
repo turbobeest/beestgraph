@@ -104,20 +104,28 @@ def _format_qualification_message(
     visibility = notification.get("recommended_visibility", "private")
     content_type = _escape_md(notification.get("recommended_type", "note"))
     topic = _escape_md(notification.get("recommended_topic", ""))
-    filename = notification.get("filename", "")
+    summary = _escape_md(notification.get("recommended_summary", ""))
 
-    # Generate slug from filename
-    slug = filename.replace(".md", "").replace(" ", "-").lower()
-    review_url = f"{web_base_url}/queue/{slug}"
+    # Build review page deep-link using vault_path (preferred) or filename fallback
+    vault_path = notification.get("vault_path", "")
+    if not vault_path:
+        filename = notification.get("filename", "")
+        vault_path = f"02-queue/{filename}" if filename else ""
+
+    from urllib.parse import quote
+    review_url = f"{web_base_url}/review\\.html?path={quote(vault_path, safe='')}"
 
     vis_icon = "\U0001f513" if visibility == "public" else "\U0001f512"
 
-    return (
-        f"\U0001f4e5 {title}\n"
-        f"{vis_icon} {_escape_md(visibility)} \u00b7 "
-        f"{content_type} \u00b7 {topic}\n"
-        f"[Review]({review_url})"
-    )
+    lines = [
+        f"\U0001f4e5 *{title}*",
+        f"{vis_icon} {_escape_md(visibility)} \u00b7 {content_type} \u00b7 {topic}",
+    ]
+    if summary:
+        lines.append(f"_{summary[:120]}_")
+    lines.append(f"[Open Review]({review_url})")
+
+    return "\n".join(lines)
 
 
 def _format_updated_message(
@@ -138,18 +146,22 @@ def _format_updated_message(
     visibility = notification.get("recommended_visibility", "private")
     content_type = _escape_md(notification.get("recommended_type", "note"))
     topic = _escape_md(notification.get("recommended_topic", ""))
-    filename = notification.get("filename", "")
 
-    slug = filename.replace(".md", "").replace(" ", "-").lower()
-    review_url = f"{web_base_url}/queue/{slug}"
+    vault_path = notification.get("vault_path", "")
+    if not vault_path:
+        filename = notification.get("filename", "")
+        vault_path = f"02-queue/{filename}" if filename else ""
+
+    from urllib.parse import quote
+    review_url = f"{web_base_url}/review\\.html?path={quote(vault_path, safe='')}"
 
     vis_icon = "\U0001f513" if visibility == "public" else "\U0001f512"
 
     return (
-        f"\u270f\ufe0f {title}\n"
+        f"\u270f\ufe0f *{title}*\n"
         f"{vis_icon} {_escape_md(visibility)} \u00b7 "
         f"{content_type} \u00b7 {topic}\n"
-        f"[Review]({review_url})"
+        f"[Open Review]({review_url})"
     )
 
 
