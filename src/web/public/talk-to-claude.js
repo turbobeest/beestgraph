@@ -137,7 +137,7 @@
     try {
       await loadDeps();
       if (!ghosttyCore) {
-        ghosttyCore = await window.GhosttyCore.load();
+        ghosttyCore = await window.GhosttyCore.load({ scrollbackLimit: 500 });
       }
     } catch (e) {
       setStatus('failed to load wterm: ' + (e && e.message ? e.message : e), 'error');
