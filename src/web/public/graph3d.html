@@ -194,10 +194,14 @@
   <nav id="graph-nav" style="position:fixed;top:0;left:0;right:0;height:36px;display:flex;align-items:center;z-index:150;background:rgba(6,10,19,0.9);border-bottom:1px solid rgba(100,116,139,0.15);backdrop-filter:blur(12px)">
     <div style="padding:0 16px;font-size:13px;font-weight:700;color:#f1f5f9;border-right:1px solid rgba(100,116,139,0.15);height:100%;display:flex;align-items:center">beestgraph</div>
     <a href="/graph3d.html" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#60a5fa;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;border-bottom:2px solid #3b82f6">3D Graph</a>
-    <a href="/wiki.html" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Wiki</a>
-    <a href="/dashboard.html" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Dashboard</a>
-    <a href="/queue" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Queue</a>
-    <div style="margin-left:auto;display:flex;align-items:center;height:100%">
+    <a href="/wiki.html" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Wiki</a>
+    <a href="/dashboard.html" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Dashboard</a>
+    <a href="/queue" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase">Queue</a>
+    <a href="/org.html" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#64748b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;margin-left:auto;border-left:1px solid rgba(100,116,139,0.15)">Org</a>
+    <a href="/audit.html" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#f59e0b;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;border-left:1px solid rgba(100,116,139,0.15)">Audit</a>
+    <a href="/review.html" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#10b981;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;border-left:1px solid rgba(100,116,139,0.15)">Review</a>
+    <a href="/wiki.html#help" target="_blank" style="padding:0 14px;height:100%;display:flex;align-items:center;color:#6b9edd;text-decoration:none;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;border-left:1px solid rgba(100,116,139,0.15)">Help</a>
+    <div style="display:flex;align-items:center;height:100%">
       <a href="https://en.wikipedia.org/wiki/Knowledge_graph" target="_blank" style="padding:0 10px;height:100%;display:flex;align-items:center;gap:4px;color:#64748b;text-decoration:none;font-size:9px;letter-spacing:0.3px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         Wikipedia
@@ -1197,7 +1201,7 @@
       const wikiName = encodeURIComponent((props.title || props.name || title).replace(/ /g, '_'));
       html += `<div style="display:flex;gap:8px;margin-bottom:8px;font-size:10px;flex-wrap:wrap">`;
       if (wikiPath) {
-        html += `<a href="/wiki.html#${wikiPath}" style="color:#60a5fa;text-decoration:none;display:flex;align-items:center;gap:3px">`;
+        html += `<a href="/wiki.html#${wikiPath}" target="_blank" style="color:#60a5fa;text-decoration:none;display:flex;align-items:center;gap:3px">`;
         html += `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
         html += `Open in Wiki</a>`;
       }
@@ -1377,7 +1381,21 @@
       if (e.key === 'Escape') closeDetail();
     });
 
-    init().catch(err => {
+    init().then(() => {
+      // Support ?node=Title to auto-focus a node from external links
+      const params = new URLSearchParams(window.location.search);
+      const nodeParam = params.get('node');
+      if (nodeParam) {
+        const match = graphData.nodes.find(n =>
+          n.display_name === nodeParam ||
+          (n.display_name || '').toLowerCase() === nodeParam.toLowerCase() ||
+          n.id === nodeParam
+        );
+        if (match) {
+          setTimeout(() => focusNode(match.id), 500);
+        }
+      }
+    }).catch(err => {
       console.error('Init failed:', err);
       document.getElementById('loading').innerHTML =
         `<div style="color:#ef4444;font-size:12px">Failed to load: ${err.message}</div>`;

@@ -1,0 +1,53 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/Recipes - Meals.md
+
+## Title
+Recipes - Meals
+
+## Recommendation Summary
+
+### Intent Assessment
+Index hub for savory meal recipes — pizza, hashbrowns, bacon, bread, dip, pancakes, and dough. Organizes all main dish recipe links.
+
+### Categorization Changes
+- **ZETT**: "reference (via status field)" → "reference" (Pure index/hub page — stable reference.)
+- **GRAPH**: "links to Food & Nutrition List, Recipes - Desserts, Recipes - Sauces & Dips, Diet Menu, Good Food List, Food Sourcing" → "Current links are excellent and comprehensive. Well-connected hub." (Already has extensive cross-links.)
+
+### Metadata Issues
+Uses older metadata format. Missing content_stage, para, version, dates object. Has uid.
+
+### Suggested Interlinks
+- [[Food & Nutrition List]]
+- [[Recipes - Desserts]]
+- [[Recipes - Sauces & Dips]]
+- [[Diet Menu]]
+- [[Good Food List]]
+- [[Food Sourcing]]
+- [[Chicago Pizza Oven Grinder]]
+- [[Potato Hashbrown Casserole]]
+- [[Rosemary Pull-Apart Mozzarella Bread]]
+- [[Homemade Bacon]]
+- [[Dirty Martini Dip]]
+- [[Japanese Pancakes]]
+- [[Pizza Dough]]
+
+### Enrichment
+Collection has 7 savory recipes spanning comfort food (casserole, bacon) to artisan (pull-apart bread, Japanese pancakes). Dirty Martini Dip categorized under Meals but really a sauce/dip — consider moving to Sauces & Dips. Japanese Pancakes should also be tagged as breakfast. Consider adding difficulty ratings or cuisine type in the index.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

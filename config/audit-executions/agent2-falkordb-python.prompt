@@ -1,0 +1,48 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/technology/programming/falkordb-python-tutorial.md
+
+## Title
+FalkorDB Python Client Tutorial
+
+## Recommendation Summary
+
+### Intent Assessment
+Tutorial on FalkorDB Python client covering installation, connection, graph operations, and Cypher queries. Core technical reference for beestgraph graph database layer.
+
+### Categorization Changes
+- **ZETT**: "literature" → "evergreen" (Contains original insight about how beestgraph uses FalkorDB with specific file paths. Qualifies as evergreen.)
+- **TREE**: "technology/programming" → "technology/programming/tooling" (FalkorDB is a programming tool/library. technology/programming/tooling is more precise.)
+- **ATLAS**: "none" → "N/A" (FalkorDB should have a tool entity page. This tutorial is a resource.)
+
+### Metadata Issues
+Good metadata with entities, key_claims, connections, source URLs. All fields well-populated. Version 2. Source points to actual falkordb-py GitHub repo.
+
+### Suggested Interlinks
+- [[Building a Raspberry Pi Homelab (already linked)]]
+- [[Understanding Docker Networking (already linked)]]
+- [[Obsidian PKM Workflows (already linked)]]
+- [[Knowledge Graph (entity)]]
+- [[Cypher (entity)]]
+- [[beestgraph (entity)]]
+- [[Production Smoke Test]]
+
+### Enrichment
+FalkorDB released FalkorDBLite in 2026 -- embedded zero-config Python graph database (pip install falkordblite), no Redis needed. Could simplify beestgraph dev/testing. Python client updated Feb 2026, supports 3.10-3.14. Async operations via falkordb.asyncio with connection pooling. FalkorDB positions as best Knowledge Graph for LLM (GraphRAG) using GraphBLAS.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

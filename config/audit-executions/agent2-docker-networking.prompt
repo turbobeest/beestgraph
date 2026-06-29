@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/technology/infrastructure/docker-networking.md
+
+## Title
+Understanding Docker Networking
+
+## Recommendation Summary
+
+### Intent Assessment
+Overview article explaining Docker network drivers (bridge, host, overlay, macvlan) with beestgraph-specific usage notes.
+
+### Categorization Changes
+- **TREE**: "technology/infrastructure" → "technology/infrastructure/docker" (Topic tree has dedicated technology/infrastructure/docker slug.)
+- **ATLAS**: "none" → "N/A" (Not an entity. Docker should have a tool entity page.)
+
+### Metadata Issues
+Good metadata with entities, key_claims, connections. Source points to official Docker docs. All fields well-populated. Version 2.
+
+### Suggested Interlinks
+- [[Building a Raspberry Pi Homelab (already linked)]]
+- [[FalkorDB Python Client Tutorial (already linked)]]
+- [[beestgraph (already linked)]]
+- [[Docker (entity)]]
+- [[Tailscale (entity)]]
+
+### Enrichment
+In 2026, custom bridge networks provide automatic DNS-based container discovery. IEEE benchmarks: bridge at 20-35 Gbps, 15-50us latency. Cilium 1.20.0 uses eBPF for container networking without kernel modules. IPvlan is now a common macvlan alternative for homelabs.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

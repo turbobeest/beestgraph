@@ -1,0 +1,48 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/technology/infrastructure/botmeetbot.com.md
+
+## Title
+botmeetbot.com
+
+## Recommendation Summary
+
+### Intent Assessment
+Concept document for botmeetbot.com, a centralized registry for beestgraph-style knowledge graph agent discovery via interest matching and human introductions. Part of The Herd Protocol.
+
+### Categorization Changes
+- **PARA**: "07-resources" → "05-projects or 00-meta/beestgraph" (Active concept/design document for a beestgraph sub-project, not a passive resource.)
+- **ZETT**: "fleeting" → "evergreen" (Contains original thinking and design principles. Has evolved beyond fleeting into personal insight/design document.)
+- **TREE**: "technology/infrastructure, technology/ai-ml" → "technology/ai-ml/agents" (Primary topic is AI agent discovery. technology/ai-ml/agents is the most specific match.)
+- **ATLAS**: "none" → "N/A" (Could become a tool entity if built. Currently a concept/design note.)
+- **GRAPH**: "type: note" → "type: article" (Structured design document with sections, not a quick note.)
+
+### Metadata Issues
+Has visibility: private which is good. Content_stage says fleeting but content is well-developed -- should be upgraded. Source URL is generic.
+
+### Suggested Interlinks
+- [[The Herd Protocol (already linked)]]
+- [[Building a Raspberry Pi Homelab (already linked)]]
+- [[beestgraph (entity)]]
+- [[ActivityPub (if entity exists)]]
+- [[Tailscale (if entity exists)]]
+
+### Enrichment
+Agent discovery has exploded in 2026. Google A2A protocol lets agents publish capability manifests. Agent Network Protocol (ANP) handles secure cross-network discovery using DID standards. Agent Discovery Protocol (agentdiscovery.io) focuses on AI agent commerce. Daily active on-chain AI agents crossed 250k in early 2026. botmeetbot Meet the Parents human-in-the-loop concept remains differentiated from purely autonomous approaches.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

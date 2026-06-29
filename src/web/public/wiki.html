@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="beestgraph">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/talk-to-claude.css">
+  <script src="/talk-to-claude.js" defer></script>
   <title>beestgraph wiki</title>
   <script src="https://unpkg.com/marked@14/marked.min.js"></script>
   <style>
@@ -37,6 +45,16 @@
       outline: none; margin-top: 8px; font-family: -apple-system, 'Segoe UI', sans-serif; }
     .sidebar input:focus { border-color: #3366cc; box-shadow: 0 0 0 1px rgba(51,102,204,0.3); }
     #page-list { padding: 6px 0; }
+
+    /* View toggle tabs */
+    .view-tabs { display: flex; margin-top: 8px; gap: 0; border: 1px solid #2a2f36; border-radius: 3px; overflow: hidden; }
+    .view-tab { flex: 1; padding: 5px 0; text-align: center; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase; color: #54606d; cursor: pointer;
+      background: #14181d; border-right: 1px solid #2a2f36; transition: all 0.15s;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .view-tab:last-child { border-right: none; }
+    .view-tab:hover { color: #8b949e; background: #1a1e24; }
+    .view-tab.active { color: #60a5fa; background: #1a2636; }
 
     /* Tree structure */
     .tree-node { user-select: none; }
@@ -228,6 +246,36 @@
       display: flex; gap: 8px; align-items: center; }
     .organize-status { font-size: 12px; color: #8b949e; margin-left: 12px; }
 
+    /* ─── Classification bar (PARA/ZETT/TREE/ATLAS) ─── */
+    .class-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin: 10px 0 14px; font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .class-cell { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 3px;
+      padding: 8px 10px; }
+    .class-cell .class-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      font-weight: 700; margin-bottom: 4px; }
+    .class-cell .class-value { font-size: 13px; font-weight: 500; color: #c8ccd1; }
+    .class-cell .class-value .class-pill { display: inline-block; padding: 1px 8px;
+      border-radius: 10px; font-size: 11px; font-weight: 600; margin: 1px 2px 1px 0; }
+    .class-cell .class-sub { font-size: 10px; color: #54606d; margin-top: 2px; }
+    /* PARA colors */
+    .class-cell.para .class-label { color: #60a5fa; }
+    .class-cell.para .class-pill { background: #1a2e4a; color: #60a5fa; border: 1px solid #2a4a7a; }
+    /* ZETT colors */
+    .class-cell.zett .class-label { color: #34d399; }
+    .class-cell.zett .class-pill { background: #1a3a2a; color: #34d399; border: 1px solid #2a5a3a; }
+    /* TREE colors */
+    .class-cell.tree .class-label { color: #fbbf24; }
+    .class-cell.tree .class-pill { background: #3a2e1a; color: #fbbf24; border: 1px solid #5a4a2a; }
+    /* ATLAS colors */
+    .class-cell.atlas .class-label { color: #c084fc; }
+    .class-cell.atlas .class-pill { background: #2e1a3a; color: #c084fc; border: 1px solid #4a2a5a; }
+    .class-cell .class-value.unset { color: #54606d; font-style: italic; font-size: 11px; }
+
+    /* Collapsible schema toggle */
+    .schema-toggle { font-size: 11px; color: #54606d; cursor: pointer; margin: 0 0 8px;
+      font-family: -apple-system, 'Segoe UI', sans-serif; display: block; text-align: right; }
+    .schema-toggle:hover { color: #8b949e; text-decoration: underline; }
+
     /* Categories (bottom of article) */
     .categories { margin-top: 24px; padding-top: 12px; border-top: 1px solid #2a2f36;
       font-size: 12px; font-family: -apple-system, 'Segoe UI', sans-serif; }
@@ -245,23 +293,77 @@
     ::-webkit-scrollbar-track { background: #14181d; }
     ::-webkit-scrollbar-thumb { background: #2a2f36; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #3a4149; }
+
+    /* Talk-to-Claude widget styles live in /talk-to-claude.css */
+    .tab.tab-terminal { color: #34d399; }
+    .tab.tab-terminal:hover { color: #6ee7b7; }
+
+    /* Mobile drawer infrastructure (hidden on desktop) */
+    .nav-toggle { display: none; background: none; border: none; color: #94a3b8;
+      font-size: 18px; padding: 0 14px; height: 100%; cursor: pointer;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+    .nav-toggle:hover { color: #e2e8f0; }
+    .nav-backdrop { display: none; position: fixed; top: 36px; left: 0; right: 0;
+      bottom: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .nav-backdrop.open { display: block; }
+
+    @media (max-width: 768px) {
+      nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      nav::-webkit-scrollbar { display: none; }
+      nav .brand { padding: 0 12px; flex-shrink: 0; }
+      nav a { padding: 0 10px; flex-shrink: 0; font-size: 9px; }
+      nav a[style*="margin-left:auto"] { margin-left: 0 !important; }
+      .nav-toggle { display: flex; align-items: center; flex-shrink: 0; }
+
+      .layout { flex-direction: column; height: auto; min-height: calc(100vh - 36px); }
+
+      .sidebar { position: fixed; top: 36px; left: 0; bottom: 0;
+        width: 280px; max-width: 82vw; min-width: 0;
+        transform: translateX(-100%); transition: transform 0.25s ease;
+        z-index: 100; box-shadow: 0 0 0 transparent; }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+
+      .content { padding: 16px 14px 60px; flex: none; }
+      .article-title { font-size: 22px; line-height: 1.25; }
+
+      .infobox { float: none; width: 100%; margin: 12px 0; }
+      .infobox-label { width: 90px; min-width: 90px; }
+
+      .toc { display: block; min-width: 0; max-width: 100%; }
+
+      .backlinks { width: 100%; min-width: 0; border-left: none;
+        border-top: 1px solid #2a2f36; }
+      .backlinks-section { padding: 12px 14px; }
+    }
   </style>
 </head>
 <body>
   <nav>
+    <button class="nav-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">&#9776;</button>
     <div class="brand">beestgraph</div>
-    <a href="/graph3d.html">3D Graph</a>
+    <a href="/graph3d.html" target="_blank">3D Graph</a>
     <a href="/wiki.html" class="active">Wiki</a>
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/queue">Queue</a>
-    <a href="/wiki.html#help" onclick="event.preventDefault();showHelp()" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
+    <a href="/dashboard.html" target="_blank">Dashboard</a>
+    <a href="/queue" target="_blank">Queue</a>
+    <a href="/org.html" target="_blank" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Org</a>
+    <a href="/audit.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#f59e0b">Audit</a>
+    <a href="/review.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#10b981">Review</a>
+    <a href="/wiki.html#help" onclick="event.preventDefault();showHelp()" style="border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
   </nav>
+
+  <div class="nav-backdrop" onclick="closeSidebar()"></div>
 
   <div class="layout">
     <div class="sidebar">
       <div class="sidebar-header">
         <h2>Contents</h2>
         <input type="text" id="page-search" placeholder="Search pages...">
+        <div class="view-tabs">
+          <div class="view-tab active" data-view="folders" onclick="setView('folders')">PARA</div>
+          <div class="view-tab" data-view="stage" onclick="setView('stage')">ZETT</div>
+          <div class="view-tab" data-view="topics" onclick="setView('topics')">TREE</div>
+          <div class="view-tab" data-view="entities" onclick="setView('entities')">ATLAS</div>
+        </div>
       </div>
       <div id="page-list"></div>
     </div>
@@ -290,21 +392,35 @@
 
   <script>
     let allPages = [];
+    let allFolders = [];
+    let orgTree = null;
     let currentPath = '';
     let editing = false;
+    let currentView = localStorage.getItem('wiki-view') || 'folders';
 
     // ─── Init ─────────────────────────────────────────────────
     async function init() {
-      const data = await fetch('/api/wiki').then(r => r.json());
+      const [data, fdata, odata] = await Promise.all([
+        fetch('/api/wiki').then(r => r.json()),
+        fetch('/api/wiki/folders').then(r => r.json()),
+        fetch('/api/org').then(r => r.json()).catch(() => null),
+      ]);
       allPages = data.pages || [];
-      renderPageList(allPages);
+      allFolders = fdata.folders || [];
+      orgTree = odata && odata.areas ? odata : null;
+      applyView(allPages);
+
+      // Restore saved view tab
+      document.querySelectorAll('.view-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.view === currentView);
+      });
 
       document.getElementById('page-search').addEventListener('input', e => {
         const q = e.target.value.toLowerCase();
         const filtered = allPages.filter(p =>
           p.title.toLowerCase().includes(q) || p.path.toLowerCase().includes(q)
         );
-        renderPageList(filtered);
+        applyView(filtered);
       });
 
       if (location.hash) {
@@ -327,18 +443,33 @@
     function toggleFolder(key) {
       openFolders[key] = !openFolders[key];
       saveOpenFolders();
-      renderPageList(_lastRenderedPages || allPages);
+      applyView(_lastRenderedPages || allPages);
     }
 
     let _lastRenderedPages = null;
 
     function renderPageList(pages) {
-      _lastRenderedPages = pages;
       const list = document.getElementById('page-list');
 
       // Build a nested tree structure from paths
       const root = { _files: [], _subs: {} };
+
+      // Pre-populate with all filesystem folders so empties still appear
+      // Skip 'entities' — that's ATLAS territory
+      allFolders.forEach(f => {
+        if (f === 'entities' || f.startsWith('entities/')) return;
+        const parts = f.split('/').filter(Boolean);
+        let node = root;
+        parts.forEach(part => {
+          if (!node._subs[part]) node._subs[part] = { _files: [], _subs: {} };
+          node = node._subs[part];
+        });
+      });
+
+      const PARA_HIDDEN = new Set(['heartbeat.md', 'identity.md', 'index.md', 'log.md']);
       pages.forEach(p => {
+        if (p.folder === 'entities' || (p.folder || '').startsWith('entities/')) return;
+        if ((p.folder === '.' || !p.folder) && PARA_HIDDEN.has(p.path)) return;
         const parts = (p.folder || '').split('/').filter(Boolean);
         let node = root;
         parts.forEach(part => {
@@ -401,11 +532,366 @@
       list.innerHTML = renderNode(root, '', 0);
     }
 
+    // ─── View: By Stage (Zettelkasten) ─────────────────────────
+    const STAGE_ORDER = ['fleeting', 'literature', 'evergreen', 'reference', 'uncategorized'];
+    const STAGE_LABELS = {
+      fleeting: 'Fleeting', literature: 'Literature',
+      evergreen: 'Evergreen', reference: 'Reference',
+      uncategorized: 'Uncategorized'
+    };
+
+    function renderByStage(pages) {
+      const list = document.getElementById('page-list');
+      const groups = {};
+      STAGE_ORDER.forEach(s => groups[s] = []);
+
+      pages.forEach(p => {
+        const stage = p.content_stage || 'uncategorized';
+        if (!groups[stage]) groups[stage] = [];
+        groups[stage].push(p);
+      });
+
+      let html = '';
+      STAGE_ORDER.forEach(stage => {
+        const items = groups[stage];
+        if (!items || items.length === 0) return;
+        const key = 'stage:' + stage;
+        const isOpen = openFolders[key] === true;
+        const arrowClass = isOpen ? 'arrow open' : 'arrow';
+        const childClass = isOpen ? 'tree-children' : 'tree-children collapsed';
+
+        html += `<div class="tree-node">`;
+        html += `<div class="tree-folder" style="padding-left:8px" onclick="toggleFolder('${key}')">`;
+        html += `<span class="${arrowClass}">&#9654;</span>`;
+        html += `<span class="folder-name">${escapeHtml(STAGE_LABELS[stage] || stage)}</span>`;
+        html += `<span class="count">${items.length}</span>`;
+        html += `</div>`;
+        html += `<div class="${childClass}">`;
+        items.sort((a, b) => a.title.localeCompare(b.title));
+        items.forEach(p => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" style="padding-left:26px" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${escapeHtml(p.title)}</div>`;
+        });
+        html += `</div></div>`;
+      });
+
+      list.innerHTML = html || '<div style="padding:12px;color:#54606d;font-size:12px">No pages found</div>';
+    }
+
+    // ─── View: By Topic (Topic Trees) ──────────────────────────
+    // Uses orgTree (from /api/org) for JD-ordered hierarchy.
+    // Falls back to alphabetical grouping if orgTree unavailable.
+
+    function renderByTopic(pages) {
+      const list = document.getElementById('page-list');
+
+      // Index pages by topic slug for quick lookup
+      const pagesBySlug = {};  // slug -> [pages]
+      const untagged = [];
+      pages.forEach(p => {
+        const topics = p.topics || [];
+        if (topics.length === 0) {
+          // Hide infrastructure pages from untagged — they don't belong in TREE
+          if ((p.folder || '').startsWith('00-meta')) return;
+          untagged.push(p); return;
+        }
+        topics.forEach(t => {
+          if (!pagesBySlug[t]) pagesBySlug[t] = [];
+          pagesBySlug[t].push(p);
+        });
+      });
+
+      // Also index by area slug (pages tagged with just "entertainment" not "entertainment/film")
+      // and by partial matches (a page with topic "technology/web" matches area "technology")
+
+      function filesForSlug(slug) {
+        return pagesBySlug[slug] || [];
+      }
+
+      function filesForArea(areaSlug) {
+        // Pages tagged with just the area (e.g. topics: entertainment)
+        return pagesBySlug[areaSlug] || [];
+      }
+
+      function renderFiles(files, indent) {
+        const seen = new Set();
+        const unique = files.filter(p => { if (seen.has(p.path)) return false; seen.add(p.path); return true; });
+        unique.sort((a, b) => a.title.localeCompare(b.title));
+        let html = '';
+        unique.forEach(p => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" style="padding-left:${indent}px" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${escapeHtml(p.title)}</div>`;
+        });
+        return html;
+      }
+
+      // Count all files under a category (direct + recursive subs)
+      function countSubTree(node) {
+        let count = filesForSlug(node.slug).length;
+        (node.subs || []).forEach(sub => count += countSubTree(sub));
+        return count;
+      }
+      function catFileCount(cat) {
+        return countSubTree(cat);
+      }
+
+      // Count all files under an area
+      function areaFileCount(area) {
+        let count = filesForArea(area.slug).length;
+        area.categories.forEach(cat => count += catFileCount(cat));
+        return count;
+      }
+
+      if (!orgTree) {
+        // Fallback: alphabetical (old behavior)
+        list.innerHTML = '<div style="padding:12px;color:#54606d;font-size:12px">Org tree not loaded — showing alphabetical</div>';
+        return;
+      }
+
+      let html = '';
+      const jdNumStyle = 'color:#54606d;font-size:10px;margin-right:5px;font-family:monospace';
+
+      orgTree.areas.forEach(area => {
+        const areaCount = areaFileCount(area);
+        const areaKey = 'topic:' + area.slug;
+        const areaOpen = openFolders[areaKey] === true;
+
+        html += `<div class="tree-node">`;
+        html += `<div class="tree-folder" style="padding-left:8px" onclick="toggleFolder('${areaKey}')">`;
+        html += `<span class="${areaOpen ? 'arrow open' : 'arrow'}">&#9654;</span>`;
+        html += `<span style="${jdNumStyle}">${area.id}</span>`;
+        html += `<span class="folder-name">${escapeHtml(area.name)}</span>`;
+        html += `<span class="count">${areaCount}</span>`;
+        html += `</div>`;
+        html += `<div class="${areaOpen ? 'tree-children' : 'tree-children collapsed'}">`;
+
+        // Pages tagged with just the area slug (no category)
+        const areaDirectFiles = filesForArea(area.slug);
+        if (areaDirectFiles.length > 0) {
+          html += renderFiles(areaDirectFiles, 40);
+        }
+
+        area.categories.forEach(cat => {
+          const catCount = catFileCount(cat);
+          const catKey = 'topic:' + cat.slug;
+          const catOpen = openFolders[catKey] === true;
+
+          html += `<div class="tree-node">`;
+          html += `<div class="tree-folder" style="padding-left:22px" onclick="toggleFolder('${catKey}')">`;
+          html += `<span class="${catOpen ? 'arrow open' : 'arrow'}">&#9654;</span>`;
+          html += `<span style="${jdNumStyle}">${cat.id}</span>`;
+          html += `<span class="folder-name">${escapeHtml(cat.name)}</span>`;
+          html += `<span class="count">${catCount}</span>`;
+          html += `</div>`;
+          html += `<div class="${catOpen ? 'tree-children' : 'tree-children collapsed'}">`;
+
+          // Pages tagged directly with this category
+          const catFiles = filesForSlug(cat.slug);
+          if (catFiles.length > 0) {
+            html += renderFiles(catFiles, 54);
+          }
+
+          // Recursive subcategories with JD numbering
+          function renderSubs(subs, parentJd, baseIndent) {
+            let h = '';
+            (subs || []).forEach(sub => {
+              const subJd = parentJd + '.' + String(sub.id).padStart(3, '0');
+              const subCount = countSubFiles(sub);
+              if (subCount === 0 && (!sub.subs || sub.subs.length === 0)) return;
+              const subKey = 'topic:' + sub.slug;
+              const subOpen = openFolders[subKey] === true;
+
+              h += `<div class="tree-node">`;
+              h += `<div class="tree-folder" style="padding-left:${baseIndent}px" onclick="toggleFolder('${subKey}')">`;
+              h += `<span class="${subOpen ? 'arrow open' : 'arrow'}">&#9654;</span>`;
+              h += `<span style="${jdNumStyle}">${subJd}</span>`;
+              h += `<span class="folder-name">${escapeHtml(sub.name)}</span>`;
+              h += `<span class="count">${subCount}</span>`;
+              h += `</div>`;
+              h += `<div class="${subOpen ? 'tree-children' : 'tree-children collapsed'}">`;
+              h += renderFiles(filesForSlug(sub.slug), baseIndent + 18);
+              h += renderSubs(sub.subs, subJd, baseIndent + 14);
+              h += `</div></div>`;
+            });
+            return h;
+          }
+
+          function countSubFiles(sub) {
+            let n = filesForSlug(sub.slug).length;
+            (sub.subs || []).forEach(s => n += countSubFiles(s));
+            return n;
+          }
+
+          html += renderSubs(cat.subs, String(cat.id), 36);
+
+          html += `</div></div>`; // close cat
+        });
+
+        html += `</div></div>`; // close area
+      });
+
+      // Untagged pages
+      if (untagged.length > 0) {
+        const key = 'topic:_untagged';
+        const isOpen = openFolders[key] === true;
+        html += `<div class="tree-node">`;
+        html += `<div class="tree-folder" style="padding-left:8px" onclick="toggleFolder('${key}')">`;
+        html += `<span class="${isOpen ? 'arrow open' : 'arrow'}">&#9654;</span>`;
+        html += `<span class="folder-name" style="color:#54606d;font-style:italic">untagged</span>`;
+        html += `<span class="count">${untagged.length}</span>`;
+        html += `</div>`;
+        html += `<div class="${isOpen ? 'tree-children' : 'tree-children collapsed'}">`;
+        html += renderFiles(untagged, 26);
+        html += `</div></div>`;
+      }
+
+      // Orphan topics: pages with topics not matching any org slug
+      const allOrgSlugs = new Set();
+      function collectSlugs(node) {
+        allOrgSlugs.add(node.slug);
+        (node.subs || []).forEach(s => collectSlugs(s));
+      }
+      if (orgTree) {
+        orgTree.areas.forEach(a => {
+          allOrgSlugs.add(a.slug);
+          a.categories.forEach(c => collectSlugs(c));
+        });
+      }
+      const orphanPages = [];
+      pages.forEach(p => {
+        (p.topics || []).forEach(t => {
+          if (!allOrgSlugs.has(t)) {
+            orphanPages.push({ page: p, topic: t });
+          }
+        });
+      });
+      if (orphanPages.length > 0) {
+        const key = 'topic:_unmapped';
+        const isOpen = openFolders[key] === true;
+        html += `<div class="tree-node">`;
+        html += `<div class="tree-folder" style="padding-left:8px" onclick="toggleFolder('${key}')">`;
+        html += `<span class="${isOpen ? 'arrow open' : 'arrow'}">&#9654;</span>`;
+        html += `<span class="folder-name" style="color:#f59e0b;font-style:italic">unmapped topics</span>`;
+        html += `<span class="count">${orphanPages.length}</span>`;
+        html += `</div>`;
+        html += `<div class="${isOpen ? 'tree-children' : 'tree-children collapsed'}">`;
+        orphanPages.forEach(({ page: p, topic }) => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" style="padding-left:26px" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')" title="topic: ${escapeHtml(topic)}">${escapeHtml(p.title)} <span style="color:#54606d;font-size:10px">(${escapeHtml(topic)})</span></div>`;
+        });
+        html += `</div></div>`;
+      }
+
+      list.innerHTML = html || '<div style="padding:12px;color:#54606d;font-size:12px">No pages found</div>';
+    }
+
+    // ─── View: By Entity Type ─────────────────────────────────
+    const ENTITY_ORDER = ['concepts', 'tools', 'people', 'organizations', 'sources', 'places'];
+    const ENTITY_LABELS = {
+      concepts: 'Concepts', tools: 'Tools', people: 'People',
+      organizations: 'Organizations', sources: 'Sources', places: 'Places'
+    };
+
+    function renderByEntity(pages) {
+      const list = document.getElementById('page-list');
+
+      // Auto-expand entity groups on first visit
+      ENTITY_ORDER.forEach(e => {
+        const key = 'entity:' + e;
+        if (openFolders[key] === undefined) openFolders[key] = true;
+      });
+
+      // Filter to entity pages and group by subfolder
+      const groups = {};
+      ENTITY_ORDER.forEach(e => groups[e] = []);
+
+      pages.forEach(p => {
+        const m = p.folder.match(/^entities\/(.+)/);
+        if (!m) return;
+        const cat = m[1].split('/')[0];
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(p);
+      });
+
+      let html = '';
+      ENTITY_ORDER.forEach(cat => {
+        const items = groups[cat];
+        if (!items || items.length === 0) return;
+        const key = 'entity:' + cat;
+        const isOpen = openFolders[key] === true;
+        const arrowClass = isOpen ? 'arrow open' : 'arrow';
+        const childClass = isOpen ? 'tree-children' : 'tree-children collapsed';
+
+        html += `<div class="tree-node">`;
+        html += `<div class="tree-folder" style="padding-left:8px" onclick="toggleFolder('${key}')">`;
+        html += `<span class="${arrowClass}">&#9654;</span>`;
+        html += `<span class="folder-name">${escapeHtml(ENTITY_LABELS[cat] || cat)}</span>`;
+        html += `<span class="count">${items.length}</span>`;
+        html += `</div>`;
+        html += `<div class="${childClass}">`;
+        items.sort((a, b) => a.title.localeCompare(b.title));
+        items.forEach(p => {
+          const active = p.path === currentPath ? ' active' : '';
+          html += `<div class="page-item${active}" style="padding-left:26px" onclick="loadPage('${p.path.replace(/'/g, "\\'")}')">${escapeHtml(p.title)}</div>`;
+        });
+        html += `</div></div>`;
+      });
+
+      list.innerHTML = html || '<div style="padding:12px;color:#54606d;font-size:12px">No entity pages found</div>';
+    }
+
+    // ─── View switching ────────────────────────────────────────
+    function applyView(pages) {
+      _lastRenderedPages = pages;
+      if (currentView === 'stage') renderByStage(pages);
+      else if (currentView === 'topics') renderByTopic(pages);
+      else if (currentView === 'entities') renderByEntity(pages);
+      else renderPageList(pages);
+    }
+
+    function setView(view) {
+      currentView = view;
+      localStorage.setItem('wiki-view', view);
+      document.querySelectorAll('.view-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.view === view);
+      });
+      const q = document.getElementById('page-search').value.toLowerCase();
+      const pages = q
+        ? allPages.filter(p => p.title.toLowerCase().includes(q) || p.path.toLowerCase().includes(q))
+        : allPages;
+      applyView(pages);
+    }
+
     // ─── Load page ────────────────────────────────────────────
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.nav-backdrop').classList.toggle('open');
+    }
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.querySelector('.nav-backdrop').classList.remove('open');
+    }
+
+    /* Talk-to-Claude widget logic lives in /talk-to-claude.js (window.TalkToClaude). */
+    function openTalkTo() {
+      if (!currentPath) {
+        alert('Open a wiki page first.');
+        return;
+      }
+      const fileName = currentPath.split('/').pop() || currentPath;
+      window.TalkToClaude.open({
+        mode: 'entry',
+        target: currentPath,
+        label: 'Talk to Claude — ' + fileName,
+        sublabel: currentPath,
+      });
+    }
+
     async function loadPage(pagePath) {
       currentPath = pagePath;
       location.hash = encodeURIComponent(pagePath);
       editing = false;
+      closeSidebar();
 
       const data = await fetch(`/api/wiki?path=${encodeURIComponent(pagePath)}`).then(r => r.json());
       if (data.error) {
@@ -415,7 +901,7 @@
 
       renderPage(data);
       renderBacklinks(data.backlinks || [], data.wikilinks || []);
-      renderPageList(allPages);
+      applyView(allPages);
     }
 
     function renderPage(data) {
@@ -430,24 +916,94 @@
         <div class="tab" onclick="toggleEdit()">Edit source</div>
         <div class="tab" onclick="showOrganize()">Organize</div>
         <div class="tab" onclick="viewIn3D()">View in graph</div>
+        <div class="tab tab-terminal" onclick="openTalkTo()" title="Open a Claude Code session about this entry">&gt;_ Talk to Claude</div>
       </div>`;
 
       // ─── Article title ───
       let titleHtml = `<h1 class="article-title">${escapeHtml(title)}</h1>`;
 
-      // ─── Infobox (from frontmatter) ───
+      // ─── Classification bar (PARA / ZETT / TREE / ATLAS) ───
+      const paraVal = fm.para || '';
+      const zettVal = fm.content_stage || '';
+      const topicsVal = fm.topics || '';
+      const filePath = data.path || '';
+
+      // Parse topics from frontmatter (may be "[a, b]" string or already an array via API)
+      let topicsList = [];
+      if (Array.isArray(topicsVal)) {
+        topicsList = topicsVal;
+      } else if (typeof topicsVal === 'string' && topicsVal.startsWith('[')) {
+        topicsList = topicsVal.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      // Resolve topic slugs to display names using orgTree
+      function resolveTopicName(slug) {
+        if (!orgTree || !orgTree.areas) return slug;
+        for (const area of orgTree.areas) {
+          if (area.slug === slug) return area.id + ' ' + area.name;
+          for (const cat of (area.categories || [])) {
+            if (cat.slug === slug) return area.id + '.' + cat.id + ' ' + cat.name;
+            for (const sub of (cat.subs || [])) {
+              if (sub.slug === slug) return area.id + '.' + cat.id + '.' + sub.id + ' ' + sub.name;
+            }
+          }
+        }
+        return slug;
+      }
+
+      // PARA display
+      const paraLabels = { projects: 'Projects', areas: 'Areas', resources: 'Resources', archive: 'Archive' };
+      const paraDisplay = paraLabels[paraVal] || paraVal;
+
+      // ZETT display
+      const zettLabels = { fleeting: 'Fleeting', literature: 'Literature', evergreen: 'Evergreen', reference: 'Reference' };
+      const zettDisplay = zettLabels[zettVal] || zettVal;
+
+      // ATLAS — derive entity type from path
+      let atlasType = '';
+      const entityMatch = filePath.match(/^entities\/([^/]+)\//);
+      if (entityMatch) atlasType = entityMatch[1].charAt(0).toUpperCase() + entityMatch[1].slice(1);
+
+      // TREE — topic pills
+      const treePills = topicsList.map(t =>
+        `<span class="class-pill">${escapeHtml(resolveTopicName(t))}</span>`
+      ).join('');
+
+      let classBarHtml = `<div class="class-bar">
+        <div class="class-cell para">
+          <div class="class-label">PARA</div>
+          <div class="class-value${paraDisplay ? '' : ' unset'}">${paraDisplay ? `<span class="class-pill">${escapeHtml(paraDisplay)}</span>` : 'Not set'}</div>
+          <div class="class-sub">Action context</div>
+        </div>
+        <div class="class-cell zett">
+          <div class="class-label">Zettelkasten</div>
+          <div class="class-value${zettDisplay ? '' : ' unset'}">${zettDisplay ? `<span class="class-pill">${escapeHtml(zettDisplay)}</span>` : 'Not set'}</div>
+          <div class="class-sub">Maturity stage</div>
+        </div>
+        <div class="class-cell tree">
+          <div class="class-label">Topic Tree</div>
+          <div class="class-value${treePills ? '' : ' unset'}">${treePills || 'Untagged'}</div>
+          <div class="class-sub">Knowledge domain</div>
+        </div>
+        <div class="class-cell atlas">
+          <div class="class-label">Atlas</div>
+          <div class="class-value${atlasType ? '' : ' unset'}">${atlasType ? `<span class="class-pill">${escapeHtml(atlasType)}</span>` : 'N/A'}</div>
+          <div class="class-sub">Entity type</div>
+        </div>
+      </div>`;
+
+      // ─── Infobox (collapsible raw schema) ───
       const fmEntries = Object.entries(fm).filter(([k]) => k !== 'title');
       let infoboxHtml = '';
       if (fmEntries.length > 0) {
-        infoboxHtml = `<div class="infobox">
+        infoboxHtml = `<div class="infobox" id="schema-infobox" style="display:none">
           <div class="infobox-header">
-            <span>Knowledge Graph Schema</span>
+            <span>Full Schema</span>
             <button class="edit-schema" onclick="toggleEdit()">edit</button>
           </div>`;
         fmEntries.forEach(([k, v]) => {
           let display = '';
           if (typeof v === 'string' && v.startsWith('[')) {
-            // Parse simple array-like values as tags
             const items = v.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
             display = items.map(t => `<span class="infobox-tag">${escapeHtml(t)}</span>`).join(' ');
           } else {
@@ -459,6 +1015,7 @@
           </div>`;
         });
         infoboxHtml += `</div>`;
+        infoboxHtml += `<span class="schema-toggle" onclick="var box=document.getElementById('schema-infobox'); var vis=box.style.display==='none'; box.style.display=vis?'':'none'; this.textContent=vis?'[hide schema]':'[show full schema]'">[show full schema]</span>`;
       }
 
       // ─── Table of contents ───
@@ -510,7 +1067,7 @@
       let pathHtml = `<div style="font-size:11px;color:#54606d;margin-top:16px;font-family:-apple-system,'Segoe UI',sans-serif">
         <em>Vault path: ${escapeHtml(data.path)}</em></div>`;
 
-      content.innerHTML = tabHtml + titleHtml + infoboxHtml + tocHtml +
+      content.innerHTML = tabHtml + titleHtml + classBarHtml + infoboxHtml + tocHtml +
         `<div class="wiki-body">${rendered}</div>` + catHtml + pathHtml;
     }
 
@@ -639,6 +1196,7 @@
           <div class="tab" onclick="toggleEdit()">Edit source</div>
           <div class="tab active">Organize</div>
           <div class="tab" onclick="viewIn3D()">View in graph</div>
+          <div class="tab tab-terminal" onclick="openTalkTo()">&gt;_ Talk to Claude</div>
         </div>
         <h1 class="article-title" style="font-size:22px">${escapeHtml(title)}</h1>
         <div class="organize-form">
@@ -837,6 +1395,7 @@
           <div class="tab active">Edit source</div>
           <div class="tab" onclick="showOrganize()">Organize</div>
           <div class="tab" onclick="viewIn3D()">View in graph</div>
+          <div class="tab tab-terminal" onclick="openTalkTo()">&gt;_ Talk to Claude</div>
         </div>
         <h1 class="article-title" style="font-size:22px">Editing: ${escapeHtml(data.frontmatter?.title || path_basename(currentPath))}</h1>
         <div style="font-size:11px;color:#54606d;margin-bottom:10px;font-family:-apple-system,'Segoe UI',sans-serif">
@@ -918,7 +1477,7 @@
         allPages = allPages.filter(p => p.path !== currentPath);
         currentPath = '';
         location.hash = '';
-        renderPageList(allPages);
+        applyView(allPages);
         document.getElementById('content').innerHTML = `
           <div class="empty">
             <h2>Page deleted</h2>
@@ -1023,7 +1582,7 @@
       currentPath = '';
       editing = false;
       location.hash = 'help';
-      renderPageList(allPages);
+      applyView(allPages);
 
       // Clear backlinks panel
       document.getElementById('backlinks-list').innerHTML = '';
@@ -1056,7 +1615,7 @@
 
         <div class="infobox">
           <div class="infobox-header">Quick Reference</div>
-          <div class="infobox-row"><div class="infobox-label">Method</div><div class="infobox-value">PARA + Zettelkasten + Topic Trees</div></div>
+          <div class="infobox-row"><div class="infobox-label">Method</div><div class="infobox-value">PARA + Zettelkasten + Topic Trees + Atlas</div></div>
           <div class="infobox-row"><div class="infobox-label">Folders</div><div class="infobox-value">00-meta through 09-attachments</div></div>
           <div class="infobox-row"><div class="infobox-label">Stages</div><div class="infobox-value">fleeting → literature → evergreen → reference</div></div>
           <div class="infobox-row"><div class="infobox-label">Types</div><div class="infobox-value">25+ (note, article, recipe, person, tool...)</div></div>
@@ -1067,7 +1626,7 @@
           <div class="toc-title">Contents</div>
           <ol>
             <li onclick="document.getElementById('s-philosophy')?.scrollIntoView({behavior:'smooth'})">Philosophy</li>
-            <li onclick="document.getElementById('s-three-axes')?.scrollIntoView({behavior:'smooth'})">The three organizational axes</li>
+            <li onclick="document.getElementById('s-four-views')?.scrollIntoView({behavior:'smooth'})">The four sidebar views</li>
             <li onclick="document.getElementById('s-folders')?.scrollIntoView({behavior:'smooth'})">Vault folder structure</li>
             <li onclick="document.getElementById('s-frontmatter')?.scrollIntoView({behavior:'smooth'})">Frontmatter &amp; metadata</li>
             <li onclick="document.getElementById('s-stages')?.scrollIntoView({behavior:'smooth'})">Content stages</li>
@@ -1081,21 +1640,25 @@
 
         <h2><span id="s-philosophy"></span>Philosophy</h2>
         <p>beestgraph treats your vault as a <strong>living knowledge graph</strong>, not a folder tree. Every markdown file is a node. Every <code>[[wikilink]]</code> is an edge. The folders are a convenience layer for browsing — the graph is the real structure.</p>
-        <p>Three proven methodologies work together:</p>
+        <p>Four organizational lenses work together:</p>
         <ul>
           <li><strong>PARA</strong> (Tiago Forte) — organizes by <em>actionability</em>: is this an active project, an ongoing area, a reference resource, or archived?</li>
           <li><strong>Zettelkasten</strong> (Luhmann) — organizes by <em>maturity</em>: raw capture → processed note → evergreen insight, connected by links</li>
-          <li><strong>Topic Trees</strong> — organizes by <em>subject</em>: technology/ai-ml, culture/film, health/nutrition, etc.</li>
+          <li><strong>Topic Trees</strong> — organizes by <em>subject</em>: technology/ai-ml, eat-drink-merriment/cocktails, entertainment/film, etc.</li>
+          <li><strong>Atlas</strong> — organizes by <em>entity type</em>: browse the named things in your knowledge graph — people, concepts, tools, sources, organizations</li>
         </ul>
-        <p>No single axis is "right" — you'll find a recipe by browsing topics (<em>eat-drink-merriment</em>), by checking your resources folder (PARA), or by following a wikilink chain (Zettelkasten). All three paths lead to the same note.</p>
+        <p>No single axis is "right" — you'll find a recipe by browsing topics (<em>eat-drink-merriment</em>), by checking your resources folder (PARA), by maturity stage (Zettelkasten), or by looking up a related entity (Atlas). All four paths lead to the same note.</p>
 
-        <h2><span id="s-three-axes"></span>The three organizational axes</h2>
+        <h2><span id="s-four-views"></span>The four sidebar views</h2>
+        <p>The sidebar tabs at the top give you four different lenses into the same content. Every page exists once in the vault — the views simply regroup them by different criteria.</p>
         <table>
-          <tr><th>Axis</th><th>Question it answers</th><th>Frontmatter field</th><th>Guide</th></tr>
-          <tr><td><strong>PARA</strong></td><td>"What do I need to <em>do</em> with this?"</td><td><code>para:</code> projects / areas / resources / archives</td><td>${guideLink(guides[2])}</td></tr>
-          <tr><td><strong>Zettelkasten</strong></td><td>"How <em>developed</em> is this idea?"</td><td><code>content_stage:</code> fleeting / literature / evergreen / reference</td><td>${guideLink(guides[3])}</td></tr>
-          <tr><td><strong>Topic Tree</strong></td><td>"What is this <em>about</em>?"</td><td><code>topics:</code> technology/ai-ml, culture/film, etc.</td><td>${guideLink(guides[4])}</td></tr>
+          <tr><th>Tab</th><th>View</th><th>Question it answers</th><th>Driven by</th><th>Guide</th></tr>
+          <tr><td><strong>PARA</strong></td><td>Folder tree</td><td>"What do I need to <em>do</em> with this?"</td><td>Physical folder location</td><td>${guideLink(guides[2])}</td></tr>
+          <tr><td><strong>ZETT</strong></td><td>By maturity stage</td><td>"How <em>developed</em> is this idea?"</td><td><code>content_stage:</code> fleeting / literature / evergreen / reference</td><td>${guideLink(guides[3])}</td></tr>
+          <tr><td><strong>TREE</strong></td><td>By topic hierarchy</td><td>"What is this <em>about</em>?"</td><td><code>topics:</code> technology/ai-ml, eat-drink-merriment/cocktails, etc.</td><td>${guideLink(guides[4])}</td></tr>
+          <tr><td><strong>ATLAS</strong></td><td>By entity type</td><td>"What <em>is</em> this thing?"</td><td>Entity pages in <code>entities/</code> — people, concepts, tools, sources, orgs</td><td>${guideLink(guides[6])}</td></tr>
         </table>
+        <p>Your selected view persists across sessions. Use <strong>PARA</strong> when you're organizing work, <strong>ZETT</strong> when you're developing ideas, <strong>TREE</strong> when you're browsing by subject, and <strong>ATLAS</strong> when you want to explore the named entities in your knowledge graph.</p>
 
         <h2><span id="s-folders"></span>Vault folder structure</h2>
         <p>Numbered prefixes ensure stable sort order. Full details: ${guideLink(guides[1])}</p>
@@ -1111,8 +1674,7 @@
           <tr><td><code>07-resources/</code></td><td>Reference material organized by topic subdirectories</td><td><strong>Resources</strong></td></tr>
           <tr><td><code>08-archive/</code></td><td>Completed projects, inactive material</td><td><strong>Archives</strong></td></tr>
           <tr><td><code>09-attachments/</code></td><td>Images, PDFs, media files</td><td>—</td></tr>
-          <tr><td><code>entities/</code></td><td>Auto-generated pages for people, tools, concepts, orgs, places</td><td>—</td></tr>
-          <tr><td><code>raw/</code></td><td>Immutable source captures — never edited after ingest</td><td>—</td></tr>
+          <tr><td><code>entities/</code></td><td>Entity wiki pages — people, tools, concepts, orgs, sources (browse via <strong>ATLAS</strong> tab)</td><td>—</td></tr>
         </table>
 
         <h2><span id="s-frontmatter"></span>Frontmatter &amp; metadata</h2>

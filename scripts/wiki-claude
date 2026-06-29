@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# wiki-claude — launch Claude Code focused on a single vault entry.
+#
+# Usage:
+#   wiki-claude <entry-path-or-title>
+#
+# <entry-path-or-title> may be:
+#   - an absolute path (/home/turbobeest/vault/foo.md)
+#   - a path relative to ~/vault (areas/foo.md, foo, foo.md)
+#   - a title (will resolve via case-insensitive find under ~/vault)
+
+set -euo pipefail
+
+VAULT="${VAULT:-$HOME/vault}"
+PROJECT="${PROJECT:-$HOME/beestgraph}"
+MODEL="${WIKI_CLAUDE_MODEL:-claude-opus-4-7}"
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: wiki-claude <entry-path-or-title>" >&2
+  exit 2
+fi
+
+target="$1"
+shift
+
+# Resolve target → absolute path of the entry
+resolve_entry() {
+  local t="$1"
+  # Already absolute and exists?
+  if [[ "$t" == /* && -f "$t" ]]; then
+    printf '%s\n' "$t"
+    return
+  fi
+  # Relative under VAULT?
+  for cand in "$VAULT/$t" "$VAULT/$t.md" "$VAULT/${t%.md}.md"; do
+    if [[ -f "$cand" ]]; then
+      printf '%s\n' "$cand"
+      return
+    fi
+  done
+  # Last resort: case-insensitive find by basename
+  local hit
+  hit="$(find "$VAULT" -type f -iname "${t%.md}.md" -print -quit 2>/dev/null || true)"
+  if [[ -n "$hit" ]]; then
+    printf '%s\n' "$hit"
+    return
+  fi
+  return 1
+}
+
+ENTRY="$(resolve_entry "$target")" || {
+  echo "wiki-claude: could not resolve entry '$target' under $VAULT" >&2
+  exit 1
+}
+
+# Extract frontmatter (between the first two '---' lines) and body preview.
+# Frontmatter via awk; body preview = first ~40 lines after frontmatter.
+fm="$(awk '
+  BEGIN { in_fm = 0; seen = 0 }
+  /^---[[:space:]]*$/ {
+    if (!seen) { in_fm = 1; seen = 1; next }
+    else { in_fm = 0; exit }
+  }
+  in_fm { print }
+' "$ENTRY")"
+
+body_preview="$(awk '
+  BEGIN { in_fm = 0; seen = 0; lines = 0 }
+  /^---[[:space:]]*$/ {
+    if (!seen) { in_fm = 1; seen = 1; next }
+    else if (in_fm) { in_fm = 0; next }
+  }
+  !in_fm && seen {
+    print
+    lines++
+    if (lines >= 40) exit
+  }
+' "$ENTRY")"
+
+REL_PATH="${ENTRY#$VAULT/}"
+
+# Build the system prompt addendum.  Keep it terse — the wiki-curator skill
+# carries the rubric; this just orients Claude to the specific entry.
+SYSTEM_PROMPT="$(cat <<EOF
+You are in a per-entry curation session for the user's beestgraph vault.
+
+The user has opened a terminal anchored to this single vault entry. Your job
+is to help them curate it: validate frontmatter, fix categorization, repair
+interlinks, suggest enrichment, and tighten formatting. Use the
+wiki-curator skill (it is loaded for this session — invoke it via /skill or
+follow its rubric directly).
+
+## Entry under curation
+
+- Path: ${ENTRY}
+- Vault-relative: ${REL_PATH}
+
+### Current frontmatter
+\`\`\`yaml
+${fm}
+\`\`\`
+
+### Body preview (first 40 lines)
+\`\`\`markdown
+${body_preview}
+\`\`\`
+
+## How to interact
+
+**Open the conversation by doing the following, in order:**
+
+1. Read the full file using the \`Read\` tool (path above).
+2. Write a single concise paragraph (4-7 sentences) that gives your own
+   assessment: how the entry currently stands, how its categorization and
+   organization look, and what additional improvements you'd recommend
+   beyond the obvious. Be specific — name fields, quote phrases, point to
+   lines. Don't hedge with generic advice.
+3. Immediately follow with 2-4 focused questions asking the user what
+   they'd like to do with this entry.
+
+Read the full file before making any change. Treat the user as the authority
+on their own knowledge base — propose, then wait for go before editing.
+EOF
+)"
+
+cd "$PROJECT"
+
+KICKOFF="${KICKOFF:-Begin now: read the entry at the path I gave you, then give your assessment paragraph followed by 2-4 focused questions, per the opening procedure in the system prompt.}"
+
+exec claude \
+  --dangerously-skip-permissions \
+  --model "$MODEL" \
+  --add-dir "$VAULT" \
+  --append-system-prompt "$SYSTEM_PROMPT" \
+  "$KICKOFF"

@@ -482,9 +482,16 @@ class QualificationQueue:
         Returns:
             Path to the created notification file.
         """
+        # vault_path: relative path from vault root (for review page deep-link)
+        try:
+            vault_rel = str(item.path.relative_to(self._vault_path))
+        except ValueError:
+            vault_rel = item.path.name
+
         notification = {
             "type": "new_qualification",
             "filename": item.path.name,
+            "vault_path": vault_rel,
             "title": item.title,
             "source_url": item.source_url,
             "source_type": item.source_type,

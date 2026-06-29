@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Boujee Lemonade.md
+
+## Title
+Boujee Lemonade
+
+## Recommendation Summary
+
+### Intent Assessment
+A fancy lemonade cocktail recipe placeholder. Stub with no ingredients or instructions — sourced from an Instagram reel.
+
+### Categorization Changes
+- **PARA**: "resources" → "07-resources" (Correct as reference recipe material.)
+- **GRAPH**: "links to Drinks List, Food & Nutrition List" → "Add link to Brazilian Limeade (citrus cocktail), Lemon Coconut Ice Cream Cocktail (lemon-based)" (Group citrus cocktails together for cross-discovery.)
+
+### Metadata Issues
+Uses newer metadata format. connections.related references Alcohol Notes (should be Drinks List) and Food & Nutrition (should be Food & Nutrition List).
+
+### Suggested Interlinks
+- [[Drinks List]]
+- [[Food & Nutrition List]]
+- [[Brazilian Limeade]]
+- [[Lemon Coconut Ice Cream Cocktail]]
+- [[Souffle Espresso Martini]]
+
+### Enrichment
+Boujee lemonade cocktails typically use vodka, fresh lemon juice, and premium mixer or berry syrup. Popular variations: berry-infused, blue raspberry frozen, peach prosecco. Instagram source should be checked for availability. Consider adding vodka brand recommendations. Garnish with lemon wheels, fresh berries, or herbs like mint.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

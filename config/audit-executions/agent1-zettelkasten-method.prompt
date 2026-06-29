@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+00-meta/beestgraph/Zettelkasten Method in beestgraph.md
+
+## Title
+Zettelkasten Method in beestgraph
+
+## Recommendation Summary
+
+### Intent Assessment
+Explains how beestgraph implements Zettelkasten with atomic notes, maturity graduation from raw to permanent, heavy wiki-linking, and the diary of bygones concept.
+
+### Categorization Changes
+- **ZETT**: "none (status: qualifying)" → "content_stage: evergreen" (Original implementation insight about Zettelkasten in beestgraph with novel concepts like Diary of Bygones. Missing content_stage field.)
+- **TREE**: "meta/pkm" → "meta/beestgraph/architecture, meta/pkm/zettelkasten" (This is about beestgraph's implementation. meta/pkm/zettelkasten is more specific than meta/pkm.)
+- **GRAPH**: "Likely has Document node" → "Ensure edges to BKS, PARA Method, Topic Tree Organization, Diary of Bygones, 3D Knowledge Graph Viewer. Zettelkasten, Atomic Notes, Maturity Graduation should be Concept nodes." (Core organizational doc needs strong connections.)
+
+### Metadata Issues
+Missing content_stage field. Status qualifying — should be published. Missing created_at/updated_at. Summary is well-written. The maturity model uses raw/fleeting/permanent but the vault ZETT model uses fleeting/literature/evergreen/reference — these are different terminologies that should be reconciled.
+
+### Suggested Interlinks
+- [[[[Vault Folder Architecture]]]]
+- [[[[Qualification Pipeline]]]]
+- [[[[Content Types Taxonomy]]]]
+- [[[[Maps of Content (MOCs)]]]]
+- [[[[Knowledge Graph Audit Playbook]]]]
+
+### Enrichment
+Zettelkasten community continues active discussion on zettelkasten.de forum. The 2026 Readlistic guide to Zettelkasten for readers emphasizes the maturity model (fleeting -> literature -> permanent). Structure notes and keywords are emerging as additional note types beyond the classic three. The beestgraph implementation with GRADUATED_FROM and SPARKED_BY graph edges is a novel enhancement that the community would find interesting. Consider publishing the graph-enhanced Zettelkasten approach.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

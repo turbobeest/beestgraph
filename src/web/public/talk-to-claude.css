@@ -1,0 +1,75 @@
+/* Floating per-entry Claude Code terminal — shared by wiki, audit, review pages. */
+.tt-overlay {
+  position: fixed; z-index: 500;
+  bottom: 24px; right: 24px;
+  width: min(960px, 65vw); height: 65vh;
+  min-width: 480px; min-height: 320px;
+  max-width: calc(100vw - 16px); max-height: calc(100vh - 60px);
+  background: #0c0f13;
+  border: 1px solid #2a2f36; border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
+  display: none; flex-direction: column;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  resize: both; overflow: hidden;
+}
+.tt-overlay.open { display: flex; }
+.tt-overlay.fullscreen {
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  max-width: 100vw; max-height: 100vh;
+  border-radius: 0; border: none; resize: none;
+}
+.tt-header { padding: 10px 14px; border-bottom: 1px solid #2a2f36;
+  display: flex; align-items: center; gap: 10px; background: #0a0d11;
+  flex-shrink: 0; cursor: move; user-select: none; }
+.tt-header .meta { flex: 1; min-width: 0; }
+.tt-title { font-size: 13px; color: #e2e8f0; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-subtitle { font-size: 11px; color: #64748b; font-family: monospace;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-btn { background: #1e2228; color: #c8ccd1; border: 1px solid #3a4046;
+  border-radius: 4px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  flex-shrink: 0; font-family: inherit; line-height: 1; }
+.tt-btn:hover { background: #2a2f36; color: #f1f5f9; }
+.tt-btn.close:hover { background: #2a1818; color: #ef4444; border-color: #ef4444; }
+.tt-term { flex: 1; min-height: 0; padding: 6px 8px;
+  background: #0c0f13; overflow: hidden; }
+.tt-term .wterm { width: 100%; height: 100%; box-shadow: none; padding: 6px 8px; }
+
+/* Theme overrides for the per-entry terminal — match the beestgraph palette.
+ *
+ * The reverse-video bg is `--term-fg`, so a bright fg color makes Claude
+ * Code's input-area cursor blocks (which use `\e[7m \e[27m`) read as white
+ * bars across the input row. Keep --term-fg subdued; let Claude's explicit
+ * 256-color SGR codes carry the actual styling. */
+.tt-term .wterm {
+  --term-fg: #6b7785;              /* muted slate — calm reverse-video bg */
+  --term-bg: #0c0f13;
+  --term-cursor: #60a5fa;          /* soft blue cursor outline */
+  --term-color-0: #0c0f13;
+  --term-color-7: #c8ccd1;
+  --term-color-15: #e2e8f0;
+}
+.tt-status { font-size: 10px; color: #64748b; padding: 4px 14px;
+  border-top: 1px solid #2a2f36; background: #0a0d11; font-family: monospace;
+  flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-status.connected { color: #22c55e; }
+.tt-status.error { color: #ef4444; }
+
+/* Trigger-button styling shared across pages — pages opt in by adding .tt-trigger */
+.tt-trigger { background: #14322a; color: #34d399; border: 1px solid #1f5a44;
+  border-radius: 4px; padding: 6px 12px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: inherit; }
+.tt-trigger:hover { background: #1a4434; color: #6ee7b7; border-color: #34d399; }
+
+@media (max-width: 768px) {
+  .tt-overlay {
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    max-width: 100vw; max-height: 100vh;
+    border-radius: 0; border: none; resize: none;
+  }
+  .tt-header { padding: 8px 12px; gap: 8px; cursor: default; }
+  .tt-title { font-size: 12px; }
+  .tt-btn { padding: 5px 8px; font-size: 11px; }
+}

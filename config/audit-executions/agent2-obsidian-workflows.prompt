@@ -1,0 +1,47 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/meta/pkm/obsidian-workflows.md
+
+## Title
+Obsidian PKM Workflows
+
+## Recommendation Summary
+
+### Intent Assessment
+Overview article on PKM workflows in Obsidian, covering PARA and Zettelkasten methods, and how beestgraph combines both. Philosophical foundation document for beestgraph vault structure.
+
+### Categorization Changes
+- **ZETT**: "literature" → "evergreen" (Contains original analysis of how beestgraph combines PARA and Zettelkasten. Qualifies as evergreen personal insight.)
+- **TREE**: "meta/pkm" → "meta/pkm/zettelkasten" (More specifically about zettelkasten and PARA methodologies.)
+- **ATLAS**: "none" → "N/A" (Not an entity. Analytical article.)
+
+### Metadata Issues
+Good metadata with entities, key_claims, connections. Source URL is fake (example.com) -- needs a real source or mark as source.type: manual. Version is 2.
+
+### Suggested Interlinks
+- [[FalkorDB Python Client Tutorial (already linked)]]
+- [[PARA Method (entity)]]
+- [[Zettelkasten (entity)]]
+- [[Tiago Forte (entity)]]
+- [[Niklas Luhmann (entity)]]
+- [[beestgraph (entity)]]
+
+### Enrichment
+In 2026, PARA + GTD + Zettelkasten integration is trending in Obsidian (TechEduByte guide). AI integration via Desktop Commander (MCP-based) lets Claude manage vaults directly. The obsidian-claude-pkm starter kit (ballred/GitHub) provides complete Obsidian + Claude Code PKM. Source URL is placeholder (example.com) -- needs replacement.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

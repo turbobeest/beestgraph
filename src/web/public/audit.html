@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="beestgraph">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/talk-to-claude.css">
+  <script src="/talk-to-claude.js" defer></script>
+  <title>beestgraph audit</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; background: #101418; color: #c8ccd1;
+      font-family: -apple-system, 'Segoe UI', sans-serif; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; height: 36px; display: flex;
+      align-items: center; z-index: 150; background: rgba(6,10,19,0.95);
+      border-bottom: 1px solid rgba(100,116,139,0.15); backdrop-filter: blur(12px); }
+    nav .brand { padding: 0 16px; font-size: 13px; font-weight: 700; color: #f1f5f9;
+      border-right: 1px solid rgba(100,116,139,0.15); height: 100%; display: flex;
+      align-items: center; }
+    nav a { padding: 0 14px; height: 100%; display: flex; align-items: center;
+      color: #64748b; text-decoration: none; font-size: 10px; letter-spacing: 0.5px;
+      text-transform: uppercase; }
+    nav a.active { color: #60a5fa; border-bottom: 2px solid #3b82f6; }
+    nav a:hover { color: #94a3b8; }
+
+    .container { margin-top: 36px; padding: 24px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+
+    h1 { font-size: 20px; color: #f1f5f9; margin-bottom: 6px; }
+    .subtitle { font-size: 12px; color: #64748b; margin-bottom: 20px; }
+
+    .stats { display: flex; gap: 16px; margin-bottom: 24px; }
+    .stat { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 6px; padding: 12px 18px; }
+    .stat-num { font-size: 24px; font-weight: 700; color: #60a5fa; }
+    .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-top: 2px; }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 20px; }
+    .filter-btn { padding: 6px 14px; font-size: 11px; border: 1px solid #2a2f36; border-radius: 4px;
+      background: #14181d; color: #8b949e; cursor: pointer; }
+    .filter-btn.active { background: #1a2636; color: #60a5fa; border-color: #3b82f6; }
+    .bulk-btn { margin-left: auto; padding: 6px 14px; font-size: 11px;
+      border: 1px solid #3a2020; border-radius: 4px; background: #1e1414; color: #ef4444;
+      cursor: pointer; font-weight: 600; }
+    .bulk-btn:hover:not(:disabled) { background: #2a1818; color: #fca5a5; border-color: #ef4444; }
+    .bulk-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .card { background: #1a1e24; border: 1px solid #2a2f36; border-radius: 8px; margin-bottom: 16px;
+      overflow: hidden; transition: border-color 0.2s; }
+    .card:hover { border-color: #3a4046; }
+    .card.approved { border-left: 3px solid #22c55e; }
+    .card.deferred { border-left: 3px solid #f59e0b; }
+
+    .card-header { display: flex; align-items: center; padding: 14px 18px; gap: 12px;
+      border-bottom: 1px solid #2a2f36; cursor: pointer; }
+    .card-header:hover { background: #1e2228; }
+    .card-title { font-size: 14px; font-weight: 600; color: #e2e8f0; flex: 1; }
+    .card-path { font-size: 10px; color: #54606d; font-family: monospace; }
+    .card-link { font-size: 9px; color: #60a5fa; background: #0f1a2e; padding: 2px 8px; border-radius: 3px;
+      text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+      border: 1px solid #1e3a5f; transition: all 0.15s; }
+    .card-link:hover { background: #1a2d4a; color: #93c5fd; }
+    .card-agent { font-size: 10px; color: #8b5cf6; background: #1e1533; padding: 2px 8px; border-radius: 3px; }
+    .card-status { font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+    .card-status.pending { color: #64748b; background: #1e2228; }
+    .card-status.approved { color: #22c55e; background: #0f2918; }
+    .card-status.deferred { color: #f59e0b; background: #2a2008; }
+
+    .card-body { padding: 0 18px; max-height: 0; overflow: hidden; transition: max-height 0.3s, padding 0.3s; }
+    .card-body.open { max-height: 2000px; padding: 18px; }
+
+    .section { margin-bottom: 16px; }
+    .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: #6b7785; margin-bottom: 6px; font-weight: 600; }
+    .section-content { font-size: 13px; line-height: 1.6; color: #b0b8c4; }
+
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+    .cat-item { background: #14181d; border: 1px solid #2a2f36; border-radius: 4px; padding: 8px 12px; }
+    .cat-item-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #54606d; }
+    .cat-item-current { font-size: 11px; color: #8b949e; margin-top: 2px; }
+    .cat-item-rec { font-size: 12px; color: #60a5fa; font-weight: 600; margin-top: 2px; }
+    .cat-item-why { font-size: 10px; color: #6b7785; margin-top: 2px; font-style: italic; }
+
+    .interlinks { display: flex; flex-wrap: wrap; gap: 6px; }
+    .interlink { font-size: 11px; color: #8b5cf6; background: #1e1533; padding: 3px 10px;
+      border-radius: 12px; border: 1px solid #2d2050; }
+
+    .actions { display: flex; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #2a2f36; }
+    .btn { padding: 7px 16px; font-size: 12px; border-radius: 4px; cursor: pointer; border: none; font-weight: 600; }
+    .btn-approve { background: #166534; color: #86efac; }
+    .btn-approve:hover { background: #15803d; }
+    .btn-defer { background: #78350f; color: #fcd34d; }
+    .btn-defer:hover { background: #92400e; }
+    .btn-pending { background: #1e2228; color: #8b949e; border: 1px solid #2a2f36; }
+    .btn-pending:hover { background: #2a2f36; }
+    .btn-delete { background: #1e2228; color: #ef4444; border: 1px solid #3a2020; margin-left: auto; }
+    .btn-delete:hover { background: #2a1818; color: #fca5a5; }
+
+    .defer-input { display: none; margin-top: 8px; }
+    .defer-input.open { display: flex; gap: 8px; }
+    .defer-input input { flex: 1; background: #14181d; border: 1px solid #2a2f36; border-radius: 4px;
+      padding: 6px 10px; color: #c8ccd1; font-size: 12px; outline: none; }
+    .defer-input input:focus { border-color: #f59e0b; }
+
+    .arrow { display: inline-block; width: 12px; font-size: 10px; color: #54606d; transition: transform 0.2s; }
+    .arrow.open { transform: rotate(90deg); }
+
+    .empty { text-align: center; padding: 60px 20px; color: #54606d; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #2a2f36;
+      border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading { text-align: center; padding: 40px; color: #64748b; }
+
+    @media (max-width: 768px) {
+      nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      nav::-webkit-scrollbar { display: none; }
+      nav .brand { padding: 0 12px; flex-shrink: 0; }
+      nav a { padding: 0 10px; flex-shrink: 0; font-size: 9px; }
+      nav a[style*="margin-left:auto"] { margin-left: 0 !important; }
+
+      .container { padding: 14px 12px; margin-top: 36px; }
+      h1 { font-size: 18px; }
+      .subtitle { font-size: 11px; margin-bottom: 14px; }
+
+      .stats { gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+      .stat { flex: 1 1 calc(50% - 4px); padding: 10px 12px; min-width: 0; }
+      .stat-num { font-size: 20px; }
+
+      .filters { flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+      .filter-btn { flex: 1 1 calc(50% - 3px); padding: 8px 12px; font-size: 12px; }
+      .bulk-btn { margin-left: 0; flex: 1 1 100%; padding: 9px 12px; font-size: 12px; }
+
+      .card-header { flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+      .card-title { font-size: 13px; flex: 1 1 100%; min-width: 0; order: -1; padding-left: 18px; position: relative; }
+      .card-header .arrow { position: absolute; left: 12px; top: 12px; }
+      .card-path { display: none; }
+      .card-agent, .card-status { font-size: 9px; padding: 2px 6px; }
+
+      .card-body.open { padding: 14px 12px; }
+      .cat-grid { grid-template-columns: 1fr; }
+
+      .actions { flex-wrap: wrap; gap: 6px; }
+      .actions .btn { flex: 1 1 calc(50% - 3px); padding: 9px 10px; font-size: 12px; }
+      .btn-delete { margin-left: 0; flex: 1 1 100%; }
+
+      .defer-input.open { flex-direction: column; gap: 6px; }
+      .defer-input input { width: 100%; }
+      .defer-input .btn { width: 100%; }
+
+      .exec-status { padding: 10px !important; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">beestgraph</div>
+    <a href="/graph3d.html" target="_blank">3D Graph</a>
+    <a href="/wiki.html" target="_blank">Wiki</a>
+    <a href="/dashboard.html" target="_blank">Dashboard</a>
+    <a href="/queue" target="_blank">Queue</a>
+    <a href="/org.html" target="_blank" style="margin-left:auto;border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Org</a>
+    <a href="/audit.html" class="active" style="border-left:1px solid rgba(100,116,139,0.15);color:#f59e0b">Audit</a>
+    <a href="/review.html" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#10b981">Review</a>
+    <a href="/wiki.html#help" target="_blank" style="border-left:1px solid rgba(100,116,139,0.15);color:#6b9edd">Help</a>
+  </nav>
+
+  <div class="container">
+    <h1>Vault Audit Recommendations</h1>
+    <div class="subtitle">Agent-generated recommendations for content quality, categorization, enrichment, and interlinking. Approve, defer, or discuss each item.</div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><div class="stat-num" id="stat-total">-</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-num" id="stat-pending" style="color:#64748b">-</div><div class="stat-label">Pending</div></div>
+      <div class="stat"><div class="stat-num" id="stat-approved" style="color:#22c55e">-</div><div class="stat-label">Approved</div></div>
+      <div class="stat"><div class="stat-num" id="stat-deferred" style="color:#f59e0b">-</div><div class="stat-label">Deferred</div></div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" onclick="setFilter('pending')">Pending</button>
+      <button class="filter-btn" onclick="setFilter('approved')">Approved</button>
+      <button class="filter-btn" onclick="setFilter('deferred')">Deferred</button>
+      <button class="bulk-btn" id="clear-approved-btn" onclick="clearAllApproved()" disabled>&#10005; Clear all approved</button>
+    </div>
+
+    <div id="cards">
+      <div class="loading"><span class="spinner"></span> Loading recommendations...</div>
+    </div>
+  </div>
+
+<script>
+let recommendations = [];
+let currentFilter = 'all';
+
+async function init() {
+  try {
+    const res = await fetch('/api/audit');
+    const data = await res.json();
+    recommendations = data.recommendations || [];
+    render();
+  } catch (e) {
+    document.getElementById('cards').innerHTML = '<div class="empty">Failed to load audit data</div>';
+  }
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === f));
+  render();
+}
+
+function render() {
+  const filtered = currentFilter === 'all' ? recommendations : recommendations.filter(r => r.status === currentFilter);
+
+  // Stats
+  document.getElementById('stat-total').textContent = recommendations.length;
+  document.getElementById('stat-pending').textContent = recommendations.filter(r => r.status === 'pending').length;
+  const approvedCount = recommendations.filter(r => r.status === 'approved').length;
+  document.getElementById('stat-approved').textContent = approvedCount;
+  document.getElementById('stat-deferred').textContent = recommendations.filter(r => r.status === 'deferred').length;
+  const bulkBtn = document.getElementById('clear-approved-btn');
+  if (bulkBtn) {
+    bulkBtn.disabled = approvedCount === 0;
+    bulkBtn.textContent = approvedCount === 0
+      ? '✕ Clear all approved'
+      : `✕ Clear all approved (${approvedCount})`;
+  }
+
+  if (filtered.length === 0) {
+    document.getElementById('cards').innerHTML = recommendations.length === 0
+      ? '<div class="empty"><div class="empty-icon">&#128270;</div>No recommendations yet. Agents are still auditing...</div>'
+      : '<div class="empty">No recommendations match this filter.</div>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach((r, i) => {
+    const cats = r.categorization || {};
+    html += `<div class="card ${r.status}" id="card-${r.id}">`;
+    html += `<div class="card-header" onclick="toggleCard('${r.id}')">`;
+    html += `<span class="arrow" id="arrow-${r.id}">&#9654;</span>`;
+    html += `<span class="card-title">${esc(r.title)}</span>`;
+    // Wiki + Graph links
+    const wikiPath = (r.file || '').replace(/^\/home\/turbobeest\/vault\//, '');
+    html += `<a href="/wiki.html?path=${encodeURIComponent(wikiPath)}#${encodeURIComponent(wikiPath)}" target="_blank" onclick="event.stopPropagation()" class="card-link" title="Open in Wiki">wiki</a>`;
+    html += `<a href="/graph3d.html?node=${encodeURIComponent(r.title)}" target="_blank" onclick="event.stopPropagation()" class="card-link" title="Find in 3D Graph">3D</a>`;
+    html += `<span class="card-path">${esc(r.file)}</span>`;
+    html += `<span class="card-agent">${esc(r.agent)}</span>`;
+    html += `<span class="card-status ${r.status}">${r.status}</span>`;
+    html += `</div>`;
+    html += `<div class="card-body" id="body-${r.id}">`;
+
+    // Intent
+    html += `<div class="section"><div class="section-label">Intent Assessment</div>`;
+    html += `<div class="section-content">${esc(r.intent)}</div></div>`;
+
+    // Categorization grid
+    html += `<div class="section"><div class="section-label">Categorization Review</div><div class="cat-grid">`;
+    ['para','zett','tree','atlas','graph'].forEach(k => {
+      const c = cats[k] || {};
+      html += `<div class="cat-item">`;
+      html += `<div class="cat-item-label">${k.toUpperCase()}</div>`;
+      html += `<div class="cat-item-current">Current: ${esc(c.current || 'n/a')}</div>`;
+      html += `<div class="cat-item-rec">&#8594; ${esc(c.recommended || 'no change')}</div>`;
+      if (c.justification) html += `<div class="cat-item-why">${esc(c.justification)}</div>`;
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+
+    // Enrichment
+    if (r.enrichment) {
+      html += `<div class="section"><div class="section-label">Enrichment Suggestions</div>`;
+      html += `<div class="section-content">${esc(r.enrichment)}</div></div>`;
+    }
+
+    // Metadata
+    if (r.metadata) {
+      html += `<div class="section"><div class="section-label">Metadata Review</div>`;
+      html += `<div class="section-content">${esc(r.metadata)}</div></div>`;
+    }
+
+    // Interlinking
+    if (r.interlinking && r.interlinking.length > 0) {
+      html += `<div class="section"><div class="section-label">Suggested Interlinks</div><div class="interlinks">`;
+      r.interlinking.forEach(link => { html += `<span class="interlink">[[${esc(link)}]]</span>`; });
+      html += `</div></div>`;
+    }
+
+    // Defer note
+    if (r.status === 'deferred' && r.defer_note) {
+      html += `<div class="section"><div class="section-label">Defer Note</div>`;
+      html += `<div class="section-content" style="color:#fcd34d">${esc(r.defer_note)}</div></div>`;
+    }
+
+    // Execution status area
+    html += `<div class="exec-status" id="exec-${r.id}" style="display:none;margin-bottom:12px;padding:12px;background:#0f1318;border:1px solid #2a2f36;border-radius:4px">`;
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">`;
+    html += `<span class="spinner" id="exec-spinner-${r.id}"></span>`;
+    html += `<span style="font-size:12px;font-weight:600;color:#60a5fa" id="exec-headline-${r.id}">Initializing...</span>`;
+    html += `</div>`;
+    html += `<div id="exec-steps-${r.id}" style="font-size:11px;color:#6b7785;line-height:1.8"></div>`;
+    html += `</div>`;
+
+    // Actions
+    html += `<div class="actions" id="actions-${r.id}">`;
+    if (r.status === 'approved') {
+      html += `<span style="font-size:12px;color:#22c55e;font-weight:600">&#10003; Applied</span>`;
+      html += `<button class="btn btn-clear" onclick="clearRec('${r.id}')" style="margin-left:auto;background:#1e2228;color:#ef4444;border:1px solid #3a2020;font-size:11px;padding:5px 12px;border-radius:4px;cursor:pointer">&#10005; Clear from Audit</button>`;
+    } else {
+      html += `<button class="btn tt-trigger" onclick="talkAboutRec('${r.id}')" title="Open a Claude Code session to refine this recommendation">&gt;_ Talk to Claude</button>`;
+      html += `<button class="btn btn-approve" id="approve-btn-${r.id}" onclick="executeApproval('${r.id}')">&#10003; Approve &amp; Apply</button>`;
+      html += `<button class="btn btn-defer" onclick="showDefer('${r.id}')">&#8987; Defer</button>`;
+      if (r.status !== 'pending') html += `<button class="btn btn-pending" onclick="updateStatus('${r.id}','pending')">Reset to Pending</button>`;
+      html += `<button class="btn btn-delete" onclick="deleteRec('${r.id}')" title="Permanently remove this recommendation">&#10005; Delete</button>`;
+    }
+    html += `</div>`;
+    html += `<div class="defer-input" id="defer-${r.id}">`;
+    html += `<input type="text" placeholder="Note for later discussion..." id="defer-note-${r.id}">`;
+    html += `<button class="btn btn-defer" onclick="submitDefer('${r.id}')">Save</button>`;
+    html += `</div>`;
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('cards').innerHTML = html;
+}
+
+function toggleCard(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function showDefer(id) {
+  document.getElementById('defer-' + id).classList.toggle('open');
+}
+
+async function deleteRec(id) {
+  const rec = recommendations.find(r => r.id === id);
+  const title = rec ? rec.title : 'this recommendation';
+  if (!confirm(`Delete "${title}"?\n\nThis permanently removes the audit entry. The vault file is not touched.`)) return;
+  await clearRec(id);
+}
+
+function talkAboutRec(id) {
+  const rec = recommendations.find(r => r.id === id);
+  if (!rec) return;
+  window.TalkToClaude.open({
+    mode: 'audit',
+    target: id,
+    label: 'Audit — ' + rec.title,
+    sublabel: rec.file,
+  });
+}
+
+async function clearAllApproved() {
+  const approved = recommendations.filter(r => r.status === 'approved');
+  if (approved.length === 0) return;
+  if (!confirm(`Clear ${approved.length} approved recommendation${approved.length > 1 ? 's' : ''} from the audit?\n\nThe vault files are not touched — only the audit entries are removed.`)) return;
+  const btn = document.getElementById('clear-approved-btn');
+  btn.disabled = true;
+  btn.textContent = 'Clearing…';
+  try {
+    const res = await fetch('/api/audit', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    recommendations = recommendations.filter(r => r.status !== 'approved');
+    render();
+  } catch (e) {
+    alert('Failed to clear approved: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+async function clearRec(id) {
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.style.transition = 'opacity 0.3s, max-height 0.3s';
+    card.style.opacity = '0';
+    card.style.maxHeight = '0';
+    card.style.overflow = 'hidden';
+    card.style.marginBottom = '0';
+    card.style.padding = '0';
+  }
+  await fetch('/api/audit', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+  recommendations = recommendations.filter(r => r.id !== id);
+  setTimeout(() => render(), 350);
+}
+
+async function executeApproval(id) {
+  const btn = document.getElementById('approve-btn-' + id);
+  const execArea = document.getElementById('exec-' + id);
+  const headline = document.getElementById('exec-headline-' + id);
+  const stepsEl = document.getElementById('exec-steps-' + id);
+  const spinner = document.getElementById('exec-spinner-' + id);
+
+  // Disable button, show status area
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  btn.style.opacity = '0.5';
+  execArea.style.display = 'block';
+  headline.textContent = 'Launching Claude Code...';
+
+  // Expand the card body if not open
+  const body = document.getElementById('body-' + id);
+  if (!body.classList.contains('open')) {
+    body.classList.add('open');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+
+  try {
+    const res = await fetch('/api/audit/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+
+    if (!data.started) {
+      headline.textContent = 'Failed to start: ' + (data.error || 'unknown error');
+      headline.style.color = '#ef4444';
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      btn.textContent = '\u2713 Approve & Apply';
+      btn.style.opacity = '1';
+      return;
+    }
+
+    // Poll for status
+    pollExecution(id);
+  } catch (e) {
+    headline.textContent = 'Error: ' + e.message;
+    headline.style.color = '#ef4444';
+    spinner.style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = '\u2713 Approve & Apply';
+    btn.style.opacity = '1';
+  }
+}
+
+function pollExecution(id) {
+  const headline = document.getElementById('exec-headline-' + id);
+  const stepsEl = document.getElementById('exec-steps-' + id);
+  const spinner = document.getElementById('exec-spinner-' + id);
+  const btn = document.getElementById('approve-btn-' + id);
+  const card = document.getElementById('card-' + id);
+
+  const poll = setInterval(async () => {
+    try {
+      const res = await fetch('/api/audit/execute?id=' + encodeURIComponent(id));
+      const status = await res.json();
+
+      if (status.steps && status.steps.length > 0) {
+        const lastStep = status.steps[status.steps.length - 1];
+        headline.textContent = lastStep;
+        stepsEl.innerHTML = status.steps.map(s =>
+          '<div style="padding:2px 0;border-bottom:1px solid #1a1e24">' + esc(s) + '</div>'
+        ).join('');
+      }
+
+      if (status.state === 'complete') {
+        clearInterval(poll);
+        headline.textContent = 'Changes applied successfully';
+        headline.style.color = '#22c55e';
+        spinner.style.display = 'none';
+        btn.textContent = '\u2713 Applied';
+        btn.style.background = '#166534';
+        card.classList.remove('pending');
+        card.classList.add('approved');
+        // Update local data
+        const rec = recommendations.find(r => r.id === id);
+        if (rec) rec.status = 'approved';
+        // Update stats
+        document.getElementById('stat-pending').textContent = recommendations.filter(r => r.status === 'pending').length;
+        document.getElementById('stat-approved').textContent = recommendations.filter(r => r.status === 'approved').length;
+        // Update status badge
+        const statusBadge = card.querySelector('.card-status');
+        if (statusBadge) { statusBadge.className = 'card-status approved'; statusBadge.textContent = 'approved'; }
+      } else if (status.state === 'error') {
+        clearInterval(poll);
+        headline.textContent = 'Error: ' + (status.error || 'unknown');
+        headline.style.color = '#ef4444';
+        spinner.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '\u2713 Approve & Apply';
+        btn.style.opacity = '1';
+      }
+    } catch { /* ignore poll errors */ }
+  }, 2000);
+}
+
+async function submitDefer(id) {
+  const note = document.getElementById('defer-note-' + id).value;
+  await updateStatus(id, 'deferred', note);
+}
+
+async function updateStatus(id, status, defer_note) {
+  const body = { id, status };
+  if (defer_note !== undefined) body.defer_note = defer_note;
+  await fetch('/api/audit', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const rec = recommendations.find(r => r.id === id);
+  if (rec) { rec.status = status; if (defer_note) rec.defer_note = defer_note; }
+  render();
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Auto-refresh every 10s to pick up new recommendations and status changes
+setInterval(async () => {
+  try {
+    const res = await fetch('/api/audit');
+    const data = await res.json();
+    if (!data.recommendations) return;
+    const changed = data.recommendations.length !== recommendations.length ||
+      data.recommendations.some((r, i) => !recommendations[i] || r.status !== recommendations[i].status || r.id !== recommendations[i].id);
+    if (changed) {
+      recommendations = data.recommendations;
+      render();
+    }
+  } catch {}
+}, 10000);
+
+init();
+</script>
+</body>
+</html>

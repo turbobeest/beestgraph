@@ -1,0 +1,48 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/technology/infrastructure/raspberry-pi-homelab.md
+
+## Title
+Building a Raspberry Pi Homelab
+
+## Recommendation Summary
+
+### Intent Assessment
+Guide to building a self-hosted homelab on Raspberry Pi 5 with Docker, Tailscale, and Syncthing. Documents the exact stack powering beestgraph. Foundational infrastructure document.
+
+### Categorization Changes
+- **ZETT**: "literature" → "evergreen" (Contains original context about beestgraph specific setup and component choices. Qualifies as evergreen.)
+- **TREE**: "technology/infrastructure" → "technology/infrastructure/homelab" (Topic tree has dedicated technology/infrastructure/homelab slug -- perfect match.)
+- **ATLAS**: "none" → "N/A" (Not an entity. Raspberry Pi Foundation correctly referenced as organization.)
+
+### Metadata Issues
+Good metadata. Source URL is placeholder (example.com) -- should be replaced or marked as manual. Version 2.
+
+### Suggested Interlinks
+- [[Understanding Docker Networking (already linked)]]
+- [[botmeetbot.com (already linked)]]
+- [[FalkorDB Python Client Tutorial (already linked)]]
+- [[Production Smoke Test]]
+- [[Tailscale (entity)]]
+- [[Docker (entity)]]
+- [[Syncthing (entity)]]
+
+### Enrichment
+In 2026, Pi 5 homelabs are mainstream. Popular additions: Portainer (containers), Ollama (local AI), Pi-hole (ad blocking), Uptime Kuma (monitoring), Cloudflared (tunneling). NVMe + ARM64 Docker makes Pi 5 viable for always-on services. Consider adding Ollama for local LLM inference as future beestgraph enhancement.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

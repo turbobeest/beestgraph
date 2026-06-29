@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+02-queue/dagrejsdagre Directed graph layout for JavaScript.md
+
+## Title
+dagrejs/dagre: Directed graph layout for JavaScript
+
+## Recommendation Summary
+
+### Intent Assessment
+Captured GitHub repo page for dagre, a JavaScript library for directed graph layout. Relevant to beestgraph graph visualization needs and directly related to the companion Dagre Layout tutorial file.
+
+### Categorization Changes
+- **PARA**: "02-queue" → "07-resources or entities/" (This is a well-established tool (61.5k dependents). It should graduate from queue to either 07-resources/technology/programming/ as a reference, or entities/ as a tool entity page.)
+- **ZETT**: "none (implicit fleeting)" → "reference" (As a GitHub repo reference page, content_stage should be reference -- lookup material about a specific tool.)
+- **TREE**: "technology/programming" → "technology/programming/tooling" (Dagre is a programming tool/library, not general programming content.)
+- **ATLAS**: "none" → "tools" (If moved to entities/, dagre is a tool entity.)
+
+### Metadata Issues
+Tags still contain clippings from import; should be replaced with recommended_tags. Missing content_stage field. Filename contains a raw URL slug -- consider renaming to dagre.md or dagrejs-dagre.md.
+
+### Suggested Interlinks
+- [[Dagre Layout]]
+- [[Svelte Flow (if entity exists)]]
+- [[D3.js (if entity exists)]]
+- [[Cytoscape.js (if entity exists)]]
+
+### Enrichment
+Dagre v3.0.0 was published recently (April 2026), indicating the project is actively maintained again. Only the @dagrejs/dagre scoped package on npm receives updates. Key alternative: ELK.js offers more layout options but is heavier. Dagre has 61.5k+ dependents. For beestgraph visualization, dagre remains the best lightweight choice for directed graph layout.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

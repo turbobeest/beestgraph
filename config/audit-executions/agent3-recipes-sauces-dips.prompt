@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/Recipes - Sauces & Dips.md
+
+## Title
+Recipes - Sauces & Dips
+
+## Recommendation Summary
+
+### Intent Assessment
+Index hub for sauce, dip, spread, and condiment recipes. Currently only contains Lemon Curd — the thinnest of the three recipe hubs.
+
+### Categorization Changes
+- **ZETT**: "reference (via status field)" → "reference" (Index page — but very sparse with only one recipe linked.)
+- **GRAPH**: "links to Food & Nutrition List, Recipes - Meals, Diet Menu" → "Add link to Dirty Martini Dip (should move here from Meals), Recipes - Desserts (lemon curd is a dessert component)" (Dirty Martini Dip is a dip that belongs here. Lemon curd straddles sauces and desserts.)
+
+### Metadata Issues
+Uses older metadata format. Missing content_stage, para, version, dates object. Has uid.
+
+### Suggested Interlinks
+- [[Food & Nutrition List]]
+- [[Recipes - Meals]]
+- [[Diet Menu]]
+- [[Lemon Curd]]
+- [[Dirty Martini Dip]]
+- [[Recipes - Desserts]]
+
+### Enrichment
+Only 1 recipe (Lemon Curd) — sparsest hub. Dirty Martini Dip from Meals should logically move here. Consider adding salad dressings (Diet Menu references olive oil/vinegar dressing), pizza sauce (companion to Pizza Dough), or marinades. Hot sauce and condiment sub-topics exist in the tree but are unused.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

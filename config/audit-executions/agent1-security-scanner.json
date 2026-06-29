@@ -1,0 +1,11 @@
+{
+  "id": "agent1-security-scanner",
+  "state": "complete",
+  "steps": [
+    "Initializing Claude Code...",
+    "Starting Claude Code session...",
+    "Claude Code session complete."
+  ],
+  "started": "2026-05-03T15:15:58.834Z",
+  "finished": "2026-05-03T11:16:24.026592-04:00"
+}

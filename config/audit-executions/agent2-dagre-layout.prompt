@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+02-queue/Dagre Layout.md
+
+## Title
+Dagre Layout
+
+## Recommendation Summary
+
+### Intent Assessment
+Tutorial showing how to use Dagre for automatic hierarchical graph layout within Svelte Flow. Contains a complete code example for node positioning, edge routing, and layout direction toggling. Directly relevant to beestgraph web UI.
+
+### Categorization Changes
+- **PARA**: "02-queue" → "07-resources/technology/web/frontend" (Polished tutorial with working code. Should graduate from queue to resources as a frontend web development reference.)
+- **ZETT**: "none (implicit fleeting)" → "literature" (Summarized tutorial from an external source (svelteflow.dev) -- classic literature note.)
+- **TREE**: "technology/web" → "technology/web/frontend" (Svelte Flow graph visualization is specifically a frontend concern.)
+- **ATLAS**: "none" → "N/A" (Tutorial, not an entity. Entity pages for Svelte Flow and Dagre should be linked.)
+- **GRAPH**: "type: reference, content_type: tutorial" → "type: tutorial, content_type: tutorial" (Type says reference but content_type says tutorial. These should agree.)
+
+### Metadata Issues
+Tags contain clippings from import. Key Takeaways section is empty. Connections section is empty. Missing content_stage field.
+
+### Suggested Interlinks
+- [[dagrejs/dagre: Directed graph layout for JavaScript]]
+- [[beestgraph web UI (if exists)]]
+- [[React Flow (if entity exists)]]
+
+### Enrichment
+Svelte Flow is part of the xyflow ecosystem (same team as React Flow). In 2026, Svelte Flow also supports ELK.js layout as an alternative for more complex hierarchical layouts with subflows. The code references @xyflow/svelte which is the current package name.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

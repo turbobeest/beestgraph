@@ -1,0 +1,32 @@
+[Unit]
+Description=beestgraph wterm — per-entry Claude Code WebSocket bridge
+Documentation=https://github.com/terbeest/beestgraph
+After=network.target
+
+[Service]
+Type=simple
+User=turbobeest
+Group=turbobeest
+WorkingDirectory=/home/turbobeest/beestgraph
+
+Environment=PATH=/home/turbobeest/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/home/turbobeest
+Environment=WTERM_HOST=127.0.0.1
+Environment=WTERM_PORT=3002
+
+ExecStart=/home/turbobeest/beestgraph/.venv/bin/python -m src.wterm.server
+
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=beestgraph-wterm
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

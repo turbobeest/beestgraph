@@ -1,0 +1,46 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+02-queue/GH Links.md
+
+## Title
+GitHub Links
+
+## Recommendation Summary
+
+### Intent Assessment
+Curated personal collection of bookmarked GitHub repositories organized by category (AI/ML, dev tools, notable orgs). Migrated from Notion. Personal reference index of interesting repos.
+
+### Categorization Changes
+- **PARA**: "02-queue" → "07-resources/technology/programming" (Stable curated reference list migrated from Notion. Should graduate from queue to resources.)
+- **ZETT**: "none (implicit fleeting)" → "reference" (Lookup/reference list of bookmarked repos.)
+- **ATLAS**: "none" → "N/A" (Curated list, not an entity.)
+- **GRAPH**: "type: resource, content_type: reference" → "type: reference, content_type: reference" (Type should be reference not resource to match taxonomy.)
+
+### Metadata Issues
+Status is qualifying but content is complete -- should be published. Notion Migration Tracker shows it as migrated. Tags are too generic. Missing content_stage. Has aliases which is good.
+
+### Suggested Interlinks
+- [[Notion Migration Tracker]]
+- [[ferdous-alam/GenCAD]]
+- [[Reading List (referenced in Related)]]
+- [[Watchlist - Movies (referenced in Related)]]
+
+### Enrichment
+Several repos have major 2026 updates: Auto-GPT evolved and rebranded. awesome-ai-agents-2026 trended #1 on GitHub Feb 2026 with 25k+ stars. Consider adding awesome-opensource-ai (alvinreal) and awesome-ai-tools (eudk). Consider splitting into sub-pages by category as list grows.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

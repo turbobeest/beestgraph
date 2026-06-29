@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+# audit-claude — launch Claude Code focused on a single audit recommendation.
+#
+# Usage: audit-claude <rec-id>
+#
+# Reads the recommendation from config/audit-recommendations.json, then opens
+# claude with a system prompt that briefs it on:
+#   - the entry under audit (path, current frontmatter, body preview)
+#   - the audit recommendation in full (intent, all five categorization
+#     dimensions with current/recommended/justification, enrichment,
+#     metadata, interlinking suggestions, current status)
+#   - that the user is here to *iterate on* the recommendation, not to
+#     auto-apply it. Approval will happen back in the audit UI.
+#
+# The wiki-curator skill is auto-loaded (it lives at
+# ~/beestgraph/.claude/skills/wiki-curator/SKILL.md).
+
+set -euo pipefail
+
+VAULT="${VAULT:-$HOME/vault}"
+PROJECT="${PROJECT:-$HOME/beestgraph}"
+AUDIT_JSON="${AUDIT_JSON:-$PROJECT/config/audit-recommendations.json}"
+MODEL="${WIKI_CLAUDE_MODEL:-claude-opus-4-7}"
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: audit-claude <rec-id>" >&2
+  exit 2
+fi
+REC_ID="$1"
+shift
+
+if [[ ! -f "$AUDIT_JSON" ]]; then
+  echo "audit-claude: missing $AUDIT_JSON" >&2
+  exit 1
+fi
+
+# Pull the recommendation + the resolved vault file path via Python — this
+# keeps JSON parsing and frontmatter extraction in one robust place.
+read -r -d '' PYHELPER <<'PY' || true
+import json, os, sys, pathlib
+
+vault = pathlib.Path(os.environ["VAULT"]).resolve()
+audit_json = os.environ["AUDIT_JSON"]
+rec_id = os.environ["REC_ID"]
+
+data = json.load(open(audit_json))
+rec = next((r for r in data.get("recommendations", []) if r.get("id") == rec_id), None)
+if not rec:
+    sys.stderr.write(f"audit-claude: recommendation {rec_id!r} not found\n")
+    sys.exit(1)
+
+rel_path = rec.get("file", "")
+abs_path = (vault / rel_path).resolve()
+try:
+    abs_path.relative_to(vault)
+except ValueError:
+    sys.stderr.write(f"audit-claude: rec.file {rel_path!r} escapes vault\n")
+    sys.exit(1)
+if not abs_path.is_file():
+    sys.stderr.write(f"audit-claude: file not found: {abs_path}\n")
+    sys.exit(1)
+
+raw = abs_path.read_text(encoding="utf-8", errors="replace")
+fm = ""
+body = raw
+if raw.startswith("---\n"):
+    end = raw.find("\n---", 4)
+    if end != -1:
+        fm = raw[4:end].rstrip("\n")
+        body = raw[end + 4:].lstrip("\n")
+body_preview = "\n".join(body.splitlines()[:60])
+
+def pretty(obj):
+    return json.dumps(obj, indent=2, ensure_ascii=False)
+
+print("=== ABSPATH ===")
+print(abs_path)
+print("=== RELPATH ===")
+print(rel_path)
+print("=== STATUS ===")
+print(rec.get("status", "pending"))
+print("=== TITLE ===")
+print(rec.get("title", ""))
+print("=== AGENT ===")
+print(rec.get("agent", ""))
+print("=== TIMESTAMP ===")
+print(rec.get("timestamp", ""))
+print("=== INTENT ===")
+print(rec.get("intent", ""))
+print("=== CATEGORIZATION_JSON ===")
+print(pretty(rec.get("categorization", {})))
+print("=== ENRICHMENT ===")
+print(rec.get("enrichment", ""))
+print("=== METADATA ===")
+print(rec.get("metadata", ""))
+print("=== INTERLINKING_JSON ===")
+print(pretty(rec.get("interlinking", [])))
+print("=== DEFER_NOTE ===")
+print(rec.get("defer_note", ""))
+print("=== FRONTMATTER ===")
+print(fm)
+print("=== BODY_PREVIEW ===")
+print(body_preview)
+PY
+
+INFO="$(VAULT="$VAULT" AUDIT_JSON="$AUDIT_JSON" REC_ID="$REC_ID" \
+  python3 -c "$PYHELPER")"
+
+# Extract sections via awk — keeps the helper output → variables glue thin.
+get_section() {
+  local name="$1"
+  awk -v n="=== $name ===" '
+    BEGIN { capture = 0 }
+    $0 == n { capture = 1; next }
+    /^=== [A-Z_]+ ===$/ { if (capture) exit; next }
+    capture { print }
+  ' <<<"$INFO"
+}
+
+ABSPATH="$(get_section ABSPATH)"
+RELPATH="$(get_section RELPATH)"
+STATUS="$(get_section STATUS)"
+TITLE="$(get_section TITLE)"
+AGENT="$(get_section AGENT)"
+TS="$(get_section TIMESTAMP)"
+INTENT="$(get_section INTENT)"
+CATEGORIZATION="$(get_section CATEGORIZATION_JSON)"
+ENRICHMENT="$(get_section ENRICHMENT)"
+METADATA="$(get_section METADATA)"
+INTERLINKING="$(get_section INTERLINKING_JSON)"
+DEFER_NOTE="$(get_section DEFER_NOTE)"
+FM="$(get_section FRONTMATTER)"
+BODY="$(get_section BODY_PREVIEW)"
+
+SYSTEM_PROMPT="$(cat <<EOF
+You are in an audit-curation session for the beestgraph vault. The user has
+opened this terminal from the Audit page to **iterate on a specific
+recommendation before approving it**. Approval and application happen back
+in the audit UI — your job here is to discuss, refine, and (if the user
+asks) edit the underlying file directly. Use the wiki-curator skill (it is
+loaded for this session); follow its rubric for any edits.
+
+## Recommendation under review
+
+- **id**:        $REC_ID
+- **status**:    $STATUS
+- **title**:     $TITLE
+- **agent**:     $AGENT
+- **timestamp**: $TS
+- **file**:      $ABSPATH
+- **vault-rel**: $RELPATH
+
+### Intent
+$INTENT
+
+### Proposed categorization changes (PARA / ZETT / TREE / ATLAS / GRAPH)
+\`\`\`json
+$CATEGORIZATION
+\`\`\`
+
+### Enrichment suggestions
+$ENRICHMENT
+
+### Metadata review
+$METADATA
+
+### Suggested interlinks
+\`\`\`json
+$INTERLINKING
+\`\`\`
+
+### Defer note (if any)
+$DEFER_NOTE
+
+## Current state of the entry
+
+### Frontmatter
+\`\`\`yaml
+$FM
+\`\`\`
+
+### Body preview (first 60 lines)
+\`\`\`markdown
+$BODY
+\`\`\`
+
+## How to interact
+
+**Open the conversation by doing the following, in order:**
+
+1. Read the full file using the \`Read\` tool (path above).
+2. Write a single concise paragraph (4-7 sentences) that gives the user
+   your own assessment: how the entry currently stands, how its
+   categorization and structure look, where the proposed recommendation
+   lands relative to your read, and what *additional* improvements you'd
+   suggest beyond the recommendation. Be specific and direct — name fields,
+   quote phrases, point to lines. Do not hedge with generic advice.
+3. Immediately follow that paragraph with 2-4 focused questions asking
+   the user what they'd like to do with this entry (e.g., "accept the
+   PARA change but not the ZETT change?", "want me to draft the
+   enrichment block first so you can edit, or talk through it?").
+
+After that opening turn, follow these rules for the rest of the session:
+
+- Wait for direction before editing. Do not apply categorization changes
+  unilaterally — that is what the audit UI's "Approve & Apply" button is
+  for. Your role is iterative refinement.
+- If the user asks you to edit the file, follow the wiki-curator rubric:
+  minimal edits, preserve voice, bump \`dates.modified\` and \`version\`
+  on the final write.
+EOF
+)"
+
+cd "$PROJECT"
+
+KICKOFF="${KICKOFF:-Begin now: read the file at the path I gave you, then give your assessment of this audit recommendation — assessment paragraph followed by 2-4 focused questions, per the opening procedure in the system prompt.}"
+
+exec claude \
+  --dangerously-skip-permissions \
+  --model "$MODEL" \
+  --add-dir "$VAULT" \
+  --append-system-prompt "$SYSTEM_PROMPT" \
+  "$KICKOFF"

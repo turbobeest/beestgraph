@@ -1,0 +1,49 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/entities/concepts/self-hosting.md
+
+## Title
+Self-Hosting
+
+## Recommendation Summary
+
+### Intent Assessment
+Entity page for the self-hosting philosophy. Well-written with links to Docker, Tailscale, Homelab, and botmeetbot.com.
+
+### Categorization Changes
+- **ZETT**: "not set" → "reference" (Missing content_stage. Should be reference — stable concept definition.)
+- **TREE**: "not set" → "technology/infrastructure/homelab" (Missing topics field. Should be technology/infrastructure/homelab as self-hosting is core to homelab.)
+- **GRAPH**: "Linked to Homelab, Docker, Tailscale, Syncthing" → "Add RELATED_TO -> beestgraph, RELATED_TO -> Raspberry Pi Foundation, RELATED_TO -> FalkorDB, ENABLES -> botmeetbot.com" (beestgraph is a self-hosted project. Raspberry Pi Foundation hardware is commonly used. FalkorDB is self-hosted.)
+
+### Metadata Issues
+Missing content_stage, topics, and summary fields. Should add content_stage: reference, topics: [technology/infrastructure/homelab].
+
+### Suggested Interlinks
+- [[Homelab]]
+- [[Docker]]
+- [[Tailscale]]
+- [[Syncthing]]
+- [[beestgraph]]
+- [[Raspberry Pi Foundation]]
+- [[FalkorDB]]
+- [[botmeetbot.com]]
+
+### Enrichment
+Self-hosting community continues to grow in 2026. Raspberry Pi sales up 25%. Docker Engine v29, Tailscale v1.96 with expanded free tier (6 users), Syncthing v2.0 all facilitate self-hosting. Privacy and data sovereignty remain key drivers.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

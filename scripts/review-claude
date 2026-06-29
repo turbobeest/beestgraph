@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# review-claude — launch Claude Code focused on a single review-queue entry.
+#
+# Usage: review-claude <vault-path>
+#
+# Review-queue entries are vault files in qualifying/draft/inbox/actionable
+# status — i.e., captures that haven't been promoted to "published" yet.
+# This launcher gives Claude both the file content and any existing
+# `recommended_*` frontmatter fields (from the classifier) so the
+# conversation can focus on finalizing classification and promoting.
+
+set -euo pipefail
+
+VAULT="${VAULT:-$HOME/vault}"
+PROJECT="${PROJECT:-$HOME/beestgraph}"
+MODEL="${WIKI_CLAUDE_MODEL:-claude-opus-4-7}"
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: review-claude <vault-path>" >&2
+  exit 2
+fi
+target="$1"
+shift
+
+resolve_entry() {
+  local t="$1"
+  if [[ "$t" == /* && -f "$t" ]]; then printf '%s\n' "$t"; return; fi
+  for cand in "$VAULT/$t" "$VAULT/$t.md" "$VAULT/${t%.md}.md"; do
+    [[ -f "$cand" ]] && { printf '%s\n' "$cand"; return; }
+  done
+  local hit
+  hit="$(find "$VAULT" -type f -iname "${t%.md}.md" -print -quit 2>/dev/null || true)"
+  [[ -n "$hit" ]] && { printf '%s\n' "$hit"; return; }
+  return 1
+}
+
+ENTRY="$(resolve_entry "$target")" || {
+  echo "review-claude: could not resolve entry '$target' under $VAULT" >&2
+  exit 1
+}
+
+fm="$(awk '
+  BEGIN { in_fm = 0; seen = 0 }
+  /^---[[:space:]]*$/ {
+    if (!seen) { in_fm = 1; seen = 1; next }
+    else { in_fm = 0; exit }
+  }
+  in_fm { print }
+' "$ENTRY")"
+
+body_preview="$(awk '
+  BEGIN { in_fm = 0; seen = 0; lines = 0 }
+  /^---[[:space:]]*$/ {
+    if (!seen) { in_fm = 1; seen = 1; next }
+    else if (in_fm) { in_fm = 0; next }
+  }
+  !in_fm && seen {
+    print
+    lines++
+    if (lines >= 60) exit
+  }
+' "$ENTRY")"
+
+REL_PATH="${ENTRY#$VAULT/}"
+
+SYSTEM_PROMPT="$(cat <<EOF
+You are in a review-queue session for the beestgraph vault. The user has
+opened this terminal from the Review page — the entry below is currently
+in qualifying / draft / inbox / actionable status (not yet \`published\`).
+Your job is to help the user **finalize classification and decide whether
+to promote** this entry. Use the wiki-curator skill (loaded for this
+session); follow its rubric for any edits.
+
+## Entry under review
+
+- Path:        $ENTRY
+- Vault-rel:   $REL_PATH
+
+### Current frontmatter
+\`\`\`yaml
+$fm
+\`\`\`
+
+### Body preview (first 60 lines)
+\`\`\`markdown
+$body_preview
+\`\`\`
+
+Note: classifier-suggested fields appear in the frontmatter as
+\`recommended_type\`, \`recommended_topic\`, \`recommended_tags\`,
+\`recommended_quality\`, \`recommended_summary\`. Treat them as a starting
+point, not gospel — you may agree or disagree based on the body.
+
+## How to interact
+
+**Open the conversation by doing the following, in order:**
+
+1. Read the full file using the \`Read\` tool (path above).
+2. Write a single concise paragraph (4-7 sentences) giving your own
+   assessment: how the entry stands, whether the suggested classification
+   looks right, structural issues you see, and what else would improve it
+   beyond the classifier's suggestions. Be specific — name fields, quote
+   phrases, point to lines.
+3. Immediately follow with 2-4 focused questions asking what the user
+   wants to do (e.g., "promote to published as-is?", "rewrite the summary
+   first?", "split into two entries?").
+
+After that opening turn:
+
+- Wait for direction before editing. Promotion to \`status: published\`
+  is what the Review UI's "Approve" button is for — your role here is to
+  refine before that happens.
+- If the user asks you to edit, follow the wiki-curator rubric: minimal
+  edits, preserve voice, bump \`dates.modified\` and \`version\`.
+EOF
+)"
+
+cd "$PROJECT"
+
+KICKOFF="${KICKOFF:-Begin now: read the entry at the path I gave you, then give your assessment of its current state and classification — assessment paragraph followed by 2-4 focused questions about what I want to do, per the opening procedure in the system prompt.}"
+
+exec claude \
+  --dangerously-skip-permissions \
+  --model "$MODEL" \
+  --add-dir "$VAULT" \
+  --append-system-prompt "$SYSTEM_PROMPT" \
+  "$KICKOFF"

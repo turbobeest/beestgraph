@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import Sidebar from "@/components/Sidebar";
 
@@ -7,6 +7,22 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "beestgraph",
   description: "AI-augmented personal knowledge graph",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "beestgraph",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1.0,
+  viewportFit: "cover",
+  themeColor: "#101418",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

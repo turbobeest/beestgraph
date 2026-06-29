@@ -1,0 +1,45 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+/home/turbobeest/vault/07-resources/eat-drink-merriment/recipes/Dirty Martini Dip.md
+
+## Title
+Dirty Martini Dip
+
+## Recommendation Summary
+
+### Intent Assessment
+A savory dip inspired by the dirty martini cocktail. Stub with no ingredients or instructions. Currently categorized under Meals but is really a dip/sauce.
+
+### Categorization Changes
+- **PARA**: "resources" → "07-resources" (Correct as reference recipe material.)
+- **TREE**: "eat-drink-merriment/meals" → "eat-drink-merriment/sauces/condiments" (RECLASSIFY: This is a dip, not a meal. Should be under sauces/condiments and linked from Recipes - Sauces & Dips instead of Recipes - Meals.)
+- **GRAPH**: "links to Recipes - Meals, Food & Nutrition List" → "MOVE parent link from Recipes - Meals to Recipes - Sauces & Dips. Add link to Drinks List (martini connection)" (This is a dip/appetizer, not a main meal. The martini inspiration connects it to the drinks domain.)
+
+### Metadata Issues
+Uses newer metadata format. connections.related references Food & Nutrition (should be Food & Nutrition List). Topic should change from meals to sauces/condiments.
+
+### Suggested Interlinks
+- [[Recipes - Sauces & Dips]]
+- [[Food & Nutrition List]]
+- [[Drinks List]]
+- [[Lemon Curd]]
+
+### Enrichment
+Dirty martini dip combines cream cheese, sour cream, olive juice/brine, blue cheese, and chopped pimiento-stuffed green olives. Mix with hand mixer, fold in olives and blue cheese, refrigerate 4+ hours (overnight best). Can be made 4 days ahead. Serve with pretzels, crackers, or crostini. Versions exist with and without alcohol. This has gone viral on social media as a party appetizer. Consider serving suggestions and pairing recommendations.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.

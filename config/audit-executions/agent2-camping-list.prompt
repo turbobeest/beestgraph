@@ -1,0 +1,42 @@
+You are applying an approved audit recommendation to a beestgraph vault file.
+
+## File
+07-resources/Camping List.md
+
+## Title
+Camping List
+
+## Recommendation Summary
+
+### Intent Assessment
+Personal camping packing checklist covering gear, clothing, and essentials. Migrated from Notion. Includes a YouTube link for tree knots. Reusable pre-trip checklist.
+
+### Categorization Changes
+- **TREE**: "personal/recreation/camping, personal/recreation/outdoors" → "personal/recreation/camping" (Primary topic is camping. Outdoors secondary topic is redundant.)
+- **ATLAS**: "none" → "N/A" (Not an entity. Personal checklist.)
+
+### Metadata Issues
+Well-structured metadata. File location at root of 07-resources/ is inconsistent with other resources in subfolders -- consider moving to 07-resources/personal/recreation/.
+
+### Suggested Interlinks
+- [[Notion Migration Tracker (source of migration)]]
+- [[Restaurants - RI (already linked)]]
+
+### Enrichment
+2026 camping checklists from REI and OutdoorGearLab suggest missing items: first aid kit, fire-starting materials, water filtration, insect repellent, sunscreen, camp stove, basic cookware, multi-tool. Also recommended: moisture-wicking base layers, rain jacket. Existing list is solid for cold-weather hammock camping but could benefit from Food/Cooking and Safety sections.
+
+## Instructions
+1. Read the file at the path above
+2. Apply all recommended categorization changes to the frontmatter
+3. Fix any metadata issues described above (add missing fields, correct formats)
+4. Add any missing interlinks to the Related/Connections section
+5. Do NOT add enrichment content directly — only fix metadata and links
+6. Do NOT change the body content unless specifically noted in metadata issues
+7. Write the updated file back
+
+Important: Use the beestgraph frontmatter standard:
+- uid, title, type, tags, status (published/draft/qualifying), content_stage (fleeting/literature/evergreen/reference)
+- topics (YAML array of topic slugs), dates: { created, modified }, para, version
+- Remove legacy fields: aliases, project, updated, created (flat), content_type, quality, recommended_*
+
+After making changes, briefly state what you changed.
